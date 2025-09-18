@@ -18,6 +18,12 @@ export default defineConfig({
         rewrite: path => path.replace(/^\/api/, ''),
       },
     },
+     // ✅ 캐시 무효화 헤더 추가 (개발서버만)
+    headers: {
+      "Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    },
   },
   resolve: {
     alias: {

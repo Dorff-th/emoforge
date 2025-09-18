@@ -7,16 +7,15 @@ const axiosInstance = axios.create({
   withCredentials: true, // ✅ 쿠키 자동 포함
 });
 
-// 응답 인터셉터 (예: 인증 실패 → 로그인 페이지 이동)
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401 || error.response?.status === 403) {
-//       window.location.href = "/login";
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+// 캐시 방지 헤더 추가
+axiosInstance.interceptors.request.use((config) => {
+  config.headers["Cache-Control"] = "no-cache";
+  config.headers["Pragma"] = "no-cache";
+  config.headers["Expires"] = "0";
+  return config;
+});
+
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

@@ -19,6 +19,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 
@@ -44,19 +45,26 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public MemberDTO getCurrentUser(Authentication authentication) {
+    public ResponseEntity<MemberDTO> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("인증되지 않은 사용자입니다.");
+            // 401 Unauthorized 반환
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String username = authentication.getName(); // JWT sub (username/email) //지금은 kakao_oauth_id로 되어있음
+        try {
+            String username = authentication.getName(); // JWT sub (현재 kakao_oauth_id)
+            Long kakaoId = Long.parseLong(username);
 
-        Long kakaoId = Long.parseLong(username);
+            Member member = memberRepository.findByKakaoId(kakaoId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
-        Member member = memberRepository.findByKakaoId(kakaoId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            MemberDTO dto = new MemberDTO(member);
+            return ResponseEntity.ok(dto);
 
-        return new MemberDTO(member);
+        } catch (NumberFormatException e) {
+            // username이 Long으로 변환 안 될 경우 → 인증 오류 처리
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/refresh")
@@ -111,5 +119,65 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         return ResponseEntity.ok("Token refreshed");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        // (옵션) 세션 무효화 - OAuth2Login 사용 시 잔여 세션 끊기
+        var session = request.getSession(false);
+        if (session != null) session.invalidate();
+
+        // 1) 과거에 '.127.0.0.1.nip.io' 로 발급된 토큰 쿠키 제거 (옵션 동일)
+        response.addHeader("Set-Cookie",
+                ResponseCookie.from("access_token", "")
+                        .domain(".127.0.0.1.nip.io") // 생성과 완전히 동일
+                        .path("/")
+                        .httpOnly(true)
+                        .sameSite("Lax")
+                        .secure(false)               // dev
+                        .maxAge(0)                   // 즉시 만료
+                        .build().toString()
+        );
+        response.addHeader("Set-Cookie",
+                ResponseCookie.from("refresh_token", "")
+                        .domain(".127.0.0.1.nip.io")
+                        .path("/")
+                        .httpOnly(true)
+                        .sameSite("Lax")
+                        .secure(false)
+                        .maxAge(0)
+                        .build().toString()
+        );
+
+        // 2) 혹시 모르는 변형들(호스트 전용/도메인 미지정)도 함께 정리
+        response.addHeader("Set-Cookie",
+                ResponseCookie.from("access_token", "")
+                        .path("/")
+                        .httpOnly(true)
+                        .sameSite("Lax")
+                        .secure(false)
+                        .maxAge(0)
+                        .build().toString()
+        );
+        response.addHeader("Set-Cookie",
+                ResponseCookie.from("refresh_token", "")
+                        .path("/")
+                        .httpOnly(true)
+                        .sameSite("Lax")
+                        .secure(false)
+                        .maxAge(0)
+                        .build().toString()
+        );
+
+        // 3) JSESSIONID도 끊기 (OAuth2Login 세션 잔여 대비)
+        response.addHeader("Set-Cookie",
+                ResponseCookie.from("JSESSIONID", "")
+                        .path("/")
+                        .maxAge(0)
+                        .build().toString()
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }

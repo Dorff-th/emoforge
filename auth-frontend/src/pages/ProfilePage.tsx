@@ -1,36 +1,44 @@
 // src/pages/ProfilePage.tsx
-import { useEffect, useState } from "react";
-import axiosInstance from "@/api/axiosInstance";
-
-interface Profile {
-  uuid: string;
-  username: string;
-  nickname: string;
-  role: string;
-  status: string;
-}
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "@/store/store";
+import { logoutThunk } from "@/store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user } = useSelector((s: RootState) => s.auth);
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    axiosInstance.get("/auth/me")
-      .then((res) => setProfile(res.data))
-      .catch(() => {
-        window.location.href = "/login";
-      });
-  }, []);
-
-  if (!profile) return <p>Loading...</p>;
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutThunk()).unwrap();
+      navigate("/login");
+    } catch {
+      // toast 등 실패 UI 처리
+    }
+  };
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold">내 프로필</h1>
-      <p><b>UUID:</b> {profile.uuid}</p>
-      <p><b>Email:</b> {profile.username}</p>
-      <p><b>닉네임:</b> {profile.nickname}</p>
-      <p><b>Role:</b> {profile.role}</p>
-      <p><b>Status:</b> {profile.status}</p>
+    <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src={user?.profileUrl ?? "/default_profile.png"}
+            alt="profile"
+            className="h-24 w-24 rounded-full border"
+          />
+          <h2 className="text-xl font-semibold">{user?.nickname}</h2>
+          <p className="text-gray-500">{user?.email}</p>
+
+          <Button
+            onClick={handleLogout}
+            className="mt-6 w-full bg-red-500 hover:bg-red-600"
+          >
+            로그아웃
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
