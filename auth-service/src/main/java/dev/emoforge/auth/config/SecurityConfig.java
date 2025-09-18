@@ -1,9 +1,13 @@
 package dev.emoforge.auth.config;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 
+import dev.emoforge.auth.entity.RefreshToken;
+import dev.emoforge.auth.repository.RefreshTokenRepository;
+import dev.emoforge.auth.service.RefreshTokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +33,8 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -61,13 +67,16 @@ public class SecurityConfig {
                             principal.getUsername(),
                             principal.getUuid()
                     );
+
+                    // ✅ DB 저장 (기존 토큰 삭제 후 새로 저장)
+                    refreshTokenService.saveRefreshToken(principal.getUuid(), refreshToken);
                 
                     // AccessToken → 쿠키 저장
                     ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                             .httpOnly(true)
                             .secure(false) // 운영에서는 true
                             //.sameSite("None")
-                            .domain("127.0.0.1.nip.io")
+                            .domain(".127.0.0.1.nip.io")
                             .path("/")
                             .maxAge(Duration.ofHours(1))
                             .build();
@@ -77,7 +86,7 @@ public class SecurityConfig {
                             .httpOnly(true)
                             .secure(false)
                             //.sameSite("None")
-                            .domain("127.0.0.1.nip.io")
+                            .domain(".127.0.0.1.nip.io")
                             .path("/")
                             .maxAge(Duration.ofDays(7))
                             .build();

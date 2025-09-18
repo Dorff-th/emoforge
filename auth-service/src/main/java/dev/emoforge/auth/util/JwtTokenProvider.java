@@ -81,7 +81,7 @@ public class JwtTokenProvider {
     /**
      * Claims 추출
      */
-    private Claims getClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

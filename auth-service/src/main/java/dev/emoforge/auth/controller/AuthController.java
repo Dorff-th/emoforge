@@ -7,12 +7,20 @@ import dev.emoforge.auth.dto.SignUpRequest;
 import dev.emoforge.auth.entity.Member;
 import dev.emoforge.auth.repository.MemberRepository;
 import dev.emoforge.auth.service.AuthService;
+import dev.emoforge.auth.util.JwtTokenProvider;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,6 +29,7 @@ public class AuthController {
     
     private final AuthService authService;
     private final MemberRepository memberRepository;
+    private final JwtTokenProvider jwtTokenProvider;
     
     @PostMapping("/signup")
     public ResponseEntity<Member> signUp(@Valid @RequestBody SignUpRequest request) {
@@ -48,5 +57,59 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         return new MemberDTO(member);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = null;
+
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                }
+            }
+        }
+
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
+
+        // ✅ refresh_token 안에 담긴 UUID 꺼냄
+        String memberUuid = jwtTokenProvider.getClaims(refreshToken).get("uuid", String.class);
+        Member member = memberRepository.findByUuid(memberUuid)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        // 새 토큰 발급
+        String newAccessToken = jwtTokenProvider.generateAccessToken(
+                member.getUsername(), member.getRole().name(), member.getUuid()
+        );
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(
+                member.getUsername(), member.getUuid()
+        );
+
+        // ✅ 쿠키 다시 세팅
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
+                .httpOnly(true)
+                .secure(false) // 운영은 true
+                //.sameSite("None")
+                .domain(".127.0.0.1.nip.io")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken)
+                .httpOnly(true)
+                .secure(false)
+                //.sameSite("None")
+                .domain(".127.0.0.1.nip.io")
+                .path("/")
+                .maxAge(Duration.ofDays(7))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok("Token refreshed");
     }
 }
