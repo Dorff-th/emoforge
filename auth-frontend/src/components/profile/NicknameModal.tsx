@@ -5,6 +5,7 @@ import type { AppDispatch } from "@/store/store";
 import { addToast } from "@/store/slices/toastSlice";
 import { Button } from "@/components/ui/button";
 import axiosInstance from "@/api/axiosInstance";
+import { fetchProfile } from "@/store/slices/authSlice";
 
 type Props = {
   onClose: () => void;
@@ -51,7 +52,7 @@ export default function NicknameModal({ onClose }: Props) {
       await axiosInstance.put(`/auth/members/nickname`, { nickname });
       dispatch(addToast({ type: "success", text: "닉네임이 변경되었습니다." }));
       onClose();
-      // TODO: 상태 갱신 로직 (authSlice의 user 정보 새로고침)
+      dispatch(fetchProfile());
     } catch (err: any) {
       dispatch(addToast({ type: "error", text: err.response?.data?.message || "변경 실패" }));
     } finally {

@@ -5,6 +5,7 @@ import type { AppDispatch } from "@/store/store";
 import { addToast } from "@/store/slices/toastSlice";
 import { Button } from "@/components/ui/button";
 import axiosInstance from "@/api/axiosInstance";
+import { fetchProfile } from "@/store/slices/authSlice";
 
 type Props = {
   onClose: () => void;
@@ -58,7 +59,7 @@ export default function EmailModal({ onClose }: Props) {
       await axiosInstance.put(`/auth/members/email`, { email });
       dispatch(addToast({ type: "success", text: "이메일이 변경되었습니다." }));
       onClose();
-      // TODO: 상태 갱신 로직 (authSlice.user.email 새로고침)
+      dispatch(fetchProfile());
     } catch (err: any) {
       dispatch(
         addToast({
