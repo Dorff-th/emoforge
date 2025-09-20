@@ -1,40 +1,52 @@
-// src/AppRouter.tsx
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import type { AppDispatch, RootState } from "@/store/store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProfile } from "@/store/slices/authSlice";
-import { RequireAuth, RequireGuest } from "@/router/guards";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import ProfilePage from "@/pages/ProfilePage";
+import UiTestPage from "@/pages/UiTestPage";
+//import HomePage from "@/pages/HomePage";
+import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
 
 export default function AppRouter() {
-  const dispatch = useDispatch<AppDispatch>();
-  const initialized = useSelector((s: RootState) => s.auth.initialized);
+  const dispatch = useAppDispatch();
+  const { status } = useAppSelector((state) => state.auth);
 
+  //최초에만 프로필 요청 (루프 방지)
   useEffect(() => {
-    // ✅ 앱 부팅 시 한 번만 프로필 확인
-    if (!initialized) {
+    if (status === "idle") {
       dispatch(fetchProfile());
     }
-  }, [dispatch, initialized]);
+  }, [dispatch, status]);
+
+  // 로딩 중이면 스피너
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <BrowserRouter>
+    <ConfirmDialogProvider>
       <Routes>
-        {/* 게스트 전용 (로그인 안된 상태만 접근) */}
-        <Route element={<RequireGuest />}>
-          <Route path="/login" element={<LoginPage />} />
-        </Route>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/ui-test" element={<UiTestPage />} />
 
-        {/* 인증 필요 */}
-        <Route element={<RequireAuth />}>
-          <Route path="/profile" element={<ProfilePage />} />
-        </Route>
+        <Route path="/profile" element={<ProfilePage />} />
 
-        {/* 기본 라우트 */}
-        <Route path="*" element={<LoginPage />} />
+        {status === "authenticated" && (
+          <>
+            {/* <Route path="/" element={<HomePage />} /> */}
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        )}
+
+        {/* fallback: 아직 상태 결정 안 됐으면 로딩 */}
+        {status === "idle" && (
+          <Route path="*" element={<div>Loading...</div>} />
+        )}
       </Routes>
+      </ConfirmDialogProvider>
     </BrowserRouter>
   );
 }

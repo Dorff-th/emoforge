@@ -15,6 +15,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     
     boolean existsByEmail(String email);
 
+    boolean existsByNickname(String nickname);
+
     //카카오 id 로 사용자 찾기
     Optional<Member> findByKakaoId(Long kakaoId);
 

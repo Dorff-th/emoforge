@@ -6,18 +6,21 @@ import dev.emoforge.auth.dto.MemberDTO;
 import dev.emoforge.auth.dto.SignUpRequest;
 import dev.emoforge.auth.entity.Member;
 import dev.emoforge.auth.repository.MemberRepository;
+import dev.emoforge.auth.security.CustomUserPrincipal;
 import dev.emoforge.auth.service.AuthService;
-import dev.emoforge.auth.util.JwtTokenProvider;
+import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,6 +29,7 @@ import java.time.Duration;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     
     private final AuthService authService;
@@ -45,27 +49,18 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<MemberDTO> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            // 401 Unauthorized 반환
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public MemberDTO getCurrentUser(@AuthenticationPrincipal CustomUserPrincipal user) {
+        if (user == null ) {
+            throw new RuntimeException("인증되지 않은 사용자입니다.");
         }
+        String uuid = user.getUuid();
 
-        try {
-            String username = authentication.getName(); // JWT sub (현재 kakao_oauth_id)
-            Long kakaoId = Long.parseLong(username);
+        Member member = memberRepository.findByUuid(uuid)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));;
 
-            Member member = memberRepository.findByKakaoId(kakaoId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-
-            MemberDTO dto = new MemberDTO(member);
-            return ResponseEntity.ok(dto);
-
-        } catch (NumberFormatException e) {
-            // username이 Long으로 변환 안 될 경우 → 인증 오류 처리
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return new MemberDTO(member);
     }
+
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {

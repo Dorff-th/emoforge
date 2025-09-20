@@ -1,5 +1,6 @@
-package dev.emoforge.auth.util;
+package dev.emoforge.auth.security.jwt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -26,9 +28,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
+        log.debug("--token : " + token);
+
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication auth = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            try {
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            } catch (Exception e) {
+                e.printStackTrace(); // 콘솔에 전체 stack trace 출력
+                throw e;             // 다시 던져서 Spring Security 흐름 유지
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -44,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 2. 쿠키
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
-                if ("token".equals(cookie.getName())) {
+                if ("access_token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

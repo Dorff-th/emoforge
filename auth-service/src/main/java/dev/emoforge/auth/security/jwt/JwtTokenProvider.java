@@ -1,11 +1,13 @@
-package dev.emoforge.auth.util;
+package dev.emoforge.auth.security.jwt;
 
+import dev.emoforge.auth.security.CustomUserPrincipal;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+
 
 @Slf4j
 @Component
@@ -124,7 +128,7 @@ public class JwtTokenProvider {
     /**
      * Authentication 생성 (Spring Security 연동)
      */
-    public Authentication getAuthentication(String token) {
+    /*public Authentication getAuthentication(String token) {
         String username = getUsernameFromToken(token);
         String role = getRoleFromToken(token);
 
@@ -133,5 +137,22 @@ public class JwtTokenProvider {
                 null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
         );
+    }*/
+    public Authentication getAuthentication(String token) {
+
+        String username = getUsernameFromToken(token);
+        String role = getRoleFromToken(token);
+        String uuid = getUuidFromToken(token); // ⚡ JWT claim에서 uuid 꺼내오기
+
+        List<GrantedAuthority> authorities =
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+
+        CustomUserPrincipal principal = new CustomUserPrincipal(username, uuid, authorities);
+
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(principal, token, authorities);
+
+        return authentication;
     }
+
 }

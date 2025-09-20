@@ -1,4 +1,4 @@
-package dev.emoforge.auth.oauth;
+package dev.emoforge.auth.security.oauth;
 
 import java.util.Collection;
 import java.util.Map;

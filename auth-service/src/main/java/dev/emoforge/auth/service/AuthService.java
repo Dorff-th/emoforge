@@ -5,7 +5,7 @@ import dev.emoforge.auth.dto.LoginResponse;
 import dev.emoforge.auth.dto.SignUpRequest;
 import dev.emoforge.auth.entity.Member;
 import dev.emoforge.auth.repository.MemberRepository;
-import dev.emoforge.auth.util.JwtTokenProvider;
+import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

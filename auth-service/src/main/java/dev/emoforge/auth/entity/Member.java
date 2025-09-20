@@ -1,10 +1,7 @@
 package dev.emoforge.auth.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,6 +14,7 @@ import dev.emoforge.auth.enums.Role;
 @Entity
 @Table(name = "member")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

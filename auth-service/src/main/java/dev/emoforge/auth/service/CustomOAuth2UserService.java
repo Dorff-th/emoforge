@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import dev.emoforge.auth.entity.Member;
-import dev.emoforge.auth.oauth.CustomOAuth2User;
+import dev.emoforge.auth.security.oauth.CustomOAuth2User;
 
 import lombok.RequiredArgsConstructor;
 
