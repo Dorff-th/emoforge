@@ -1,0 +1,84 @@
+package dev.emoforge.attach.controller;
+
+import dev.emoforge.attach.domain.Attachment;
+import dev.emoforge.attach.domain.UploadType;
+import dev.emoforge.attach.dto.AttachmentMapper;
+import dev.emoforge.attach.dto.AttachmentResponse;
+import dev.emoforge.attach.service.AttachmentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/attachments")
+@RequiredArgsConstructor
+public class AttachmentController {
+
+    private final AttachmentService attachmentService;
+
+    /**
+     * 파일 업로드
+     * @param file 업로드할 파일
+     * @param uploadType 업로드 타입 (PROFILE_IMAGE, EDITOR_IMAGE, ATTACHMENT)
+     * @param postId 게시글 ID (첨부/에디터 이미지일 경우 필요)
+     * @param memberUuid 업로더 UUID (프로필 이미지일 경우 필요)
+     */
+    @PostMapping
+    public ResponseEntity<AttachmentResponse> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("uploadType") UploadType uploadType,
+            @RequestParam(value = "postId", required = false) Long postId,
+            @RequestParam(value = "memberUuid", required = false) String memberUuid
+    ) throws IOException {
+        Attachment saved = attachmentService.uploadFile(file, uploadType, postId, memberUuid);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(AttachmentMapper.toResponse(saved));
+    }
+
+    /**
+     * 파일 삭제 (soft delete + 실제 파일 삭제)
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+        attachmentService.deleteFile(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 게시글 첨부파일 조회
+     */
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<AttachmentResponse>> getAttachmentsByPost(@PathVariable Long postId) {
+        return ResponseEntity.ok(
+                attachmentService.getAttachmentsByPost(postId)
+                        .stream()
+                        .map(AttachmentMapper::toResponse)
+                        .toList()
+        );
+    }
+
+    /**
+     * 사용자 프로필 이미지 조회 (최신 1개)
+     */
+    @GetMapping("/profile/{memberUuid}")
+    public ResponseEntity<AttachmentResponse> getProfileImage(@PathVariable String memberUuid) {
+        return attachmentService.getProfileImage(memberUuid)
+                .map(AttachmentMapper::toResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * 특정 게시글이 첨부 업로드 가능한 상태인지 확인 (3개 제한)
+     */
+    @GetMapping("/post/{postId}/can-upload")
+    public ResponseEntity<Boolean> canUploadAttachment(@PathVariable Long postId) {
+        return ResponseEntity.ok(attachmentService.canUploadAttachment(postId));
+    }
+}
