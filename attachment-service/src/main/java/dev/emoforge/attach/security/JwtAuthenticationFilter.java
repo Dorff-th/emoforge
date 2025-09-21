@@ -28,8 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = resolveTokenFromCookie(request);
 
-        System.out.println("쿠키에서 읽은 access_token = " + token);
-
         if (token != null && jwtTokenProvider.validateToken(token)) {
             String memberUuid = jwtTokenProvider.getMemberUuid(token);
 

@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "@/api/axiosInstance";
+import axiosAuth from "@/api/axiosAuth";
 
 export const fetchProfile = createAsyncThunk(
   "auth/fetchProfile",
   async (_, { rejectWithValue }) => {
     
     try {
-      const res = await axiosInstance.get("/auth/me", {});
+      const res = await axiosAuth.get("/auth/me", {});
       return res.data;
     } catch (err: any) {
       console.error("Fetch profile error:", err);
@@ -20,7 +20,7 @@ export const fetchProfile = createAsyncThunk(
 
 // ✅ 로그아웃(쿠키 삭제) + 상태 초기화
 export const logoutThunk = createAsyncThunk<void>("auth/logout", async () => {
-  await axiosInstance.post("/auth/logout", {}); // 204 기대
+  await axiosAuth.post("/auth/logout", {}); // 204 기대
 });
 
 interface AuthState {

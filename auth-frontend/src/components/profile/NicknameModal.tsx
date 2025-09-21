@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store/store";
 import { addToast } from "@/store/slices/toastSlice";
 import { Button } from "@/components/ui/button";
-import axiosInstance from "@/api/axiosInstance";
+import axiosAuth from "@/api/axiosAuth";
 import { fetchProfile } from "@/store/slices/authSlice";
 
 type Props = {
@@ -25,7 +25,7 @@ export default function NicknameModal({ onClose }: Props) {
     }
     try {
       setIsChecking(true);
-      const res = await axiosInstance.get(`/auth/members/check-nickname`, {
+      const res = await axiosAuth.get(`/auth/members/check-nickname`, {
         params: { nickname },
       });
       if (res.data.available) {
@@ -49,7 +49,7 @@ export default function NicknameModal({ onClose }: Props) {
     }
     try {
       setSaving(true);
-      await axiosInstance.put(`/auth/members/nickname`, { nickname });
+      await axiosAuth.put(`/auth/members/nickname`, { nickname });
       dispatch(addToast({ type: "success", text: "닉네임이 변경되었습니다." }));
       onClose();
       dispatch(fetchProfile());

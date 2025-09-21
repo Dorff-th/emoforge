@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "@/store/store";
 import { addToast } from "@/store/slices/toastSlice";
 import { Button } from "@/components/ui/button";
-import axiosInstance from "@/api/axiosInstance";
+import axiosAuth from "@/api/axiosAuth";
 import { fetchProfile } from "@/store/slices/authSlice";
 
 type Props = {
@@ -32,7 +32,7 @@ export default function EmailModal({ onClose }: Props) {
     }
     try {
       setIsChecking(true);
-      const res = await axiosInstance.get(`/auth/members/check-email`, {
+      const res = await axiosAuth.get(`/auth/members/check-email`, {
         params: { email },
       });
       if (res.data.available) {
@@ -56,7 +56,7 @@ export default function EmailModal({ onClose }: Props) {
     }
     try {
       setSaving(true);
-      await axiosInstance.put(`/auth/members/email`, { email });
+      await axiosAuth.put(`/auth/members/email`, { email });
       dispatch(addToast({ type: "success", text: "이메일이 변경되었습니다." }));
       onClose();
       dispatch(fetchProfile());

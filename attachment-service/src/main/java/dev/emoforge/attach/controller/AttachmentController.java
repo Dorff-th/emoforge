@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/attachments")
+@RequestMapping("/api/attach")
 @RequiredArgsConstructor
 public class AttachmentController {
 
@@ -45,7 +45,7 @@ public class AttachmentController {
      * 파일 삭제 (soft delete + 실제 파일 삭제)
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFile(@PathVariable("id") Long id) {
         attachmentService.deleteFile(id);
         return ResponseEntity.noContent().build();
     }
@@ -54,7 +54,7 @@ public class AttachmentController {
      * 게시글 첨부파일 조회
      */
     @GetMapping("/post/{postId}")
-    public ResponseEntity<List<AttachmentResponse>> getAttachmentsByPost(@PathVariable Long postId) {
+    public ResponseEntity<List<AttachmentResponse>> getAttachmentsByPost(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(
                 attachmentService.getAttachmentsByPost(postId)
                         .stream()
@@ -67,7 +67,7 @@ public class AttachmentController {
      * 사용자 프로필 이미지 조회 (최신 1개)
      */
     @GetMapping("/profile/{memberUuid}")
-    public ResponseEntity<AttachmentResponse> getProfileImage(@PathVariable String memberUuid) {
+    public ResponseEntity<AttachmentResponse> getProfileImage(@PathVariable("memberUuid") String memberUuid) {
         return attachmentService.getProfileImage(memberUuid)
                 .map(AttachmentMapper::toResponse)
                 .map(ResponseEntity::ok)

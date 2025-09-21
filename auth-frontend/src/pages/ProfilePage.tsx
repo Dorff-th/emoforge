@@ -2,14 +2,20 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "@/api/axiosInstance";
+import axiosAuth from "@/api/axiosAuth";
 import { Button } from "@/components/ui/button";
 import { addToast } from "@/store/slices/toastSlice";
 import type { RootState, AppDispatch } from "@/store/store";
 import { logoutThunk } from "@/store/slices/authSlice";
-
 import NicknameModal from "@/components/profile/NicknameModal";
 import EmailModal from "@/components/profile/EmailModal";
+import { fetchProfileImage } from "@/api/profileImageApi";
+import type { ProfileImageResponse } from "@/api/profileImageApi";
+import { Settings } from 'lucide-react';
+import ProfileImageUploadModal from "@/components/profile/ProfileImageUploadModal";
+
+
+import defaultProfileImg from "@/assets/default-profile.svg";
 
 interface Profile {
   uuid: string;
@@ -20,7 +26,8 @@ interface Profile {
   profielUrl: string | null;
 }
 
-export default function ProfilePage() {
+
+export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -29,16 +36,41 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [openNicknameModal, setOpenNicknameModal] = useState(false);
   const [openEmailModal, setOpenEmailModal] = useState(false);
-  const [openImageModal, setOpenImageModal] = useState(false);
 
-  useEffect(() => {
-    axiosInstance.get("/auth/me",{})
-      .then((res) => {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+
+  const [profileImage, setProfileImage] = useState<ProfileImageResponse | null>(null);
+
+   useEffect(() => {
+    const loadProfileImage = async () => {
+      try {
+        const data = await fetchProfileImage(user.uuid);
+        setProfileImage(data);
+      } catch (error: any) {
+        // 이미지가 없거나 404 → 기본 이미지로 대체
+        setProfileImage(null);
+      }
+    };
+
+    loadProfileImage();
+  }, [memberUuid]);
+
+  
+
+  function fetchProfile() {
+    axiosAuth.get("/auth/me",{})
+      .then((res) => {  
         return setProfile(res.data)})
       .catch(() => {
         dispatch(addToast({ type: "error", text: "프로필 조회 실패" }));
         window.location.href = "/login";
-      }); 
+      });
+  }
+
+  useEffect(() => {
+    fetchProfile();
   }, []);
 
   const handleLogout = async () => {
@@ -60,15 +92,15 @@ export default function ProfilePage() {
           {/* 프로필 이미지 */}
           <div className="relative">
             <img
-              src={user?.profileUrl ?? "/default_profile.png"}
+              src={profileImage ? profileImage.publicUrl : defaultProfileImg}
               alt="profile"
               className="h-24 w-24 rounded-full border"
             />
             <button
               className="absolute bottom-0 right-0 rounded-full bg-gray-700 p-1 text-white hover:bg-gray-600"
-              onClick={() => setOpenImageModal(true)}
+              onClick={() => setIsModalOpen(true)}
             >
-              ✏️
+             <Settings size={20} className="text-gray-200" />
             </button>
           </div>
 
@@ -111,9 +143,13 @@ export default function ProfilePage() {
       {openEmailModal && (
         <EmailModal onClose={() => setOpenEmailModal(false)} />
       )}
-      {/* {openImageModal && (
-        <ProfileImageModal onClose={() => setOpenImageModal(false)} />
-      )} */}
+      {/* 모달 */}
+      <ProfileImageUploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        memberUuid={user.uuid}
+        onUploaded={fetchProfile} // 업로드 후 다시 조회
+    />
     </div>
   );
 

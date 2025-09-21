@@ -5,12 +5,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import ProfilePage from "@/pages/ProfilePage";
 import UiTestPage from "@/pages/UiTestPage";
+import TestPage from "@/pages/TestPage";
 //import HomePage from "@/pages/HomePage";
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
 
 export default function AppRouter() {
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.auth);
+  const isAuthenticated = status === "authenticated";
 
   //최초에만 프로필 요청 (루프 방지)
   useEffect(() => {
@@ -26,26 +28,37 @@ export default function AppRouter() {
 
   return (
     <BrowserRouter>
-    <ConfirmDialogProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/ui-test" element={<UiTestPage />} />
+      <ConfirmDialogProvider>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              status === "authenticated" || status === "unauthenticated" ? (
+                <Navigate to={isAuthenticated ? "/profile" : "/login"} replace />
+              ) : (
+                <div>Loading...</div>
+              )
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/ui-test" element={<UiTestPage />} />
+          <Route path="/test" element={<TestPage />} />
 
-        <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
 
-        {status === "authenticated" && (
-          <>
-            {/* <Route path="/" element={<HomePage />} /> */}
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
+          {isAuthenticated && (
+            <>
+              {/* <Route path="/" element={<HomePage />} /> */}
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
 
-        {/* fallback: 아직 상태 결정 안 됐으면 로딩 */}
-        {status === "idle" && (
-          <Route path="*" element={<div>Loading...</div>} />
-        )}
-      </Routes>
+          {/* fallback: 아직 상태 결정 안 됐으면 로딩 */}
+          {status === "idle" && (
+            <Route path="*" element={<div>Loading...</div>} />
+          )}
+        </Routes>
       </ConfirmDialogProvider>
     </BrowserRouter>
   );
