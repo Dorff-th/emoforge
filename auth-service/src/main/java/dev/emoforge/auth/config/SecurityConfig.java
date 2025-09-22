@@ -1,11 +1,13 @@
 package dev.emoforge.auth.config;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 
 
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import dev.emoforge.auth.security.oauth.CustomOAuth2User;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -90,9 +92,18 @@ public class SecurityConfig {
                             // SPA에서 필요하다면 헤더에도 내려줄 수 있음
                             response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
-                            response.sendRedirect("http://app1.127.0.0.1.nip.io:5173/profile");
+                            try {
+                                response.sendRedirect("http://app1.127.0.0.1.nip.io:5173/profile");
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } finally {
+                            }
                         })
 
+                ).exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        })
                 );
 
         return http.build();

@@ -9,7 +9,7 @@ export const fetchProfile = createAsyncThunk(
       const res = await axiosAuth.get("/auth/me", {});
       return res.data;
     } catch (err: any) {
-      console.error("Fetch profile error:", err);
+      
       if (err.response?.status === 403) {
         return rejectWithValue("unauthenticated");
       }

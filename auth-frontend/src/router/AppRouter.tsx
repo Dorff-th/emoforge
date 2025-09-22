@@ -14,14 +14,14 @@ export default function AppRouter() {
   const { status } = useAppSelector((state) => state.auth);
   const isAuthenticated = status === "authenticated";
 
-  //최초에만 프로필 요청 (루프 방지)
+  // Fetch profile only once on first load (avoid loop)
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchProfile());
     }
   }, [dispatch, status]);
 
-  // 로딩 중이면 스피너
+  // Show loading indicator while fetching
   if (status === "loading") {
     return <div>Loading...</div>;
   }
@@ -44,17 +44,27 @@ export default function AppRouter() {
           <Route path="/ui-test" element={<UiTestPage />} />
           <Route path="/test" element={<TestPage />} />
 
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route
+            path="/profile"
+            element={
+              status === "authenticated" ? (
+                <ProfilePage />
+              ) : status === "idle" ? (
+                <div>Loading...</div>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
 
           {isAuthenticated && (
             <>
               {/* <Route path="/" element={<HomePage />} /> */}
-              <Route path="/profile" element={<ProfilePage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}
 
-          {/* fallback: 아직 상태 결정 안 됐으면 로딩 */}
+          {/* fallback: show loading until auth status resolves */}
           {status === "idle" && (
             <Route path="*" element={<div>Loading...</div>} />
           )}
@@ -63,3 +73,5 @@ export default function AppRouter() {
     </BrowserRouter>
   );
 }
+
+

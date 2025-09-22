@@ -1,7 +1,6 @@
 // src/pages/LoginPage.tsx
 export default function LoginPage() {
   const handleKakaoLogin = () => {
-    //window.location.href = "http://auth.127.0.0.1.nip.io:8081/oauth2/authorization/kakao";
     window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
   };
 

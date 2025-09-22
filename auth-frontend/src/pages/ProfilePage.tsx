@@ -1,5 +1,5 @@
 // src/pages/ProfilePage.tsx
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosAuth from "@/api/axiosAuth";
@@ -11,10 +11,8 @@ import NicknameModal from "@/components/profile/NicknameModal";
 import EmailModal from "@/components/profile/EmailModal";
 import { fetchProfileImage } from "@/api/profileImageApi";
 import type { ProfileImageResponse } from "@/api/profileImageApi";
-import { Settings } from 'lucide-react';
+import { Settings } from "lucide-react";
 import ProfileImageUploadModal from "@/components/profile/ProfileImageUploadModal";
-
-
 import defaultProfileImg from "@/assets/default-profile.svg";
 
 interface Profile {
@@ -26,9 +24,7 @@ interface Profile {
   profielUrl: string | null;
 }
 
-
-export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
-
+export default function ProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -36,42 +32,41 @@ export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [openNicknameModal, setOpenNicknameModal] = useState(false);
   const [openEmailModal, setOpenEmailModal] = useState(false);
-
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-
   const [profileImage, setProfileImage] = useState<ProfileImageResponse | null>(null);
 
-   useEffect(() => {
-    const loadProfileImage = async () => {
-      try {
-        const data = await fetchProfileImage(user.uuid);
-        setProfileImage(data);
-      } catch (error: any) {
-        // 이미지가 없거나 404 → 기본 이미지로 대체
-        setProfileImage(null);
-      }
-    };
+  const loadProfileImage = useCallback(async () => {
+    if (!user?.uuid) {
+      setProfileImage(null);
+      return;
+    }
 
-    loadProfileImage();
-  }, [memberUuid]);
-
-  
-
-  function fetchProfile() {
-    axiosAuth.get("/auth/me",{})
-      .then((res) => {  
-        return setProfile(res.data)})
-      .catch(() => {
-        dispatch(addToast({ type: "error", text: "프로필 조회 실패" }));
-        window.location.href = "/login";
-      });
-  }
+    try {
+      const data = await fetchProfileImage(user.uuid);
+      setProfileImage(data);
+    } catch {
+      // Use default image when fetch fails
+      setProfileImage(null);
+    }
+  }, [user?.uuid]);
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    void loadProfileImage();
+  }, [loadProfileImage]);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await axiosAuth.get("/auth/me", {});
+      setProfile(res.data);
+    } catch {
+      dispatch(addToast({ type: "error", text: "프로필 조회 실패" }));
+      window.location.href = "/login";
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    void fetchProfile();
+  }, [fetchProfile]);
 
   const handleLogout = async () => {
     try {
@@ -83,13 +78,18 @@ export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
     }
   };
 
+  const handleProfileImageUploaded = async () => {
+    await loadProfileImage();
+    await fetchProfile();
+  };
+
   if (!user) return <p>Loading...</p>;
 
-   return (
+  return (
     <div className="flex h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
         <div className="flex flex-col items-center gap-4">
-          {/* 프로필 이미지 */}
+          {/* Profile image */}
           <div className="relative">
             <img
               src={profileImage ? profileImage.publicUrl : defaultProfileImg}
@@ -100,11 +100,11 @@ export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
               className="absolute bottom-0 right-0 rounded-full bg-gray-700 p-1 text-white hover:bg-gray-600"
               onClick={() => setIsModalOpen(true)}
             >
-             <Settings size={20} className="text-gray-200" />
+              <Settings size={20} className="text-gray-200" />
             </button>
           </div>
 
-          {/* 닉네임 */}
+          {/* Nickname */}
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-semibold">{user?.nickname}</h2>
             <button
@@ -115,7 +115,7 @@ export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
             </button>
           </div>
 
-          {/* 이메일 */}
+          {/* Email */}
           <div className="flex items-center gap-2 text-gray-500">
             <p>{user?.email}</p>
             <button
@@ -126,7 +126,7 @@ export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
             </button>
           </div>
 
-          {/* 로그아웃 버튼 */}
+          {/* Logout button */}
           <Button
             onClick={handleLogout}
             className="mt-6 w-full bg-red-500 hover:bg-red-600"
@@ -136,21 +136,18 @@ export default function ProfilePage({ memberUuid }: { memberUuid: string }) {
         </div>
       </div>
 
-      {/* 모달들 */}
       {openNicknameModal && (
         <NicknameModal onClose={() => setOpenNicknameModal(false)} />
       )}
       {openEmailModal && (
         <EmailModal onClose={() => setOpenEmailModal(false)} />
       )}
-      {/* 모달 */}
       <ProfileImageUploadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         memberUuid={user.uuid}
-        onUploaded={fetchProfile} // 업로드 후 다시 조회
-    />
+        onUploaded={handleProfileImageUploaded}
+      />
     </div>
   );
-
 }
