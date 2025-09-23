@@ -14,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,4 +121,17 @@ public class AttachmentService {
             throw new IllegalArgumentException("Invalid file extension: " + ext);
         }
     }
+
+    /**
+     * post에 첨부된 파일 개수 구하기(Post-Service 에서 bbf로직에서 사용)
+     * 첨부된 일반 파일 개수만 구하는것이므로 Upload_type는 'ATTACHMENT'로만 조회
+     */
+     public Map<Long, Integer> countByPostIds(List<Long> postIds) {
+        return attachmentRepository.countByPostIds(postIds, UploadType.ATTACHMENT).stream()
+            .collect(Collectors.toMap(
+                row -> (Long) row[0],   // postId
+                row -> ((Number) row[1]).intValue() // count
+        ));
+     }
+
 }

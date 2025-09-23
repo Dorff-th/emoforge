@@ -44,4 +44,13 @@ public class MemberProfileController {
         String uuid = user.getUuid();
         return memberProfileService.updateEmail(uuid, req.email());
     }
+
+    /*
+    * Post-Service의 bbf에서 사용(authClient)
+    * */
+    @GetMapping("/{uuid}/profile")
+    public MemberProfileResponse getProfile(@PathVariable("uuid") String uuid) {
+        log.debug("\n\n\n===getProfile uuid : " + uuid);
+        return memberProfileService.getProfile(uuid);
+    }
 }

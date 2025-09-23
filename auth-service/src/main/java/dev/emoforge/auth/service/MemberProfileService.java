@@ -78,5 +78,17 @@ public class MemberProfileService {
         if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
             throw new IllegalArgumentException("유효한 이메일 형식이 아닙니다.");
     }
+
+    public MemberProfileResponse getProfile(String uuid) {
+        Member member = memberRepository.findByUuid(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found: " + uuid));
+
+        return new MemberProfileResponse(
+                member.getUuid(),
+                member.getEmail(),
+                member.getNickname()
+        );
+    }
+
 }
 

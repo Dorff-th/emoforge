@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -81,4 +82,13 @@ public class AttachmentController {
     public ResponseEntity<Boolean> canUploadAttachment(@PathVariable Long postId) {
         return ResponseEntity.ok(attachmentService.canUploadAttachment(postId));
     }
+
+    /**
+     * post에 첨부된 파일 개수 구하기(Post-Service 에서 bbf로직에서 사용)
+     */
+    @PostMapping("/count/batch")
+    public Map<Long, Integer> countByPostIds(@RequestBody List<Long> postIds) {
+        return attachmentService.countByPostIds(postIds);
+    }
+
 }

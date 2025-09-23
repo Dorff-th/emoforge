@@ -1,17 +1,16 @@
-package dev.emoforge.attach.config;
+package dev.emoforge.post.config;
 
-import dev.emoforge.attach.security.JwtAuthenticationFilter;
-import dev.emoforge.attach.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+//import dev.emoforge.post.config.JwtTokenProvider;
 
 import java.util.Arrays;
 
@@ -19,6 +18,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+
 
     public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
@@ -29,15 +29,20 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ 여기!
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/attach/welcome",  "/api/attach/test/**").permitAll()
-                        .requestMatchers("/uploads/profile_image/**").permitAll()
-                        .requestMatchers("/api/attach/count/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/attach/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE,"/api/attach/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT,"/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE,"/api/posts/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("Unauthorized");
+                        })
+                );;
 
         return http.build();
     }
@@ -47,7 +52,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // ✅ 쿠키 포함
         config.setAllowedOrigins(Arrays.asList(
-                "http://app1.127.0.0.1.nip.io:5173"
+                "http://app2.127.0.0.1.nip.io:5174"
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
