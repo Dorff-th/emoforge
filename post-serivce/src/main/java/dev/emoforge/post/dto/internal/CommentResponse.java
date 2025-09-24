@@ -6,15 +6,15 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record CommentResponseDTO(
+public record CommentResponse(
         Long id,
         String content,
         LocalDateTime createdAt,
         Long postId,
         String memberUuid
 ) {
-    public static CommentResponseDTO fromEntity(Comment comment) {
-        return CommentResponseDTO.builder()
+    public static CommentResponse fromEntity(Comment comment) {
+        return CommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())

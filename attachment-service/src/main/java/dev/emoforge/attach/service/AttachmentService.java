@@ -2,6 +2,7 @@ package dev.emoforge.attach.service;
 
 import dev.emoforge.attach.domain.Attachment;
 import dev.emoforge.attach.domain.UploadType;
+import dev.emoforge.attach.dto.AttachmentResponse;
 import dev.emoforge.attach.policy.UploadPolicy;
 import dev.emoforge.attach.policy.UploadPolicyRegistry;
 import dev.emoforge.attach.repository.AttachmentRepository;
@@ -124,14 +125,38 @@ public class AttachmentService {
 
     /**
      * post에 첨부된 파일 개수 구하기(Post-Service 에서 bbf로직에서 사용)
-     * 첨부된 일반 파일 개수만 구하는것이므로 Upload_type는 'ATTACHMENT'로만 조회
+     * 목록(posts)에서 첨부된 일반 파일 개수만 구하는것이므로 Upload_type는 'ATTACHMENT'로만 조회
      */
      public Map<Long, Integer> countByPostIds(List<Long> postIds) {
         return attachmentRepository.countByPostIds(postIds, UploadType.ATTACHMENT).stream()
             .collect(Collectors.toMap(
                 row -> (Long) row[0],   // postId
                 row -> ((Number) row[1]).intValue() // count
-        ));
+            ));
      }
 
+    /**
+     * post detail 에 첨부된 파일 정보 구하기(Post-Service 에서 bbf로직에서 사용)
+     * 여기서는 첨부된 에디터 이미지(UPLOAD_TYPE = 'EDITOR_IMAGE')
+     * 일반 첨부파일 정보를 (UPLOAD_TYPE = 'ATTACHMENT')
+     *  uploadType값에 따라 달리한다.
+     */
+    public List<AttachmentResponse> findByPostId(Long postId, UploadType uploadType) {
+         return attachmentRepository.findByPostId(postId, uploadType).stream()
+                 .map(attachment -> {
+                     return AttachmentResponse.builder()
+                             .id(attachment.getId())
+                             .postId(attachment.getId())
+                             .memberUuid(attachment.getMemberUuid())
+                             .originFileName(attachment.getOriginFileName())
+                             .fileName(attachment.getFileName())
+                             .fileType(attachment.getFileType())
+                             .fileSize(attachment.getFileSize())
+                             .publicUrl(attachment.getPublicUrl())
+                             .uploadType(attachment.getUploadType())
+                             .uploadedAt(attachment.getUploadedAt())
+                             .build();
+                    }
+                 ).toList();
+    }
 }

@@ -40,7 +40,7 @@ class PostTestDataInitializer {
             int sequence = i + 1;
             String memberUuid = memberAssignments.get(i);
             long categoryId = randomCategoryId();
-            Post post = Post.create("테스트 게시글 " + sequence,
+            Post post = Post.   create("테스트 게시글 " + sequence,
                     "내용 " + sequence, categoryId, memberUuid);
             posts.add(post);
         }

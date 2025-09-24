@@ -15,17 +15,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
-class PostListFacadeTest {
+class PostListFacadeServiceTest {
 
     @Autowired
-    private PostListFacade postListFacade;
+    private PostListFacadeService postListFacadeService;
 
     @Autowired
     private PostRepository postRepository;
@@ -59,7 +56,7 @@ class PostListFacadeTest {
 
         // when
         PageResponseDTO<PostListItemResponse> result =
-            postListFacade.getPostList(new PageRequestDTO(1,10, "id", SortDirection.DESC));
+            postListFacadeService.getPostList(new PageRequestDTO(1,10, "id", SortDirection.DESC));
 
         // then
         result.getDtoList().forEach(item -> {

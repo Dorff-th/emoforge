@@ -21,7 +21,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class PostListFacade {
+public class PostListFacadeService {
 
     private static final int PAGE_BLOCK_SIZE = 10;
 

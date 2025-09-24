@@ -1,9 +1,12 @@
 package dev.emoforge.post.service.external;
 
+import dev.emoforge.post.dto.external.AttachmentResponse;
 import dev.emoforge.post.dto.external.MemberProfileResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @FeignClient(
     name = "auth-service",
@@ -13,4 +16,5 @@ public interface AuthClient {
 
     @GetMapping("/api/auth/members/{uuid}/profile")
     MemberProfileResponse getMemberProfile(@PathVariable("uuid") String uuid);
+
 }

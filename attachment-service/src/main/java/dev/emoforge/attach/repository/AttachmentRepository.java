@@ -33,4 +33,9 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
             @Param("postIds") List<Long> postIds,
             @Param("uploadType") UploadType uploadType
     );
+
+    //post에 첨부된 파일 메타 정보 구하기(Post-Service 에서 bbf로직에서 사용)
+    @Query("SELECT a FROM Attachment a WHERE a.postId = :postId AND a.uploadType = :uploadType")
+    List<Attachment> findByPostId(@Param("postId") Long postId, @Param("uploadType") UploadType uploadType);
+
 }

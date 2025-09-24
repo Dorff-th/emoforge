@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.concurrent.Executor;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class PostListFacadeIntegrationTest {
+class PostListFacadeServiceIntegrationTest {
 
     @TestConfiguration
     static class NoAsyncConfig {
@@ -26,7 +26,7 @@ class PostListFacadeIntegrationTest {
     }
 
     @Autowired
-    private PostListFacade postListFacade;
+    private PostListFacadeService postListFacadeService;
 
     @Test
     void 게시판목록_실제서비스_조립성공() {
@@ -34,7 +34,7 @@ class PostListFacadeIntegrationTest {
         PageRequestDTO request = new PageRequestDTO(1, 10, "id", SortDirection.DESC);
 
         // when
-        PageResponseDTO<PostListItemResponse> result = postListFacade.getPostList(request);
+        PageResponseDTO<PostListItemResponse> result = postListFacadeService.getPostList(request);
 
         // then
         result.getDtoList().forEach(item -> {

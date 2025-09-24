@@ -52,9 +52,9 @@ public class AttachmentController {
     }
 
     /**
-     * 게시글 첨부파일 조회
+     * 게시글 첨부파일 조회 - unUsed (첨부파일 조회는 Post-Service에서 bbf로 호출하기때문에 api 호출은 필요가 없음.
      */
-    @GetMapping("/post/{postId}")
+    /*@GetMapping("/post/{postId}")
     public ResponseEntity<List<AttachmentResponse>> getAttachmentsByPost(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(
                 attachmentService.getAttachmentsByPost(postId)
@@ -62,7 +62,7 @@ public class AttachmentController {
                         .map(AttachmentMapper::toResponse)
                         .toList()
         );
-    }
+    }*/
 
     /**
      * 사용자 프로필 이미지 조회 (최신 1개)
@@ -91,4 +91,21 @@ public class AttachmentController {
         return attachmentService.countByPostIds(postIds);
     }
 
+    /**
+     * post에 첨부된 파일 정보 구하기(Post-Service 에서 bbf로직에서 사용)
+     * uploadType (EDITOR_IMAGE, ATTACHMENT)
+     */
+    @GetMapping("/post/{postId}")
+    public List<AttachmentResponse> findByPostId(@PathVariable("postId") Long postId, @RequestParam("uploadType") UploadType uploadType) {
+        return attachmentService.findByPostId(postId, uploadType);
+    }
+
+    @GetMapping("/profile-images/{memberUuid}")
+    public ResponseEntity<AttachmentResponse> getLatestProfileImage(@PathVariable("memberUuid") String memberUuid) {
+        return ResponseEntity.ok(
+                attachmentService.getProfileImage(memberUuid)
+                        .map(AttachmentMapper::toResponse)
+                        .orElse(null)   // 없는 경우 null 반환
+        );
+    }
 }
