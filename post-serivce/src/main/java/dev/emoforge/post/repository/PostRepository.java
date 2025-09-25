@@ -27,6 +27,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     void deleteByIdIn(List<Long> postIds);
 
+    //게시글 목록 조회
     @Query("SELECT new dev.emoforge.post.dto.internal.PostSimpleDTO(" +
         "p.id, p.title, p.createdAt, c.name, p.memberUuid, " +
         "(SELECT COUNT(cm) FROM Comment cm WHERE cm.postId = p.id)" +
@@ -36,22 +37,18 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         "ORDER BY p.id DESC")
     Page<PostSimpleDTO> findAllPosts(Pageable pageable);
 
-    /*// 특정 태그 조회
-    @Query("SELECT new dev.noteforge.knowhub.post.dto.PostDTO(" +
-        "p.id, p.title, p.createdAt, c.name, m.username, m.id, " +
-        "COUNT(cm.id), m.nickname, " +
-        "COUNT(CASE WHEN a.uploadType = 'ATTACHMENT' THEN a.id END)) " +
+    // 특정 태그 조회
+    @Query("SELECT new dev.emoforge.post.dto.internal.PostSimpleDTO(" +
+        "p.id, p.title, p.createdAt, c.name, p.memberUuid, " +
+        "(SELECT COUNT(cm) FROM Comment cm WHERE cm.postId = p.id)" +
+        ") " +
         "FROM Post p " +
-        "LEFT JOIN p.category c " +
-        "LEFT JOIN p.member m " +
-        "LEFT JOIN p.comments cm " +
-        "LEFT JOIN p.attachments a " +
+        "LEFT JOIN Category c ON p.categoryId = c.id " +
         "JOIN p.postTags pt " +
         "JOIN pt.tag t " +
         "WHERE t.name = :tagName " +
-        "GROUP BY p.id, p.title, p.createdAt, c.name, m.username, m.id, m.nickname " +
         "ORDER BY p.id DESC")
-    Page<PostDTO> findAllPostsByTag(@Param("tagName") String tagName, Pageable pageable);*/
+    Page<PostSimpleDTO> findAllPostsByTag(@Param("tagName") String tagName, Pageable pageable);
 
     /**
      *  게시물 상세 조회

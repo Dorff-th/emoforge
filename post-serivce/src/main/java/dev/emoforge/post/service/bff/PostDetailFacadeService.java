@@ -42,8 +42,6 @@ public class PostDetailFacadeService {
         List<AttachmentResponse> attachments =
             attachClient.findByPostId(postId, "ATTACHMENT");
 
-
-
         // 4. 조립 후 반환
         return new PostDetailResponse(
             postDetailDTO.getId(),

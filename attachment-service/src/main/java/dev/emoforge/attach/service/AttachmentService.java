@@ -1,6 +1,7 @@
 package dev.emoforge.attach.service;
 
 import dev.emoforge.attach.domain.Attachment;
+import dev.emoforge.attach.domain.AttachmentStatus;
 import dev.emoforge.attach.domain.UploadType;
 import dev.emoforge.attach.dto.AttachmentResponse;
 import dev.emoforge.attach.policy.UploadPolicy;
@@ -33,8 +34,10 @@ public class AttachmentService {
      */
     public Attachment uploadFile(MultipartFile file,
                                  UploadType uploadType,
+                                 AttachmentStatus attachmentStatus,
                                  Long postId,
-                                 String memberUuid) throws IOException {
+                                 String memberUuid,
+                                 String tempKey) throws IOException {
 
         UploadPolicy policy = policyRegistry.getPolicy(uploadType);
 
@@ -60,6 +63,8 @@ public class AttachmentService {
                 .fileType(result.getFileType())
                 .fileSize(result.getFileSize())
                 .uploadType(uploadType)
+                .attachmentStatus(attachmentStatus)
+                .tempKey(tempKey)
                 .deleted(false)
                 .build();
 

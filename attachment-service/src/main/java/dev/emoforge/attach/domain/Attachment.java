@@ -71,4 +71,12 @@ public class Attachment {
     // 소프트 삭제 플래그 (tinyint(1) ↔ boolean)
     @Column(name = "deleted", nullable = false, columnDefinition = "TINYINT(1) default 0")
     private boolean deleted;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private AttachmentStatus attachmentStatus;
+
+    @Column(name = "temp_key")
+    private String tempKey;
+
 }

@@ -27,12 +27,15 @@ export const fetchProfileImage = async (memberUuid: string) => {
 export const uploadProfileImage = async (
   file: File,
   uploadType: string,
+  attachmentStatus: string,
   memberUuid?: string,
   postId?: number
 ) => {
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("uploadType", uploadType);
+  formData.append("attachmentStatus", attachmentStatus);
   if (memberUuid) formData.append("memberUuid", memberUuid);
   if (postId) formData.append("postId", postId.toString());
 

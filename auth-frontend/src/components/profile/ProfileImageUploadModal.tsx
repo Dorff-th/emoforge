@@ -14,7 +14,7 @@ function ProfileImageUploadModal({ isOpen, onClose, memberUuid, onUploaded }: Pr
 
   const handleSubmit = async () => {
     if (!file) return;
-    await uploadProfileImage(file, "PROFILE_IMAGE", memberUuid);
+    await uploadProfileImage(file, "PROFILE_IMAGE", "CONFIRMED", memberUuid);
     onUploaded();
     onClose();
   };

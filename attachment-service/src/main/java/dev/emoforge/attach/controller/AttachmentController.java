@@ -1,6 +1,7 @@
 package dev.emoforge.attach.controller;
 
 import dev.emoforge.attach.domain.Attachment;
+import dev.emoforge.attach.domain.AttachmentStatus;
 import dev.emoforge.attach.domain.UploadType;
 import dev.emoforge.attach.dto.AttachmentMapper;
 import dev.emoforge.attach.dto.AttachmentResponse;
@@ -27,6 +28,7 @@ public class AttachmentController {
      * 파일 업로드
      * @param file 업로드할 파일
      * @param uploadType 업로드 타입 (PROFILE_IMAGE, EDITOR_IMAGE, ATTACHMENT)
+     *
      * @param postId 게시글 ID (첨부/에디터 이미지일 경우 필요)
      * @param memberUuid 업로더 UUID (프로필 이미지일 경우 필요)
      */
@@ -34,10 +36,12 @@ public class AttachmentController {
     public ResponseEntity<AttachmentResponse> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("uploadType") UploadType uploadType,
+            @RequestParam("attachmentStatus") AttachmentStatus attachmentStatus,
             @RequestParam(value = "postId", required = false) Long postId,
-            @RequestParam(value = "memberUuid", required = false) String memberUuid
+            @RequestParam(value = "memberUuid", required = false) String memberUuid,
+            @RequestParam(value = "tempKey", required = false) String tempKey
     ) throws IOException {
-        Attachment saved = attachmentService.uploadFile(file, uploadType, postId, memberUuid);
+        Attachment saved = attachmentService.uploadFile(file, uploadType, attachmentStatus, postId, memberUuid, tempKey);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(AttachmentMapper.toResponse(saved));
     }

@@ -29,14 +29,21 @@ public class PostListFacadeService {
     private final AttachClient attachClient;
     private final AuthClient authClient;
 
-    public PageResponseDTO<PostListItemResponse> getPostList(PageRequestDTO requestDTO) {
+    public PageResponseDTO<PostListItemResponse> getPostList(String tagName, PageRequestDTO requestDTO) {
         Pageable pageable = PageRequest.of(
             requestDTO.page() - 1,
             requestDTO.size(),
             Sort.by(Sort.Direction.valueOf(requestDTO.direction().toString()), requestDTO.sort())
         );
 
-        Page<PostSimpleDTO> posts = postRepository.findAllPosts(pageable);
+        Page<PostSimpleDTO> posts = null;
+        if(tagName == null) {
+            posts = postRepository.findAllPosts(pageable);
+        } else {
+            posts = postRepository.findAllPostsByTag(tagName, pageable);
+        }
+
+
         List<PostSimpleDTO> dtoList = posts.getContent();
         if (dtoList.isEmpty()) {
             return new PageResponseDTO<>(requestDTO, posts.getTotalElements(), List.of(), PAGE_BLOCK_SIZE);

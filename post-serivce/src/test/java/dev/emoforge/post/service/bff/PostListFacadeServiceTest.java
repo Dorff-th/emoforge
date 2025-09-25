@@ -56,7 +56,7 @@ class PostListFacadeServiceTest {
 
         // when
         PageResponseDTO<PostListItemResponse> result =
-            postListFacadeService.getPostList(new PageRequestDTO(1,10, "id", SortDirection.DESC));
+            postListFacadeService.getPostList(null, new PageRequestDTO(1,10, "id", SortDirection.DESC));
 
         // then
         result.getDtoList().forEach(item -> {

@@ -34,7 +34,7 @@ class PostListFacadeServiceIntegrationTest {
         PageRequestDTO request = new PageRequestDTO(1, 10, "id", SortDirection.DESC);
 
         // when
-        PageResponseDTO<PostListItemResponse> result = postListFacadeService.getPostList(request);
+        PageResponseDTO<PostListItemResponse> result = postListFacadeService.getPostList(null, request);
 
         // then
         result.getDtoList().forEach(item -> {
@@ -46,4 +46,26 @@ class PostListFacadeServiceIntegrationTest {
             );
         });
     }
+
+    @Test
+    void 게시판목록_실제서비스_조립성공_특정태그() {
+        // given
+        PageRequestDTO request = new PageRequestDTO(1, 10, "id", SortDirection.DESC);
+
+        String tagName = "GPT";
+
+        // when
+        PageResponseDTO<PostListItemResponse> result = postListFacadeService.getPostList(tagName, request);
+
+        // then
+        result.getDtoList().forEach(item -> {
+            System.out.println(
+                "제목: " + item.title()
+                    + ", 작성자: " + item.nickname()
+                    + ", 댓글수: " + item.commentCount()
+                    + ", 첨부수: " + item.attachmentCount()
+            );
+        });
+    }
+
 }
