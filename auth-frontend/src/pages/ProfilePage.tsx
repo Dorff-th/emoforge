@@ -1,12 +1,9 @@
 // src/pages/ProfilePage.tsx
 import { useCallback, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import axiosAuth from "@/api/axiosAuth";
-import { Button } from "@/components/ui/button";
 import { addToast } from "@/store/slices/toastSlice";
 import type { RootState, AppDispatch } from "@/store/store";
-import { logoutThunk } from "@/store/slices/authSlice";
 import NicknameModal from "@/components/profile/NicknameModal";
 import EmailModal from "@/components/profile/EmailModal";
 import { fetchProfileImage } from "@/api/profileImageApi";
@@ -26,7 +23,6 @@ interface Profile {
 
 export default function ProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -67,16 +63,6 @@ export default function ProfilePage() {
   useEffect(() => {
     void fetchProfile();
   }, [fetchProfile]);
-
-  const handleLogout = async () => {
-    try {
-      await dispatch(logoutThunk()).unwrap();
-      dispatch(addToast({ type: "info", text: "로그아웃 되었습니다." }));
-      navigate("/login");
-    } catch {
-      dispatch(addToast({ type: "error", text: "로그아웃 실패" }));
-    }
-  };
 
   const handleProfileImageUploaded = async () => {
     await loadProfileImage();
@@ -126,13 +112,15 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Logout button */}
-          <Button
-            onClick={handleLogout}
-            className="mt-6 w-full bg-red-500 hover:bg-red-600"
-          >
-            로그아웃
-          </Button>
+          {/* 로그아웃 버튼은 Header로 이동 */}
+          {/**
+           * <Button
+           *   onClick={handleLogout}
+           *   className="mt-6 w-full bg-red-500 hover:bg-red-600"
+           * >
+           *   로그아웃
+           * </Button>
+           */}
         </div>
       </div>
 

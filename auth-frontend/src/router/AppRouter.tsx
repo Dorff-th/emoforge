@@ -6,8 +6,8 @@ import LoginPage from "@/pages/LoginPage";
 import ProfilePage from "@/pages/ProfilePage";
 import UiTestPage from "@/pages/UiTestPage";
 import TestPage from "@/pages/TestPage";
-//import HomePage from "@/pages/HomePage";
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
+import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 
 export default function AppRouter() {
   const dispatch = useAppDispatch();
@@ -48,7 +48,9 @@ export default function AppRouter() {
             path="/profile"
             element={
               status === "authenticated" ? (
-                <ProfilePage />
+                <AuthenticatedLayout>
+                  <ProfilePage />
+                </AuthenticatedLayout>
               ) : status === "idle" ? (
                 <div>Loading...</div>
               ) : (
