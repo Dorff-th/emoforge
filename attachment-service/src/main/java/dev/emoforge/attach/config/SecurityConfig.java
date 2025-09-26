@@ -49,7 +49,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // ✅ 쿠키 포함
         config.setAllowedOrigins(Arrays.asList(
-                "http://app1.127.0.0.1.nip.io:5173"
+                "http://app1.127.0.0.1.nip.io:5173",
+                "http://app2.127.0.0.1.nip.io:5174",
+                "http://app3.127.0.0.1.nip.io:5175"
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));

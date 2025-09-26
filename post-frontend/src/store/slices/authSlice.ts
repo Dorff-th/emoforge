@@ -1,15 +1,51 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosAuth from "@/api/axiosAuth";
+import { fetchProfileImage } from "@/api/profileImageApi";
 
-export const fetchProfile = createAsyncThunk(
+interface AuthUser {
+  id?: string;
+  uuid?: string;
+  username?: string;
+  nickname?: string;
+  email?: string;
+  role?: string;
+  status?: string;
+  profileImageUrl?: string | null;
+  [key: string]: unknown;
+}
+
+interface AuthState {
+  user: AuthUser | null;
+  status: "idle" | "loading" | "authenticated" | "unauthenticated" | "error";
+}
+
+export const fetchProfile = createAsyncThunk<
+  AuthUser,
+  void,
+  { rejectValue: "unauthenticated" | "error" }
+>(
   "auth/fetchProfile",
   async (_, { rejectWithValue }) => {
-    
     try {
-      const res = await axiosAuth.get("/auth/me", {});
-      return res.data;
+      const res = await axiosAuth.get<AuthUser>("/auth/me", {});
+      const profile = res.data;
+
+      let profileImageUrl: string | null = profile.profileImageUrl ?? null;
+
+      if (!profileImageUrl && profile.uuid) {
+        try {
+          const profileImage = await fetchProfileImage(profile.uuid);
+          profileImageUrl = profileImage.publicUrl;
+        } catch {
+          profileImageUrl = null; // fallback when profile image fetch fails
+        }
+      }
+
+      return {
+        ...profile,
+        profileImageUrl,
+      };
     } catch (err: any) {
-      
       if (err.response?.status === 403) {
         return rejectWithValue("unauthenticated");
       }
@@ -18,15 +54,10 @@ export const fetchProfile = createAsyncThunk(
   }
 );
 
-// ✅ 로그아웃(쿠키 삭제) + 상태 초기화
-export const logoutThunk = createAsyncThunk<void>("auth/logout", async () => {
-  await axiosAuth.post("/auth/logout", {}); // 204 기대
-});
 
-interface AuthState {
-  user: any | null;
-  status: "idle" | "loading" | "authenticated" | "unauthenticated" | "error";
-}
+export const logoutThunk = createAsyncThunk<void>("auth/logout", async () => {
+  await axiosAuth.post("/auth/logout", {}); // 204 ????
+});
 
 const initialState: AuthState = {
   user: null,
