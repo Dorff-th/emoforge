@@ -1,14 +1,19 @@
 // src/components/common/Header.tsx
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
 import { logoutThunk } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
 import type { AppDispatch } from "@/store/store";
+import type { RootState } from '@store/store';
+import Avatar from '@/components/common/Avatar';
 
 function Header() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  console.log('Header user:', user);
 
   const handleLogout = async () => {
     try {
@@ -31,7 +36,9 @@ function Header() {
         {/* Navigation */}
         <nav className="flex gap-6">
           <Link to="/profile" className="text-gray-700 hover:text-blue-600">
-            프로필
+            
+            <Avatar src={user?.profileImageUrl} alt={user?.nickname} size={32} />
+            
           </Link>
           <a
             href={`${SERVICE_URLS.POST}/posts`}

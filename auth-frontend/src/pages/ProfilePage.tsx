@@ -11,6 +11,7 @@ import type { ProfileImageResponse } from "@/api/profileImageApi";
 import { Settings } from "lucide-react";
 import ProfileImageUploadModal from "@/components/profile/ProfileImageUploadModal";
 import defaultProfileImg from "@/assets/default-profile.svg";
+import { fetchProfile as fetchProfileThunk } from "@/store/slices/authSlice";
 
 interface Profile {
   uuid: string;
@@ -67,6 +68,7 @@ export default function ProfilePage() {
   const handleProfileImageUploaded = async () => {
     await loadProfileImage();
     await fetchProfile();
+    await dispatch(fetchProfileThunk()).unwrap(); // 전역 상태 갱신
   };
 
   if (!user) return <p>Loading...</p>;
@@ -133,7 +135,7 @@ export default function ProfilePage() {
       <ProfileImageUploadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        memberUuid={user.uuid}
+        memberUuid={user.uuid ?? ""}
         onUploaded={handleProfileImageUploaded}
       />
     </div>
