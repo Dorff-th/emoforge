@@ -3,15 +3,20 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProfile } from "@/store/slices/authSlice";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
-import { SERVICE_URLS } from "@/config/constants";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
+
+import PageListPage from "@/pages/PostListPage";
+import PostDetail from '@/pages/PostDetail';
+import TagPostListPage from "@/pages/TagPostListPage";
+
+
 import UiTestPage from "@/pages/UiTestPage";
 
 export default function AppRouter() {
 
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.auth);
-  const isAuthenticated = status === "authenticated";
+  //const isAuthenticated = status === "authenticated";
 
   // Fetch profile only once on first load (avoid loop)
   useEffect(() => {
@@ -31,23 +36,29 @@ export default function AppRouter() {
             <Routes>
                 {/* <Route path="/ui-test" element={<UiTestPage />} /> */}
 
-            <Route
-              path="/ui-test"
-              element={
-                status === "authenticated" ? (
-                  <AuthenticatedLayout>
-                    <UiTestPage />
-                  </AuthenticatedLayout>
-                ) : status === "idle" ? (
-                  <div>Loading...</div>
-                ) : (
-                   (() => {
-                    window.location.href = `${SERVICE_URLS.AUTH}/login`;
-                    return null; // JSX 반환 막음
-                    })()
-                )
-              }
-            />
+              <Route
+                path="/ui-test"
+                element={
+                  status === "authenticated" ? (
+                    <AuthenticatedLayout>
+                      <UiTestPage />
+                    </AuthenticatedLayout>
+                    ) : status === "idle" ? (
+                      <div>Loading...</div>
+                    ) : (
+                     (() => {
+                      //window.location.href = `${SERVICE_URLS.AUTH}/login`;
+                      return null; // JSX 반환 막음
+                      })()
+                    )
+                  }
+                />
+
+              <Route path="/posts" element={<PageListPage />} />
+              <Route path="/posts/tags/:tagName"element={<TagPostListPage />}/>
+         
+              <Route path="/posts/:id" element={<PostDetail />} />
+      
 
                 <Route path="*" element={<Navigate to="/ui-test" replace />} />
             </Routes>

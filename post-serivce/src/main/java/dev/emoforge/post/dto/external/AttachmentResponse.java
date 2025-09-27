@@ -11,18 +11,19 @@ import java.time.LocalDateTime;
  */
 @Builder
 public record AttachmentResponse (
-   /*  Long id,
+     Long id,
      Long postId,
      String memberUuid,
      String originFileName,
      String fileName,
      String fileType,
      long fileSize,
-     String publicUrl*/
+     String publicUrl,
+    String fileSizeText
 
-    Long id,
+    /*Long id,
     String fileName,
     String fileUrl,
     String uploadType,
-    String publicUrl
+    String publicUrl*/
 ) {}

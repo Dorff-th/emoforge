@@ -73,6 +73,8 @@ export default function ProfilePage() {
 
   if (!user) return <p>Loading...</p>;
 
+  const ATTACH_BASE_URL = import.meta.env.VITE_ATTACH_BASE_URL;
+
   return (
     <div className="flex h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
@@ -80,7 +82,7 @@ export default function ProfilePage() {
           {/* Profile image */}
           <div className="relative">
             <img
-              src={profileImage ? profileImage.publicUrl : defaultProfileImg}
+              src={profileImage ? `${ATTACH_BASE_URL + profileImage.publicUrl}` : defaultProfileImg}
               alt="profile"
               className="h-24 w-24 rounded-full border"
             />

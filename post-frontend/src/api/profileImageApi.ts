@@ -11,7 +11,7 @@ export interface ProfileImageResponse {
   createdAt: string;
 }
 
-const ATTACH_BASE_URL = import.meta.env.VITE_ATTACH_BASE_URL;
+//const ATTACH_BASE_URL = import.meta.env.VITE_ATTACH_BASE_URL;
 
 export const fetchProfileImage = async (memberUuid: string) => {
   const response = await axiosAttach.get<ProfileImageResponse>(
@@ -20,7 +20,8 @@ export const fetchProfileImage = async (memberUuid: string) => {
    const data = response.data;
   return {
     ...data,
-    publicUrl:  `${ATTACH_BASE_URL}${data.publicUrl}`,
+    //publicUrl:  `${ATTACH_BASE_URL}${data.publicUrl}`,
+    publicUrl:  data.publicUrl,
   };
 };
 

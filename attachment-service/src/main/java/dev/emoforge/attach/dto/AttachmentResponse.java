@@ -22,4 +22,5 @@ public class AttachmentResponse {
     private String publicUrl;
     private UploadType uploadType;
     private LocalDateTime uploadedAt;
+    private String fileSizeText;  // 화면용: "2.3 MB"
 }

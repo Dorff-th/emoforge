@@ -9,6 +9,7 @@ import dev.emoforge.attach.policy.UploadPolicyRegistry;
 import dev.emoforge.attach.repository.AttachmentRepository;
 import dev.emoforge.attach.dto.UploadedFileResult;
 import dev.emoforge.attach.util.FileUploadUtil;
+import dev.emoforge.attach.util.FormatFileSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,6 +158,7 @@ public class AttachmentService {
                              .fileName(attachment.getFileName())
                              .fileType(attachment.getFileType())
                              .fileSize(attachment.getFileSize())
+                             .fileSizeText(FormatFileSize.formatFileSize(attachment.getFileSize()))
                              .publicUrl(attachment.getPublicUrl())
                              .uploadType(attachment.getUploadType())
                              .uploadedAt(attachment.getUploadedAt())

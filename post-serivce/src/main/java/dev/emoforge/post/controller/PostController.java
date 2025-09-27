@@ -38,6 +38,7 @@ public class PostController {
     /**
      * 게시글 목록 조회 (페이징 포함)
      */
+    @GetMapping
     public PageResponseDTO<PostListItemResponse> getPostList(PageRequestDTO requestDTO) {
         return postListFacadeService.getPostList(null, requestDTO);
     }
@@ -45,7 +46,7 @@ public class PostController {
     /**
      * 특정태그가 있는 게시글 목록 조회(페이징 포함)
      */
-    @GetMapping("/api/posts/{tagName}")
+    @GetMapping("/tags/{tagName}")
     public PageResponseDTO<PostListItemResponse> getPostListByTag(
         @PathVariable("tagName") String tagName,
         PageRequestDTO requestDTO) {

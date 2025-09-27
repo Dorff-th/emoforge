@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 @Builder
 public record PostListItemResponse(
-    Long postId,
+    //Long postId,
+    Long id,
     String title,
     LocalDateTime createdAt,
     String categoryName,
