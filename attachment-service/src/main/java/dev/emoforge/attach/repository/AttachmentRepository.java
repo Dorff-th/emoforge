@@ -1,10 +1,13 @@
 package dev.emoforge.attach.repository;
 
 import dev.emoforge.attach.domain.Attachment;
+import dev.emoforge.attach.domain.AttachmentStatus;
 import dev.emoforge.attach.domain.UploadType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,5 +40,15 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     //post에 첨부된 파일 메타 정보 구하기(Post-Service 에서 bbf로직에서 사용)
     @Query("SELECT a FROM Attachment a WHERE a.postId = :postId AND a.uploadType = :uploadType")
     List<Attachment> findByPostId(@Param("postId") Long postId, @Param("uploadType") UploadType uploadType);
+
+    //Post 등록이 성공하면 postId에 가져온 postId값과 status를 CONFIRMED로 업데이트 한다.
+    @Modifying
+    @Transactional
+    @Query("UPDATE Attachment a " +
+            "SET a.postId = :postId, a.attachmentStatus = :status " +
+            "WHERE a.tempKey = :tempKey")
+    int updatePostIdAndConfirmByTempKey(@Param("postId") Long postId,
+                                        @Param("status") AttachmentStatus status ,
+                                        @Param("tempKey") String tempKey);
 
 }

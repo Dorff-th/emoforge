@@ -172,4 +172,12 @@ public class AttachmentService {
                     }
                  ).toList();
     }
+
+    /**
+     * Post 등록이 성공하면 postId에 가져온 postId값과 status를 CONFIRMED로 업데이트 한다.
+     */
+    public int confirmAttachments(Long postId, String tempKey) {
+        return attachmentRepository.updatePostIdAndConfirmByTempKey(postId, AttachmentStatus.CONFIRMED, tempKey);
+
+    }
 }

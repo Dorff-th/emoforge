@@ -3,6 +3,7 @@ package dev.emoforge.attach.controller;
 import dev.emoforge.attach.domain.Attachment;
 import dev.emoforge.attach.domain.AttachmentStatus;
 import dev.emoforge.attach.domain.UploadType;
+import dev.emoforge.attach.dto.AttachmentConfirmRequest;
 import dev.emoforge.attach.dto.AttachmentMapper;
 import dev.emoforge.attach.dto.AttachmentResponse;
 import dev.emoforge.attach.service.AttachmentService;
@@ -112,4 +113,14 @@ public class AttachmentController {
                         .orElse(null)   // 없는 경우 null 반환
         );
     }
+
+    /**
+     * Post 등록이 성공하면 postId에 가져온 postId값과 status를 CONFIRMED로 업데이트 한다.
+     */
+    @PostMapping("/confirm")
+    public ResponseEntity<?> attachmentConfirm(@RequestBody AttachmentConfirmRequest request) {
+        attachmentService.confirmAttachments(request.postId(), request.groupTempKey());
+        return ResponseEntity.ok().build();
+    }
+
 }

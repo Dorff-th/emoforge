@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect } from "react";
+﻿import { forwardRef, useCallback, useEffect, useRef } from "react";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import axiosAttach from "@/api/axiosAttach";
@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 interface Props {
   value: string;
   onChange: (val: string) => void;
+  groupTempKey?: string;
 }
 
 interface AttachUploadResponseDto {
@@ -23,11 +24,11 @@ interface AttachUploadResponseDto {
   createdAt: string;
 }
 
-const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange }, ref) => {
+const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange, groupTempKey }, ref) => {
   const dispatch = useAppDispatch();
   const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
 
-  const tempKey: string = uuidv4();
+  const tempKeyRef = useRef<string>(groupTempKey ?? uuidv4());
 
   const handleImageUpload = useCallback(
     async (blob: Blob, callback: (url: string, altText: string) => void) => {
@@ -43,12 +44,12 @@ const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange }, ref) =
 
       const formData = new FormData();
 
-      
       formData.append("file", blob);
       formData.append("uploadType", "EDITOR_IMAGE");
       formData.append("memberUuid", memberUuid);
       formData.append("attachmentStatus", "TEMP");
-      formData.append("tempKey", tempKey);
+      formData.append("tempKey", tempKeyRef.current);
+      formData.append("groupTempKey", tempKeyRef.current);
 
       try {
         const { data } = await axiosAttach.post<AttachUploadResponseDto>(

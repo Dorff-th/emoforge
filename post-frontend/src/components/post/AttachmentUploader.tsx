@@ -4,29 +4,30 @@ import axiosAttach from "@/api/axiosAttach";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToast as showToast } from "@/store/slices/toastSlice";
 import { formatFileSize } from "@/utils/fileUtils";
-import { v4 as uuidv4 } from "uuid";
 
 interface AttachmentUploadResponseDto {
   id: number;
-  tempKey: string;
-  publicUrl?: string;
-  originFileName: string;
-  fileSize: number;
+  tempKey?: string;
+  groupTempKey?: string;
+  fileName?: string;
+  originalName?: string;
+  originFileName?: string;
+  fileUrl?: string;
+  uploadType: "EDITOR_IMAGE" | "ATTACHMENT";
+  status: "TEMP" | "CONFIRMED";
+  fileSize?: number;
 }
 
-interface UploadedAttachment {
-  id: number;
-  tempKey: string;
-  originFileName: string;
-  fileSize: number;
-  publicUrl?: string;
+interface UploadedAttachment extends AttachmentUploadResponseDto {
+  fileSize?: number;
 }
 
 interface AttachmentUploaderProps {
+  groupTempKey: string;
   onChange: (attachmentIds: number[]) => void;
 }
 
-const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
+const AttachmentUploader = ({ groupTempKey, onChange }: AttachmentUploaderProps) => {
   const dispatch = useAppDispatch();
   const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
 
@@ -34,11 +35,6 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Record<number, boolean>>({});
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const groupTempKeyRef = useRef<string>("");
-
-  if (!groupTempKeyRef.current) {
-    groupTempKeyRef.current = uuidv4();
-  }
 
   useEffect(() => {
     onChange(attachments.map((att) => att.id));
@@ -61,7 +57,18 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
         dispatch(
           showToast({
             type: "error",
-            text: "Sign in to upload attachments.",
+            text: "첨부파일 업로드를 위해 로그인이 필요합니다.",
+          }),
+        );
+        resetInput();
+        return;
+      }
+
+      if (!groupTempKey) {
+        dispatch(
+          showToast({
+            type: "error",
+            text: "첨부파일 업로드 키를 찾을 수 없습니다.",
           }),
         );
         resetInput();
@@ -71,16 +78,16 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
       setIsUploading(true);
 
       const newlyUploaded: UploadedAttachment[] = [];
-      const sharedTempKey = groupTempKeyRef.current;
 
       try {
         for (const file of selectedFiles) {
           const formData = new FormData();
           formData.append("file", file);
+          formData.append("groupTempKey", groupTempKey);
+          formData.append("tempKey", groupTempKey);
           formData.append("uploadType", "ATTACHMENT");
           formData.append("memberUuid", memberUuid);
           formData.append("attachmentStatus", "TEMP");
-          formData.append("tempKey", sharedTempKey);
 
           try {
             const { data } = await axiosAttach.post<AttachmentUploadResponseDto>(
@@ -96,18 +103,16 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
             }
 
             newlyUploaded.push({
-              id: data.id,
-              tempKey: data.tempKey ?? sharedTempKey,
-              originFileName: data.originFileName ?? file.name,
+              ...data,
+              originalName: data.originalName ?? data.originFileName ?? data.fileName ?? file.name,
               fileSize: data.fileSize ?? file.size,
-              publicUrl: data.publicUrl,
             });
           } catch (error) {
             console.error("Attachment upload failed:", error);
             dispatch(
               showToast({
                 type: "error",
-                text: `Failed to upload ${file.name}.`,
+                text: `파일 ${file.name} 업로드에 실패했습니다.`,
               }),
             );
           }
@@ -121,7 +126,7 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
         setAttachments((prev) => [...prev, ...newlyUploaded]);
       }
     },
-    [dispatch, memberUuid, resetInput],
+    [dispatch, groupTempKey, memberUuid, resetInput],
   );
 
   const handleDelete = useCallback(
@@ -135,12 +140,18 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
       try {
         await axiosAttach.delete(`/attach/${attachmentId}`);
         setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
+        dispatch(
+          showToast({
+            type: "success",
+            text: "첨부파일이 삭제되었습니다.",
+          }),
+        );
       } catch (error) {
         console.error("Attachment delete failed:", error);
         dispatch(
           showToast({
             type: "error",
-            text: "Failed to delete attachment.",
+            text: "첨부파일 삭제에 실패했습니다.",
           }),
         );
       } finally {
@@ -179,8 +190,12 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
               className="flex items-center justify-between rounded border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm"
             >
               <div className="min-w-0 pr-3">
-                <p className="truncate font-medium text-gray-800">{attachment.originFileName}</p>
-                <p className="text-xs text-gray-500">{formatFileSize(attachment.fileSize)}</p>
+                <p className="truncate font-medium text-gray-800">
+                  {attachment.originalName ?? attachment.fileName ?? '파일'}
+                </p>
+                {typeof attachment.fileSize === "number" && (
+                  <p className="text-xs text-gray-500">{formatFileSize(attachment.fileSize)}</p>
+                )}
               </div>
               <button
                 type="button"
@@ -199,4 +214,3 @@ const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
 };
 
 export default AttachmentUploader;
-

@@ -1,23 +1,26 @@
 package dev.emoforge.post.controller;
 
+import dev.emoforge.post.domain.Post;
 import dev.emoforge.post.dto.bff.PageResponseDTO;
 import dev.emoforge.post.dto.bff.PostDetailResponse;
 import dev.emoforge.post.dto.bff.PostListItemResponse;
 import dev.emoforge.post.dto.bff.TagResponse;
 import dev.emoforge.post.dto.internal.PageRequestDTO;
 
+import dev.emoforge.post.dto.internal.PostRequestDTO;
 import dev.emoforge.post.service.bff.CommentsFacadeService;
 import dev.emoforge.post.service.bff.PostDetailFacadeService;
 import dev.emoforge.post.service.bff.PostListFacadeService;
+import dev.emoforge.post.service.internal.PostService;
 import dev.emoforge.post.service.internal.PostTagService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +35,7 @@ public class PostController {
     private final PostListFacadeService postListFacadeService;  // bff
     private final PostDetailFacadeService postDetailFacadeService; // bff
     private final PostTagService postTagService;
-
+    private final PostService postService;
 
 
     /**
@@ -80,8 +83,18 @@ public class PostController {
     }
 
     /**
-     * 신규 등록 요청 - TODO
+     * 신규 등록 요청
      */
+    @PostMapping
+    public ResponseEntity<?> createPost(
+        Authentication authentication,
+        @Valid @RequestBody  PostRequestDTO dto
+    ) {
+        String memberUuid = authentication.getPrincipal().toString();
+        Post saved = postService.createPost(dto, memberUuid);
+
+        return ResponseEntity.ok(saved.getId()); // 일단 ID만 반환
+    }
 
     /**
      * 수정 (PUT) 요청 - TODO
