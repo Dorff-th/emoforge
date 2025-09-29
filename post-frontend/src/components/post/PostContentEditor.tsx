@@ -27,6 +27,8 @@ const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange }, ref) =
   const dispatch = useAppDispatch();
   const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
 
+  const tempKey: string = uuidv4();
+
   const handleImageUpload = useCallback(
     async (blob: Blob, callback: (url: string, altText: string) => void) => {
       if (!memberUuid) {
@@ -41,7 +43,7 @@ const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange }, ref) =
 
       const formData = new FormData();
 
-      const tempKey: string = uuidv4();
+      
       formData.append("file", blob);
       formData.append("uploadType", "EDITOR_IMAGE");
       formData.append("memberUuid", memberUuid);

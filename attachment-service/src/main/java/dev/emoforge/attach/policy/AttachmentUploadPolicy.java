@@ -36,6 +36,6 @@ public class AttachmentUploadPolicy implements UploadPolicy {
 
     @Override
     public List<String> allowedExtensions() {
-        return List.of("pdf", "docx", "xlsx", "zip");
+        return List.of("pdf", "docx", "xlsx", "zip", "md", "hwp", "hwpx");
     }
 }

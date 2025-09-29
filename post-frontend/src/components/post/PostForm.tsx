@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+﻿import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Editor } from '@toast-ui/react-editor';
@@ -8,7 +8,6 @@ import PostTitleInput from './PostTitleInput';
 import PostContentEditor from './PostContentEditor';
 import PostTagInput from './PostTagInput';
 import AttachmentUploader from './AttachmentUploader';
-import type { ExistingAttachment } from './AttachmentUploader';
 import FormActions from './FormActions';
 import { addToast } from '@/store/slices/toastSlice';
 import type { PostDetailDTO } from '@/types/Post';
@@ -25,26 +24,19 @@ export default function PostForm({ mode, initialData }: PostFormProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // ✅ 단일 상태 객체
   const [formData, setFormData] = useState<PostRequest>({
     title: initialData?.title ?? '',
     categoryId: initialData?.categoryId ?? 0,
     content: initialData?.content ?? '',
     tags: [],
     deleteTagIds: [],
-    attachments: [],
+    attachmentIds: [],
   });
 
-  // ✅ 수정 모드 전용: 기존 첨부파일 + 삭제대상
-  const [existingAttachments] = useState<ExistingAttachment[]>(
-    initialData?.attachments?.map((att) => ({
-      id: att.id,
-      originalName: att.originFileName,
-    })) ?? [],
-  );
-  const [deleteIds, setDeleteIds] = useState<number[]>([]);
+  const handleAttachmentChange = useCallback((attachmentIds: number[]) => {
+    setFormData((prev) => ({ ...prev, attachmentIds }));
+  }, []);
 
-  // ✅ 최종 저장 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -53,7 +45,6 @@ export default function PostForm({ mode, initialData }: PostFormProps) {
 
     let content = editorInstance.getMarkdown();
 
-    // blob URL → 서버 업로드
     const blobRegex = /!\[.*?\]\((blob:[^)]+)\)/g;
     const matches = [...content.matchAll(blobRegex)];
 
@@ -72,13 +63,12 @@ export default function PostForm({ mode, initialData }: PostFormProps) {
           content = content.replace(blobUrl, data.url);
         }
       } catch (err) {
-        console.error('이미지 업로드 중 오류:', err);
+        console.error('이미지 업로드 오류:', err);
       }
     }
 
     content = fixContentForSave(content);
 
-    // ✅ formData → FormData 변환
     const fd = new FormData();
     fd.append('title', formData.title);
     fd.append('categoryId', String(formData.categoryId));
@@ -89,12 +79,8 @@ export default function PostForm({ mode, initialData }: PostFormProps) {
       fd.append('deleteTagIds', formData.deleteTagIds.join(','));
     }
 
-    if (deleteIds.length > 0) {
-      fd.append('deleteIds', deleteIds.join(',')); // ✅ 기존 첨부 삭제대상
-    }
-
-    formData.attachments?.forEach((file) => {
-      fd.append('attachments', file);
+    formData.attachmentIds?.forEach((id) => {
+      fd.append('attachmentIds', String(id));
     });
 
     try {
@@ -162,14 +148,9 @@ export default function PostForm({ mode, initialData }: PostFormProps) {
         value={formData.tags}
         onChange={(tags, deleteTagIds) => setFormData((prev) => ({ ...prev, tags, deleteTagIds }))}
       />
-      <AttachmentUploader
-        files={formData.attachments || []}
-        onChange={(files) => setFormData((prev) => ({ ...prev, attachments: files }))}
-        existingAttachments={existingAttachments}
-        deleteIds={deleteIds}
-        onDeleteIdsChange={setDeleteIds}
-      />
+      <AttachmentUploader onChange={handleAttachmentChange} />
       <FormActions />
     </form>
   );
 }
+

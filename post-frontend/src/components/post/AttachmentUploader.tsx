@@ -1,116 +1,194 @@
-import { useState } from 'react';
-import { formatFileSize } from '@/utils/fileUtils';
+﻿import { useCallback, useEffect, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
+import axiosAttach from "@/api/axiosAttach";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { addToast as showToast } from "@/store/slices/toastSlice";
+import { formatFileSize } from "@/utils/fileUtils";
+import { v4 as uuidv4 } from "uuid";
 
-// 기존 첨부파일 DTO (백엔드에서 내려오는 데이터 구조)
-export interface ExistingAttachment {
+interface AttachmentUploadResponseDto {
   id: number;
-  originalName: string;
+  tempKey: string;
+  publicUrl?: string;
+  originFileName: string;
+  fileSize: number;
+}
+
+interface UploadedAttachment {
+  id: number;
+  tempKey: string;
+  originFileName: string;
+  fileSize: number;
+  publicUrl?: string;
 }
 
 interface AttachmentUploaderProps {
-  // 신규 파일
-  files: File[];
-  onChange: (files: File[]) => void;
-
-  // 수정 모드: 기존 첨부파일
-  existingAttachments?: ExistingAttachment[];
-  deleteIds?: number[];
-  onDeleteIdsChange?: (ids: number[]) => void;
+  onChange: (attachmentIds: number[]) => void;
 }
 
-export default function AttachmentUploader({
-  files,
-  onChange,
-  existingAttachments = [],
-  deleteIds = [],
-  onDeleteIdsChange = () => {},
-}: AttachmentUploaderProps) {
-  const [error, setError] = useState<string | null>(null);
+const AttachmentUploader = ({ onChange }: AttachmentUploaderProps) => {
+  const dispatch = useAppDispatch();
+  const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
-    if (!selectedFiles.length) return;
+  const [attachments, setAttachments] = useState<UploadedAttachment[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [deletingIds, setDeletingIds] = useState<Record<number, boolean>>({});
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const groupTempKeyRef = useRef<string>("");
 
-    const totalFiles = [...files, ...selectedFiles];
-    if (totalFiles.length + existingAttachments.length - deleteIds.length > 3) {
-      setError('첨부파일은 최대 3개까지만 가능합니다.');
-      return;
+  if (!groupTempKeyRef.current) {
+    groupTempKeyRef.current = uuidv4();
+  }
+
+  useEffect(() => {
+    onChange(attachments.map((att) => att.id));
+  }, [attachments, onChange]);
+
+  const resetInput = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.value = "";
     }
+  }, []);
 
-    setError(null);
-    onChange(totalFiles);
-  };
+  const handleFileSelect = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const selectedFiles = event.target.files ? Array.from(event.target.files) : [];
+      if (!selectedFiles.length) {
+        return;
+      }
 
-  const handleRemoveNew = (index: number) => {
-    const newFiles = files.filter((_, i) => i !== index);
-    onChange(newFiles);
-  };
+      if (!memberUuid) {
+        dispatch(
+          showToast({
+            type: "error",
+            text: "Sign in to upload attachments.",
+          }),
+        );
+        resetInput();
+        return;
+      }
 
-  const handleToggleExisting = (id: number) => {
-    if (deleteIds.includes(id)) {
-      onDeleteIdsChange(deleteIds.filter((d) => d !== id)); // 삭제 취소
-    } else {
-      onDeleteIdsChange([...deleteIds, id]); // 삭제 추가
-    }
-  };
+      setIsUploading(true);
+
+      const newlyUploaded: UploadedAttachment[] = [];
+      const sharedTempKey = groupTempKeyRef.current;
+
+      try {
+        for (const file of selectedFiles) {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("uploadType", "ATTACHMENT");
+          formData.append("memberUuid", memberUuid);
+          formData.append("attachmentStatus", "TEMP");
+          formData.append("tempKey", sharedTempKey);
+
+          try {
+            const { data } = await axiosAttach.post<AttachmentUploadResponseDto>(
+              "/attach",
+              formData,
+              {
+                headers: { "Content-Type": "multipart/form-data" },
+              },
+            );
+
+            if (typeof data.id !== "number") {
+              throw new Error("Attachment service did not return an attachment id.");
+            }
+
+            newlyUploaded.push({
+              id: data.id,
+              tempKey: data.tempKey ?? sharedTempKey,
+              originFileName: data.originFileName ?? file.name,
+              fileSize: data.fileSize ?? file.size,
+              publicUrl: data.publicUrl,
+            });
+          } catch (error) {
+            console.error("Attachment upload failed:", error);
+            dispatch(
+              showToast({
+                type: "error",
+                text: `Failed to upload ${file.name}.`,
+              }),
+            );
+          }
+        }
+      } finally {
+        setIsUploading(false);
+        resetInput();
+      }
+
+      if (newlyUploaded.length) {
+        setAttachments((prev) => [...prev, ...newlyUploaded]);
+      }
+    },
+    [dispatch, memberUuid, resetInput],
+  );
+
+  const handleDelete = useCallback(
+    async (attachmentId: number) => {
+      if (!attachmentId) {
+        return;
+      }
+
+      setDeletingIds((prev) => ({ ...prev, [attachmentId]: true }));
+
+      try {
+        await axiosAttach.delete(`/attach/${attachmentId}`);
+        setAttachments((prev) => prev.filter((att) => att.id !== attachmentId));
+      } catch (error) {
+        console.error("Attachment delete failed:", error);
+        dispatch(
+          showToast({
+            type: "error",
+            text: "Failed to delete attachment.",
+          }),
+        );
+      } finally {
+        setDeletingIds((prev) => {
+          const next = { ...prev };
+          delete next[attachmentId];
+          return next;
+        });
+      }
+    },
+    [dispatch],
+  );
 
   return (
-    <div className="space-y-2">
-      <label className="block font-semibold text-gray-700">첨부파일</label>
+    <div className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Attachments</label>
+        <p className="text-xs text-gray-500">Upload supporting files for this post.</p>
+      </div>
+
       <input
+        ref={inputRef}
         type="file"
         multiple
         onChange={handleFileSelect}
-        className="block w-full border rounded px-2 py-1 text-sm"
+        disabled={isUploading}
+        className="block w-full cursor-pointer rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100"
       />
+      {isUploading && <p className="text-xs text-indigo-600">Uploading...</p>}
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-
-      {/* 기존 첨부파일 리스트 (수정 모드) */}
-      {existingAttachments.length > 0 && (
-        <ul className="space-y-1">
-          {existingAttachments.map((att) => {
-            const marked = deleteIds.includes(att.id);
-            return (
-              <li
-                key={att.id}
-                className={`flex items-center justify-between text-sm border p-2 rounded ${
-                  marked ? 'opacity-50' : ''
-                }`}
-              >
-                <span>{att.originalName} </span>
-                <button
-                  type="button"
-                  onClick={() => handleToggleExisting(att.id)}
-                  className={
-                    marked ? 'text-blue-500 hover:underline' : 'text-red-500 hover:underline'
-                  }
-                >
-                  {marked ? '삭제취소' : '삭제'}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {/* 신규 첨부파일 리스트 */}
-      {files.length > 0 && (
-        <ul className="space-y-1">
-          {files.map((file, index) => (
+      {attachments.length > 0 && (
+        <ul className="space-y-2">
+          {attachments.map((attachment) => (
             <li
-              key={index}
-              className="flex items-center justify-between text-sm border p-2 rounded"
+              key={attachment.id}
+              className="flex items-center justify-between rounded border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm"
             >
-              <span>
-                {file.name} <span className="text-gray-500">({formatFileSize(file.size)})</span>
-              </span>
+              <div className="min-w-0 pr-3">
+                <p className="truncate font-medium text-gray-800">{attachment.originFileName}</p>
+                <p className="text-xs text-gray-500">{formatFileSize(attachment.fileSize)}</p>
+              </div>
               <button
                 type="button"
-                onClick={() => handleRemoveNew(index)}
-                className="text-red-500 hover:underline"
+                onClick={() => handleDelete(attachment.id)}
+                disabled={Boolean(deletingIds[attachment.id])}
+                className="text-xs font-medium text-red-500 hover:text-red-600 disabled:cursor-not-allowed disabled:text-red-300"
               >
-                삭제
+                {deletingIds[attachment.id] ? "Removing..." : "Delete"}
               </button>
             </li>
           ))}
@@ -118,4 +196,7 @@ export default function AttachmentUploader({
       )}
     </div>
   );
-}
+};
+
+export default AttachmentUploader;
+

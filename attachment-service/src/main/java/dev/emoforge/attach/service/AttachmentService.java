@@ -73,7 +73,7 @@ public class AttachmentService {
     }
 
     /**
-     * 첨부파일 삭제 (soft delete + 실제 파일 삭제)
+     * 첨부파일 삭제 (soft delete + 실제 파일 삭제) <-검토중
      */
     public void deleteFile(Long id) {
         Attachment attachment = attachmentRepository.findById(id)
@@ -86,6 +86,12 @@ public class AttachmentService {
         fileUploadUtil.deleteFile(attachment.getFileUrl());
     }
 
+    /**
+     * tempKey를 조회해서 첨부파일 삭제(실제 DB에서 삭제)
+     */
+    public void deleteFileByTempKey(String tempKey) {
+
+    }
     /**
      * 게시글 첨부 조회
      */
