@@ -1,6 +1,6 @@
 // src/components/common/Header.tsx
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
 import { logoutThunk } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
@@ -35,11 +35,11 @@ function Header() {
 
         {/* Navigation */}
         <nav className="flex gap-6">
-          <Link to="/profile" className="text-gray-700 hover:text-blue-600">
+          <a href={`${SERVICE_URLS.AUTH}/profile`} className="text-gray-700 hover:text-blue-600">
             
             <Avatar src={user?.profileImageUrl} alt={user?.nickname} size={32} />
             
-          </Link>
+          </a>
           <a
             href={`${SERVICE_URLS.POST}/posts`}
             className="text-gray-700 hover:text-blue-600"

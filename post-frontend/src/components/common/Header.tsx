@@ -13,7 +13,7 @@ function Header() {
   //const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
-  console.log('Header user:', user);
+  
 
   const handleLogout = async () => {
     try {
@@ -36,11 +36,9 @@ function Header() {
 
         {/* Navigation */}
         <nav className="flex gap-6">
-          <Link to="/profile" className="text-gray-700 hover:text-blue-600">
-            
+          <a href={`${SERVICE_URLS.AUTH}/profile`} className="text-gray-700 hover:text-blue-600">
             <Avatar src={user?.profileImageUrl} alt={user?.nickname} size={32} />
-            
-          </Link>
+          </a>
           <a
             href={`${SERVICE_URLS.POST}/posts`}
             className="text-gray-700 hover:text-blue-600"

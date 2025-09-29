@@ -6,6 +6,7 @@ interface ToastMessage {
   id: string;
   type: "success" | "error" | "info" | "warning";
   text: string;
+   duration: number; // ✅ 새로 추가
 }
 
 interface ToastState {
@@ -22,11 +23,13 @@ const toastSlice = createSlice({
   reducers: {
     addToast: (
       state,
-      action: PayloadAction<{ type: "success" | "error" | "info" | "warning"; text: string }>
+      action: PayloadAction<{ type: "success" | "error" | "info" | "warning"; text: string; duration?: number; }>
     ) => {
       state.messages.push({
         id: Date.now().toString(),
-        ...action.payload,
+        type: action.payload.type,
+        text: action.payload.text,
+        duration: action.payload.duration ?? 3000, // default duration (e.g., 3000ms)
       });
     },
     removeToast: (state, action: PayloadAction<string>) => {
