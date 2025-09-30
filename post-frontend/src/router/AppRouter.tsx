@@ -8,6 +8,7 @@ import PageListPage from "@/pages/PostListPage";
 import PostDetail from '@/pages/PostDetail';
 import TagPostListPage from "@/pages/TagPostListPage";
 import PostWritePage from "@/pages/PostWritePage";
+import PostEditPage from "@/pages/PostEditPage";
 
 
 import UiTestPage from "@/pages/UiTestPage";
@@ -72,6 +73,16 @@ export default function AppRouter() {
                 element={
                   <ConditionalLayoutRoute status={status} authRequired>
                     <PostWritePage />
+                  </ConditionalLayoutRoute>
+                }
+              />
+
+              {/* 게시글 수정 */}
+              <Route
+                path="/posts/:id/edit"
+                element={ 
+                  <ConditionalLayoutRoute status={status} authRequired>
+                    <PostEditPage />
                   </ConditionalLayoutRoute>
                 }
               />

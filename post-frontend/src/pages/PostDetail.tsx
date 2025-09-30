@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@store/store';
@@ -38,22 +38,35 @@ export default function PostDetail() {
 
   const { status } = useAppSelector((state) => state.auth);
   const isAuthenticated = status === "authenticated";
-
   const currentUser = useSelector((state: RootState) => state.auth.user);
 
-  const isAuthor = isAuthenticated && currentUser?.memberUuid === post?.memberUuid;
+  
+  const isAuthor = useMemo(() => {
+    if (!isAuthenticated || !post?.memberUuid || !currentUser?.uuid) {
+      return null; // 아직 준비 전 상태
+    } 
 
-  //todo 삭제 기능 구현
-  const handleDelete = async (id: number) => {
-    await withToast(
-      deletePost(id).then(() => navigate(`/posts`)),
-      { success: '삭제가 완료 되었습니다.' },
-    );
+    return currentUser.uuid === post.memberUuid; // 준비 완료 → true/false 반환
+  }, [isAuthenticated, currentUser?.uuid, post?.memberUuid]);
+  
+
+  const handleDelete = async (postIdToDelete: number) => {
+    const result = await withToast(deletePost(postIdToDelete), {
+      success: 'Post deleted successfully.',
+      error: 'Failed to delete post.',
+    });
+
+    if (result !== null) {
+      navigate('/posts');
+      return true;
+    }
+
+    return false;
   };
 
-  const handleConfirm = (id: number) => {
-    handleDelete(id); // ✅ 이제 여기서 실제 삭제 실행
+  const handleConfirm = async (postIdToDelete: number) => {
     setOpen(false);
+    await handleDelete(postIdToDelete);
   };
 
   if (!post) return <div className="p-6">로딩중...</div>;

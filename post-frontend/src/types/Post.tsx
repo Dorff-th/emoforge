@@ -6,7 +6,7 @@ export interface PostDTO {
   categoryName: string;
   title: string;
 
-  memberId: number;
+  memberUuid: string;
   nickname: string; // ✅ username 제외
 
   createdAt: string;

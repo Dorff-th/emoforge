@@ -7,6 +7,7 @@ import dev.emoforge.auth.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class MemberProfileService {
 
     private final MemberRepository memberRepository;

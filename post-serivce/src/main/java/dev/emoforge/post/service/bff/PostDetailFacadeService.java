@@ -35,6 +35,7 @@ public class PostDetailFacadeService {
         // 2. 작성자 정보
         MemberProfileResponse profile = authClient.getMemberProfile(postDetailDTO.getMemberUuid());
 
+
         // 3. 첨부파일 조회 (Attachment-Service)
         List<AttachmentResponse> editorImages =
             attachClient.findByPostId(postId, "EDITOR_IMAGE");
@@ -47,7 +48,7 @@ public class PostDetailFacadeService {
             postDetailDTO.getId(),
             postDetailDTO.getTitle(),
             postDetailDTO.getContent(),
-            profile.memberUuid(),
+            profile.uuid(),
             postDetailDTO.getCreatedAt(),
             postDetailDTO.getUpdatedAt(),
             postDetailDTO.getCategoryId(),

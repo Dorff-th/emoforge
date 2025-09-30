@@ -50,7 +50,7 @@ public class MemberProfileController {
     * */
     @GetMapping("/{uuid}/profile")
     public MemberProfileResponse getProfile(@PathVariable("uuid") String uuid) {
-        log.debug("\n\n\n===getProfile uuid : " + uuid);
+
         return memberProfileService.getProfile(uuid);
     }
 }
