@@ -7,7 +7,9 @@ import dev.emoforge.attach.dto.AttachmentConfirmRequest;
 import dev.emoforge.attach.dto.AttachmentMapper;
 import dev.emoforge.attach.dto.AttachmentResponse;
 import dev.emoforge.attach.service.AttachmentService;
+import dev.emoforge.attach.util.FileDownloadUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ import java.util.Optional;
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
+    private final FileDownloadUtil fileDownloadUtil;
 
     /**
      * 파일 업로드
@@ -121,6 +124,12 @@ public class AttachmentController {
     public ResponseEntity<?> attachmentConfirm(@RequestBody AttachmentConfirmRequest request) {
         attachmentService.confirmAttachments(request.postId(), request.groupTempKey());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> download(@PathVariable("id") Long id) {
+        Attachment attachment = attachmentService.getById(id).orElseThrow(() -> new IllegalArgumentException("해당 id를 갖는 첨부파일이 없습니다!"));
+        return fileDownloadUtil.getDownloadResponse(attachment.getFileUrl(), attachment.getOriginFileName());
     }
 
 }

@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/attach/welcome",  "/api/attach/test/**").permitAll()
                         .requestMatchers("/uploads/profile_image/**").permitAll()
+                        .requestMatchers("/uploads/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/attach/download/**").permitAll()
                         .requestMatchers("/api/attach/count/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/attach/post/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/attach/profile-images/**").permitAll()

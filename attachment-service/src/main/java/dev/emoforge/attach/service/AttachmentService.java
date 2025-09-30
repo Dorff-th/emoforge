@@ -180,4 +180,11 @@ public class AttachmentService {
         return attachmentRepository.updatePostIdAndConfirmByTempKey(postId, AttachmentStatus.CONFIRMED, tempKey);
 
     }
+
+    /**
+     *  첨부파일을 다운로드 하기위해서 id로 조회한다.
+     */
+    public Optional<Attachment> getById(Long id) {
+        return attachmentRepository.findById(id);
+    }
 }

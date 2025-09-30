@@ -1,6 +1,5 @@
 // src/components/common/Header.tsx
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
 import { logoutThunk } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
@@ -8,7 +7,7 @@ import type { AppDispatch } from "@/store/store";
 import type { RootState } from '@store/store';
 import Avatar from '@/components/common/Avatar';
 
-function Header() {
+function AuthenticatedHeader() {
   const dispatch = useDispatch<AppDispatch>();
   //const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -58,4 +57,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default AuthenticatedHeader;

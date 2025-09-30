@@ -1,8 +1,22 @@
 // src/pages/LoginPage.tsx
+import { useEffect } from "react";
+import { useAppDispatch } from "@/store/hooks";
+import { addToast } from "@/store/slices/toastSlice";
+
 export default function LoginPage() {
+
+  const dispatch = useAppDispatch();
+
   const handleKakaoLogin = () => {
     window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("status") === "unauthorized") {
+      dispatch(addToast({ type: "error", text: "로그인이 필요합니다." }));
+    }
+  }, [dispatch])
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">

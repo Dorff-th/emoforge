@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchProfile } from "@/store/slices/authSlice";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { fetchProfile } from "@/store/slices/authSlice";
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
-import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
+import ConditionalLayoutRoute from "@/components/layout/ConditionalLayoutRoute";
 import PageListPage from "@/pages/PostListPage";
 import PostDetail from '@/pages/PostDetail';
 import TagPostListPage from "@/pages/TagPostListPage";
@@ -34,50 +34,49 @@ export default function AppRouter() {
         <BrowserRouter>
             <ConfirmDialogProvider>
             <Routes>
-                {/* <Route path="/ui-test" element={<UiTestPage />} /> */}
-
+              <Route path="/ui-test" element={<UiTestPage />} />
+              
+              {/* 게시글 목록 */}
               <Route
-                path="/ui-test"
+                path="/posts"
                 element={
-                  status === "authenticated" ? (
-                    <AuthenticatedLayout>
-                      <UiTestPage />
-                    </AuthenticatedLayout>
-                    ) : status === "idle" ? (
-                      <div>Loading...</div>
-                    ) : (
-                     (() => {
-                      //window.location.href = `${SERVICE_URLS.AUTH}/login`;
-                      return null; // JSX 반환 막음
-                      })()
-                    )
-                  }
-                />
+                  <ConditionalLayoutRoute status={status}>
+                    <PageListPage />
+                  </ConditionalLayoutRoute>
+                }
+              />
 
-              <Route path="/posts" element={<PageListPage />} />
-              <Route path="/posts/tags/:tagName"element={<TagPostListPage />}/>
+              {/* 태그별 게시글 목록 */}    
+              <Route
+                path="/posts/tags/:tagName"
+                element={
+                  <ConditionalLayoutRoute status={status}>
+                    <TagPostListPage />
+                  </ConditionalLayoutRoute>
+                }
+              />
          
-              <Route path="/posts/:id" element={<PostDetail />} />
+              {/* 게시글 상세 */}
+              <Route
+                path="/posts/:id"
+                element={
+                  <ConditionalLayoutRoute status={status}>
+                    <PostDetail />
+                  </ConditionalLayoutRoute>
+                }
+              />
 
+              {/* 게시글 작성 */}
               <Route
                 path="/posts/new"
                 element={
-                  status === "authenticated" ? (
-                    <AuthenticatedLayout>
-                      <PostWritePage />
-                    </AuthenticatedLayout>
-                    ) : status === "idle" ? (
-                      <div>Loading...</div>
-                    ) : (
-                     (() => {
-                      //window.location.href = `${SERVICE_URLS.AUTH}/login`;
-                      return null; // JSX 반환 막음
-                      })()
-                    )
-                  }
-                />
+                  <ConditionalLayoutRoute status={status} authRequired>
+                    <PostWritePage />
+                  </ConditionalLayoutRoute>
+                }
+              />
 
-                <Route path="*" element={<Navigate to="/ui-test" replace />} />
+              <Route path="*" element={<Navigate to="/ui-test" replace />} />
             </Routes>
             </ConfirmDialogProvider>
         </BrowserRouter>

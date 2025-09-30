@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
 import { logoutThunk } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
-import type { AppDispatch } from "@/store/store";
-import type { RootState } from '@store/store';
+import type { AppDispatch, RootState } from "@/store/store";
 import Avatar from '@/components/common/Avatar';
 
 function Header() {
@@ -18,8 +17,9 @@ function Header() {
   const handleLogout = async () => {
     try {
       await dispatch(logoutThunk()).unwrap();
-      dispatch(addToast({ type: "info", text: "로그아웃 되었습니다." }));
-      navigate("/login");
+      //dispatch(addToast({ type: "info", text: "로그아웃 되었습니다." }));
+      //navigate("/login"); //외부 서비스인 PostService로 이동
+      window.location.href = `${SERVICE_URLS.POST}/posts?state=logout_success`; 
     } catch {
       dispatch(addToast({ type: "error", text: "로그아웃 실패" }));
     }
