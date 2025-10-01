@@ -1,4 +1,4 @@
-﻿import { forwardRef, useCallback, useEffect, useRef } from "react";
+﻿﻿import { forwardRef, useCallback, useEffect, useRef } from "react";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 import axiosAttach from "@/api/axiosAttach";
@@ -11,6 +11,7 @@ interface Props {
   value: string;
   onChange: (val: string) => void;
   groupTempKey?: string;
+  postId?: number; // edit 모드에서만 넘어오는 postId
 }
 
 interface AttachUploadResponseDto {
@@ -24,7 +25,7 @@ interface AttachUploadResponseDto {
   createdAt: string;
 }
 
-const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange, groupTempKey }, ref) => {
+const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange, groupTempKey, postId }, ref) => {
   const dispatch = useAppDispatch();
   const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
 
@@ -50,6 +51,9 @@ const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange, groupTem
       formData.append("attachmentStatus", "TEMP");
       formData.append("tempKey", tempKeyRef.current);
       formData.append("groupTempKey", tempKeyRef.current);
+      if (postId) {
+        formData.append("postId", postId.toString());
+      }
 
       try {
         const { data } = await axiosAttach.post<AttachUploadResponseDto>(

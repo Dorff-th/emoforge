@@ -9,6 +9,7 @@ import dev.emoforge.attach.dto.AttachmentResponse;
 import dev.emoforge.attach.service.AttachmentService;
 import dev.emoforge.attach.util.FileDownloadUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/attach")
 @RequiredArgsConstructor
+@Slf4j
 public class AttachmentController {
 
     private final AttachmentService attachmentService;
@@ -122,6 +124,11 @@ public class AttachmentController {
      */
     @PostMapping("/confirm")
     public ResponseEntity<?> attachmentConfirm(@RequestBody AttachmentConfirmRequest request) {
+
+        log.debug("\n\n====confirm");
+        log.debug("postId : " + request.postId());
+        log.debug("groupTempKey : " + request.groupTempKey());
+
         attachmentService.confirmAttachments(request.postId(), request.groupTempKey());
         return ResponseEntity.ok().build();
     }

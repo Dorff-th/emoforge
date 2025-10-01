@@ -21,8 +21,15 @@ public class FileUploadUtil {
         Files.createDirectories(baseDir);
 
         // 2. 파일명 유니크 처리
-        String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        //String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String originalName = file.getOriginalFilename();
+        String ext = "";
+        if (originalName != null && originalName.contains(".")) {
+            ext = originalName.substring(originalName.lastIndexOf(".") + 1); // "png"
+        }
 
+        String uuid = UUID.randomUUID().toString().replace("-", ""); // "a12f3c45..."
+        String uniqueName = ext.isEmpty() ? uuid : uuid + "." + ext;
         // 3. 실제 저장
         Path savePath = baseDir.resolve(uniqueName);
         file.transferTo(savePath.toFile());

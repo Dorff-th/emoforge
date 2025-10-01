@@ -3,6 +3,7 @@ package dev.emoforge.post.repository;
 import dev.emoforge.post.domain.Post;
 import dev.emoforge.post.dto.internal.PostDetailDTO;
 import dev.emoforge.post.dto.internal.PostSimpleDTO;
+import dev.emoforge.post.dto.internal.PostUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -70,4 +71,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         WHERE p.id = :postId
     """)
     Optional<PostDetailDTO> findPostDetail(@Param("postId") Long postId);
+
+    /**
+     * 게시물을 수정한다.
+     * @param dto
+     * @return int
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Post a SET a.title = :#{#dto.title}, a.content =:#{#dto.content}, categoryId =:#{#dto.categoryId}, a.updatedAt =:#{#dto.updatedAt} " +
+        "WHERE a.id = :#{#dto.id}")
+    int updatePostById(@Param("dto") PostUpdateDTO dto);
 }

@@ -14,6 +14,7 @@ import dev.emoforge.post.dto.internal.PostUpdateDTO;
 import dev.emoforge.post.repository.CategoryRepository;
 import dev.emoforge.post.repository.PostRepository;
 import dev.emoforge.post.repository.PostTagRepository;
+import dev.emoforge.post.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -71,46 +72,20 @@ public class PostService {
     }
 
 
-    /*@Transactional
-    public int editPost(PostUpdateDTO dto) {
+    @Transactional
+    public Post editPost(PostUpdateDTO dto) {
 
-        Post post = postRepository.findById(dto.getId()).orElseThrow(()->new IllegalArgumentException("해당 post가 없음!"));
-        if(dto.getAttachments() != null && !dto.getAttachments().isEmpty()  ) {
-            List<FileSaveResultDTO> fileSaveResultDTO= generalFileUtil.saveFiles(dto.getAttachments(), dto.getId());
-            //fileSaveResultDTO.forEach(fileSaveDTO->log.debug("fileSaveDTO :" , fileSaveDTO.toString()));
-
-            //Post post = postRepository.findById(dto.getId()).orElseThrow(()->new IllegalArgumentException("해당 post가 없음!"));
-
-            List<Attachment> attachments = fileSaveResultDTO.stream()
-                    .map(saveDto -> Attachment.builder()
-                            .post(post)
-                            .fileName(saveDto.getFileName())
-                            .originFileName(saveDto.getOriginFileName())
-                            .fileType(saveDto.getFileType())
-                            .fileSize(saveDto.getSize())
-                            .fileUrl(saveDto.getFileUrl())
-                            .uploadType(saveDto.getUploadType())
-                            .uploadedAt(LocalDateTime.now())
-                            .build())
-                    .toList();
-
-            attachmentRepository.saveAll(attachments);
-        }
-
-        //첨부된 파일중 삭제 대상 첨부 파일 삭제
-        if( dto.getDeleteIds() != null && !dto.getDeleteIds().isEmpty()) {
-            attachmentRepository.deleteAllByIdInBatch(dto.getDeleteIds());
-        }
+        Post post = postRepository.findById(dto.id()).orElseThrow(()->new IllegalArgumentException("해당 post가 없음!"));
 
         //삭제 대상 tag id들을 List<Long> 타입으로 변환후 삭제 쿼리 실행
-        List<Long> deleteTagIds = StringUtils.toLongList(dto.getDeleteTagIds());
+        List<Long> deleteTagIds = StringUtils.toLongList(dto.deleteTagIds());
         if(deleteTagIds != null && !deleteTagIds.isEmpty()) {
             postTagRepository.deleteByPostIdAndTagIdIn(post.getId(), deleteTagIds);
         }
 
         //태그 & post_tag 관계 저장
-        if (dto.getTags() != null) {
-            String[] tagArray = dto.getTags().split(",");
+        if (dto.tags() != null) {
+            String[] tagArray = dto.tags().split(",");
             for (String tagName : tagArray) {
                 Tag tag = tagService.getOrCreateTag(tagName);
                 PostTag postTag = new PostTag(post, tag);
@@ -118,10 +93,10 @@ public class PostService {
             }
         }
 
+      postRepository.updatePostById(dto);
 
-
-      return  postRepository.updatePostById(dto);
-    }*/
+      return post;
+    }
 
 
     //Post 삭제

@@ -8,6 +8,7 @@ import dev.emoforge.post.dto.bff.TagResponse;
 import dev.emoforge.post.dto.internal.PageRequestDTO;
 
 import dev.emoforge.post.dto.internal.PostRequestDTO;
+import dev.emoforge.post.dto.internal.PostUpdateDTO;
 import dev.emoforge.post.service.bff.CommentsFacadeService;
 import dev.emoforge.post.service.bff.PostDetailFacadeService;
 import dev.emoforge.post.service.bff.PostListFacadeService;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -99,7 +101,27 @@ public class PostController {
     /**
      * 수정 (PUT) 요청 - TODO
      */
+    @PutMapping("/{id}")
+    public ResponseEntity<Long> updatePost(
+        Authentication authentication,
+        @RequestBody PostUpdateDTO dto) {
 
+        // 1. 게시글 존재 여부 확인
+        Post post = postService.getPostById(dto.id())
+            .orElseThrow(() -> new IllegalArgumentException("Post가 존재하지 않습니다!"));
+
+        // 2. 권한 체크 (본인만 수정 가능)
+        String memberUuid = authentication.getPrincipal().toString();
+        if(!memberUuid.equals(dto.authorUuid())) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        // 4. 업데이트 수행
+        Post updated = postService.editPost(dto);
+
+        // 5. postId 반환
+        return ResponseEntity.ok(updated.getId());
+    }
     /**
      * 삭제 (PUT) 요청 - TODO
      */

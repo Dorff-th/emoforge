@@ -51,4 +51,18 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
                                         @Param("status") AttachmentStatus status ,
                                         @Param("tempKey") String tempKey);
 
+
+    // 본문에 남아있는 이미지들만 CONFIRMED 상태로 변경
+    @Modifying
+    @Query("UPDATE Attachment a SET a.attachmentStatus = 'CONFIRMED' " +
+            "WHERE a.postId = :postId AND a.uploadType = :uploadType AND a.publicUrl IN :fileUrls")
+    int confirmEditorImages(@Param("postId") Long postId, @Param("uploadType") UploadType uploadType, @Param("fileUrls") List<String> fileUrls);
+
+    // 본문에 없는 이미지들은 삭제
+    @Modifying
+    @Query("DELETE FROM Attachment a " +
+            "WHERE a.postId = :postId AND a.uploadType = :uploadType " +
+            "AND a.publicUrl NOT IN :fileUrls")
+    int deleteUnusedEditorImages(@Param("postId") Long postId, @Param("uploadType") UploadType uploadType,  @Param("fileUrls") List<String> fileUrls);
+
 }
