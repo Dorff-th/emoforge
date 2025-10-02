@@ -4,6 +4,7 @@ import dev.emoforge.attach.domain.Attachment;
 import dev.emoforge.attach.domain.AttachmentStatus;
 import dev.emoforge.attach.domain.UploadType;
 import dev.emoforge.attach.dto.AttachmentConfirmRequest;
+import dev.emoforge.attach.dto.AttachmentDeleteRequest;
 import dev.emoforge.attach.dto.AttachmentMapper;
 import dev.emoforge.attach.dto.AttachmentResponse;
 import dev.emoforge.attach.service.AttachmentService;
@@ -130,6 +131,18 @@ public class AttachmentController {
         log.debug("groupTempKey : " + request.groupTempKey());
 
         attachmentService.confirmAttachments(request.postId(), request.groupTempKey());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 게시글 첨부파일 일괄 삭제 처리
+     *
+     * @param request 첨부파일 ID 목록
+     * @return 성공 여부 응답
+     */
+    @PostMapping("/delete/batch")
+    public ResponseEntity<?> deleteBatch(@RequestBody AttachmentDeleteRequest request) {
+        attachmentService.deleteBatch(request.getAttachmentIds());
         return ResponseEntity.ok().build();
     }
 

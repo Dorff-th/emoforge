@@ -11,6 +11,7 @@ import dev.emoforge.attach.dto.UploadedFileResult;
 import dev.emoforge.attach.util.FileUploadUtil;
 import dev.emoforge.attach.util.FormatFileSize;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AttachmentService {
 
     private final FileUploadUtil fileUploadUtil;
@@ -79,11 +81,11 @@ public class AttachmentService {
         Attachment attachment = attachmentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Attachment not found: " + id));
 
-        // DB soft delete
-        attachment.setDeleted(true);
+        // DB 정보 delete
+        attachmentRepository.deleteById(id);
 
-        // 실제 파일 삭제
-        fileUploadUtil.deleteFile(attachment.getFileUrl());
+        // 실제 파일 삭제 - 추후 배치 프로그램 만들어서 일괄삭제
+        //fileUploadUtil.deleteFile(attachment.getFileUrl());
     }
 
     /**
@@ -186,5 +188,28 @@ public class AttachmentService {
      */
     public Optional<Attachment> getById(Long id) {
         return attachmentRepository.findById(id);
+    }
+
+    /**
+     * 첨부파일 ID 목록을 기반으로 일괄 삭제 처리한다.
+     *
+     * - DB에서 해당 ID 목록에 해당하는 첨부파일 데이터를 삭제한다.
+     * - 실제 파일 시스템(S3, 로컬 디렉토리 등)에서도 삭제 처리가 필요할 경우 추가 로직을 작성한다.
+     *
+     * @param attachmentIds 삭제할 첨부파일 ID 목록
+     */
+    @Transactional
+    public void deleteBatch(List<Long> attachmentIds) {
+        log.debug("\n\n\n=====attachmentIds : " + attachmentIds);
+        // DB 삭제
+        if (attachmentIds == null || attachmentIds.isEmpty()) {
+            return; // 삭제 대상 없음
+        }
+
+        attachmentRepository.deleteAllByIdInBatch(attachmentIds);
+        // TODO: 실제 파일 삭제 (ex. LocalStorageService, S3Service 등 연동 필요)
+        // for (Long id : attachmentIds) {
+        //     fileStorageService.deleteFile(attachmentRepository.findById(id).get().getFileName());
+        // }
     }
 }

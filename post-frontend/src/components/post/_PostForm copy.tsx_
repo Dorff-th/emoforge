@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+﻿import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Editor } from '@toast-ui/react-editor';
@@ -28,6 +28,7 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
   const dispatch = useDispatch();
 
   const attachmentGroupTempKeyRef = useRef(groupTempKey ?? uuidv4());
+  const existingPostId = initialData?.id;
 
   const [formData, setFormData] = useState<PostRequest>({
     title: initialData?.title ?? '',
@@ -51,17 +52,37 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
     let content = editorInstance.getMarkdown();
 
     content = fixContentForSave(content);
+   
+    // const payload = {
+    //   id : existingPostId,
+    //   title: formData.title,
+    //   categoryId: formData.categoryId,
+    //   content: content,
+    //   authorUuid: initialData?.memberUuid,
+    //   tags: formData.tags.map((t) => t.name).join(','),
+    //   deleteTagIds: formData.deleteTagIds && formData.deleteTagIds.length > 0 
+    //     ? formData.deleteTagIds 
+    //   : []
+    // };
 
-    const payload = {
+    const basePayload = {
       title: formData.title,
       categoryId: formData.categoryId,
-      content: content,
-      //tags: formData.tags.map((t) => t.name), // 배열 그대로 보내는 게 더 일반적
-      tags: formData.tags.map((t) => t.name).join(','),
-      deleteTagIds: formData.deleteTagIds && formData.deleteTagIds.length > 0 
-        ? formData.deleteTagIds 
-      : []
+      content,
+      tags: formData.tags.map((t) => t.name).join(','), // DTO의 String tags와 매칭
     };
+
+const payload =
+  mode === 'edit'
+    ? {
+        ...basePayload,
+        id: existingPostId, // PostUpdateDTO.id
+        authorUuid: initialData?.memberUuid, // 필요 시 전달
+        deleteTagIds: formData.deleteTagIds?.length
+          ? formData.deleteTagIds.join(',') // DTO의 String deleteTagIds와 맞춤
+          : undefined, // 빈 값이면 필드 자체를 생략
+      }
+    : basePayload;
 
     try {
       let res;
@@ -70,18 +91,64 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
           headers: { 'Content-Type': 'application/json' },
         });
       } else {
-        const postId = initialData?.id;
-        res = await axiosPost.put(`/posts/${postId}`, payload, {
+        res = await axiosPost.put(`/posts/${existingPostId}`, payload, {
           headers: { 'Content-Type': 'application/json' },
         });
       }
 
-      const postId = res.data;
+      const postId = res.data;  
+
+      if (mode === 'edit' && postId) {
+        // 현재 마크다운 본문에서 이미지 URL만 추출 (blob: 제외)
+        const mdImgRegex = /!\[[^\]]*]\((?<url>[^)\s]+)(?:\s+"[^"]*")?\)/g;
+        const fileUrls: string[] = [];
+        for (const match of content.matchAll(mdImgRegex)) {
+          // TS: match를 RegExpMatchArray로 안전하게 취급
+          const url = (match as RegExpMatchArray).groups?.url ?? (match as RegExpMatchArray)[1];
+          if (url && !url.startsWith('blob:')) fileUrls.push(url);
+        }
+
+        
+
+        try {
+            // 백엔드: 해당 postId의 EDITOR_IMAGE 중 본문에 남아있는 URL만 CONFIRMED,
+            // 나머지는 삭제 처리 (서비스 쪽에서 uploadType=EDITOR_IMAGE로 제한)
+            const res = await axiosAttach.post('/attach/cleanup/editor', {
+              postId,
+              fileUrls,
+            });
+            
+        } catch (error) {
+          console.error('에디터 이미지 cleanup 실패', error);
+        dispatch(
+          addToast({
+            text: '에디터 이미지를 정리하는 데 실패했습니다.',
+            type: 'error',
+          }),
+        );
+      }
+    }
+    
+
       if (postId) {
+
+        const mdImgRegex = /!\[[^\]]*]\((?<url>[^)\s]+)(?:\s+"[^"]*")?\)/g;
+        const editorImageUrls: string[] = [];
+
+        for (const match of content.matchAll(mdImgRegex)) {
+          const url = (match as RegExpMatchArray).groups?.url ?? (match as RegExpMatchArray)[1];
+          if (url && !url.startsWith('blob:')) {
+            editorImageUrls.push(url);
+          }
+        }
+
+        const hasPendingAttachments =
+          (formData.attachmentIds?.length ?? 0) > 0 || editorImageUrls.length > 0;  
+
         if (
           mode === 'write' &&
           attachmentGroupTempKeyRef.current &&
-          (formData.attachmentIds?.length ?? 0) > 0
+          hasPendingAttachments
         ) {
           try {
             await axiosAttach.post('/attach/confirm', {
@@ -98,34 +165,6 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
             );
           }
         }
-
-        if (mode === 'edit' && postId) {
-        // 현재 마크다운 본문에서 이미지 URL만 추출 (blob: 제외)
-        const mdImgRegex = /!\[[^\]]*]\((?<url>[^)\s]+)(?:\s+"[^"]*")?\)/g;
-        const fileUrls: string[] = [];
-        for (const match of content.matchAll(mdImgRegex)) {
-          // TS: match를 RegExpMatchArray로 안전하게 취급
-          const url = (match as RegExpMatchArray).groups?.url ?? (match as RegExpMatchArray)[1];
-          if (url && !url.startsWith('blob:')) fileUrls.push(url);
-        }
-
-        try {
-          // 백엔드: 해당 postId의 EDITOR_IMAGE 중 본문에 남아있는 URL만 CONFIRMED,
-          // 나머지는 삭제 처리 (서비스 쪽에서 uploadType=EDITOR_IMAGE로 제한)
-          await axiosAttach.post('/attach/cleanup/editor', {
-            postId,
-            fileUrls,
-          });
-        } catch (error) {
-          console.error('에디터 이미지 cleanup 실패', error);
-          dispatch(
-            addToast({
-              text: '에디터 이미지를 정리하는 데 실패했습니다.',
-              type: 'error',
-            }),
-          );
-          }
-      }
 
         dispatch(
           addToast({
@@ -157,6 +196,8 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
     }
   };
 
+  const postIdForEditor = mode === 'edit' ? existingPostId : undefined;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <CategorySelect
@@ -169,12 +210,13 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
       />
       <PostContentEditor
         ref={editorRef}
-        initialValue={formData.content}
+        value={formData.content}
         onChange={(val) => setFormData((prev) => ({ ...prev, content: val }))}
         groupTempKey={attachmentGroupTempKeyRef.current}
+        postId={postIdForEditor}
       />
       <PostTagInput
-        postId={mode === 'edit' ? initialData?.id : undefined}
+        postId={mode === 'edit' ? existingPostId : undefined}
         value={formData.tags}
         onChange={(tags, deleteTagIds) =>
           setFormData((prev) => ({ ...prev, tags, deleteTagIds }))
