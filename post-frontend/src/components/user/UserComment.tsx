@@ -79,6 +79,7 @@ export default function UserComment({ postId }: UserCommentProps) {
       <div className="space-y-3">
         {comments.length > 0 ? (
           comments.map((c) => (
+            
             <div
               key={c.id}
               className="p-4 border rounded-md bg-white hover:shadow-md transition flex gap-3"
@@ -98,7 +99,7 @@ export default function UserComment({ postId }: UserCommentProps) {
               </div>
 
               {/* 본인 댓글일 때만 삭제 버튼 */}
-              {currentUser?.memberUuid === c.memberUuid && (
+              {currentUser?.uuid === c.memberUuid && (
                 <Button
                   variant="destructive"
                   onClick={() => {

@@ -29,9 +29,6 @@ public class CommentService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
-        /*Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));*/
-
         Comment comment = Comment.create(postId, memberUuid, content);
 
         Comment saved = commentRepository.save(comment);
@@ -39,14 +36,14 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long postId, Long commentId, Long memberId) {
+    public void deleteComment(Long postId, Long commentId, String memberUuid) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
 
         if (!comment.getPostId().equals(postId)) {
             throw new IllegalArgumentException("해당 게시물의 댓글이 아닙니다.");
         }
-        if (!comment.getMemberUuid().equals(memberId)) {
+        if (!comment.getMemberUuid().equals(memberUuid)) {
             throw new SecurityException("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
 

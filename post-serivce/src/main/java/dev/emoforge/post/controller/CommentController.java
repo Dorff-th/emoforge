@@ -1,14 +1,17 @@
 package dev.emoforge.post.controller;
 
 
+import dev.emoforge.post.domain.Post;
 import dev.emoforge.post.dto.bff.CommentDetailResponse;
 import dev.emoforge.post.dto.internal.CommentRequest;
 import dev.emoforge.post.dto.internal.CommentResponse;
 import dev.emoforge.post.service.bff.CommentsFacadeService;
 import dev.emoforge.post.service.internal.CommentService;
+import dev.emoforge.post.service.internal.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ import java.util.List;
 @RequestMapping("/api/posts/{postId}/comments")
 public class CommentController {
 
+    private final PostService postService;
     private final CommentService commentService;
     private final CommentsFacadeService commentsFacadeService;
 
@@ -30,25 +34,33 @@ public class CommentController {
     }
 
     // 댓글 작성
-    /*@PostMapping
+    @PostMapping
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable("postId") Long postId,
-            @AuthenticationPrincipal MemberDetails loginUser,
-            @RequestBody CommentRequest request
+            @RequestBody CommentRequest request,
+            Authentication authentication
     ) {
-        CommentResponse response = commentService.createComment(postId, loginUser.getId(), request.getContent());
+
+        // 1. 게시글 존재 여부 확인
+        Post post = postService.getPostById(postId)
+            .orElseThrow(() -> new IllegalArgumentException("Post가 존재하지 않습니다!"));
+
+        String memberUuid = authentication.getPrincipal().toString();
+
+        CommentResponse response = commentService.createComment(postId, memberUuid, request.getContent());
         return ResponseEntity.ok(response);
-    }*/
+    }
 
     // 댓글 삭제
-    /*@DeleteMapping("/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable("postId") Long postId,
             @PathVariable("commentId") Long commentId,
-            @AuthenticationPrincipal MemberDetails loginUser
+            Authentication authentication
     ) {
-        commentService.deleteComment(postId, commentId, loginUser.getId());
+        String memberUuid = authentication.getPrincipal().toString();
+        commentService.deleteComment(postId, commentId, memberUuid);
         return ResponseEntity.noContent().build();
-    }*/
+    }
 
 }
