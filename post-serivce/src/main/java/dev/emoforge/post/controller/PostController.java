@@ -10,6 +10,7 @@ import dev.emoforge.post.dto.internal.PageRequestDTO;
 import dev.emoforge.post.dto.internal.PostRequestDTO;
 import dev.emoforge.post.dto.internal.PostUpdateDTO;
 import dev.emoforge.post.service.bff.CommentsFacadeService;
+import dev.emoforge.post.service.bff.PostDeleteFacadeService;
 import dev.emoforge.post.service.bff.PostDetailFacadeService;
 import dev.emoforge.post.service.bff.PostListFacadeService;
 import dev.emoforge.post.service.internal.PostService;
@@ -38,6 +39,7 @@ public class PostController {
     private final PostDetailFacadeService postDetailFacadeService; // bff
     private final PostTagService postTagService;
     private final PostService postService;
+    private final PostDeleteFacadeService postDeleteFacadeService; // bbf
 
 
     /**
@@ -99,7 +101,7 @@ public class PostController {
     }
 
     /**
-     * 수정 (PUT) 요청 - TODO
+     * 수정 (PUT) 요청 -
      */
     @PutMapping("/{id}")
     public ResponseEntity<Long> updatePost(
@@ -125,5 +127,21 @@ public class PostController {
     /**
      * 삭제 (PUT) 요청 - TODO
      */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePost(Authentication authentication, @PathVariable("id") Long id) {
+
+        // 1. 게시글 존재 여부 확인
+        Post post = postService.getPostById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Post가 존재하지 않습니다!"));
+
+        // 2. 권한 체크 (본인만 수정 가능)
+        String memberUuid = authentication.getPrincipal().toString();
+        if(!memberUuid.equals(post.getMemberUuid())) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+
+        postDeleteFacadeService.deletePost(id);
+        return ResponseEntity.noContent().build(); // 204 반환
+    }
 }
 

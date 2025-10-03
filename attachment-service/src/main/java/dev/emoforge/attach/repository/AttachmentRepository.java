@@ -65,4 +65,11 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
             "AND a.publicUrl NOT IN :fileUrls")
     int deleteUnusedEditorImages(@Param("postId") Long postId, @Param("uploadType") UploadType uploadType,  @Param("fileUrls") List<String> fileUrls);
 
+
+    //Post 삭제될때 하위 Attachment 모두 삭제 - 관리자 기능
+    void deleteByPostIdIn(List<Long> postIds);
+
+    //특정 Post 삭제될때 Attachment 삭제
+    void deleteByPostId(Long postId);
+
 }

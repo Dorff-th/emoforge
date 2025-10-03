@@ -19,4 +19,8 @@ public interface AttachClient {
     @GetMapping("/api/attach/profile-images/{memberUuid}")
     public ResponseEntity<AttachmentResponse> findLatestProfileImage(@PathVariable("memberUuid") String memberUuid);
 
+    @DeleteMapping("/api/attach/post/{postId}")
+    public ResponseEntity<Void> deleteByPostId(@PathVariable("postId") Long postId);
+
+
 }

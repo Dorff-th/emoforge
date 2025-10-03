@@ -62,18 +62,6 @@ public class AttachmentController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 게시글 첨부파일 조회 - unUsed (첨부파일 조회는 Post-Service에서 bbf로 호출하기때문에 api 호출은 필요가 없음.
-     */
-    /*@GetMapping("/post/{postId}")
-    public ResponseEntity<List<AttachmentResponse>> getAttachmentsByPost(@PathVariable("postId") Long postId) {
-        return ResponseEntity.ok(
-                attachmentService.getAttachmentsByPost(postId)
-                        .stream()
-                        .map(AttachmentMapper::toResponse)
-                        .toList()
-        );
-    }*/
 
     /**
      * 사용자 프로필 이미지 조회 (최신 1개)
@@ -152,4 +140,12 @@ public class AttachmentController {
         return fileDownloadUtil.getDownloadResponse(attachment.getFileUrl(), attachment.getOriginFileName());
     }
 
+    /**
+     * 특정 게시글 아이디(postId)의 첨부파일 정보 삭제
+     */
+    @DeleteMapping("/post/{postId}")
+    public ResponseEntity<Void> deleteByPostId(@PathVariable("postId") Long postId) {
+        attachmentService.deleteByPostId(postId);
+        return ResponseEntity.noContent().build(); // ✅ 204 No Content
+    }
 }

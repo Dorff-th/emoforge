@@ -212,4 +212,11 @@ public class AttachmentService {
         //     fileStorageService.deleteFile(attachmentRepository.findById(id).get().getFileName());
         // }
     }
+
+    /**
+     * 특정 postId의 첨부파일 정보를 삭제
+     */
+    public void deleteByPostId(Long postId) {
+        attachmentRepository.deleteByPostId(postId);
+    }
 }
