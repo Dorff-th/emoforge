@@ -1,4 +1,4 @@
-package dev.emoforge.diary.config;
+package dev.emoforge.diary.global.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

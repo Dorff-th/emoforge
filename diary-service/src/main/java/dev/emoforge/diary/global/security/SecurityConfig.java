@@ -1,4 +1,4 @@
-package dev.emoforge.diary.config;
+package dev.emoforge.diary.global.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -28,10 +28,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ 여기!
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET,"/api/diary/welcome/**").permitAll()
-                        /*.requestMatchers(HttpMethod.GET,"/api/posts/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/posts/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT,"/api/posts/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE,"/api/posts/**").authenticated()*/
+                        .requestMatchers(
+                                "/", "/index.html", "/static/**", "/css/**", "/js/**", "/img/**", "/assets/**", "/*.svg", "/favicon.ico"
+                        ).permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
