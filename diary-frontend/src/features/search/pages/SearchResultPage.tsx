@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate  } from 'react-router-dom';
-import axiosInstance from '@/lib/axios/axiosInstance';
+import axiosDiary from '@/lib/axios/axiosDiary';
 import Header from '@/features/layout/components/Header';
 import EmotionRangeSlider from '@/features/ui/components/EmotionRangeSlider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -46,7 +46,7 @@ const SearchResultPage = () => {
 
   const fetchResults = async () => {
     try {
-      const response = await axiosInstance.post(`/user/diaries/search?page=${page - 1}&size=${size}`, {
+      const response = await axiosDiary.post(`/diary/diaries/search?page=${page - 1}&size=${size}`, {
         query,
         fields: effectiveFields,
         emotionMap: {

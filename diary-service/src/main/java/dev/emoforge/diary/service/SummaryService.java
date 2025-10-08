@@ -5,6 +5,7 @@ import dev.emoforge.diary.domain.DiaryEntry;
 import dev.emoforge.diary.domain.GptSummary;
 import dev.emoforge.diary.dto.response.GPTSummaryResponseDTO;
 import dev.emoforge.diary.dto.response.SummaryResponseDTO;
+import dev.emoforge.diary.global.exception.DataNotFoundException;
 import dev.emoforge.diary.repository.DiaryEntryRepository;
 import dev.emoforge.diary.repository.GptSummaryRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class SummaryService {
         LocalDate today = LocalDate.now();
 
         DiaryEntry diary = diaryEntryRepository.findTopByMemberUuidAndDiaryDateOrderByCreatedAtDesc(memberUuid, today)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "오늘의 회고가 없습니다."));
+                .orElseThrow(() -> new DataNotFoundException("오늘의 회고가 없습니다."));
 
         GptSummary gpt = gptSummaryRepository.findByDiaryEntry(diary).orElse(null);
 
@@ -46,7 +47,7 @@ public class SummaryService {
 
         LocalDate today = LocalDate.now();
         GptSummary todayGptSummary = gptSummaryRepository.findByMemberUuidAndDiaryDate(memberUuid, today)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"오늘의 GPT 요약이 없습니다."));
+                .orElseThrow(() -> new DataNotFoundException("오늘의 GPT 요약이 없습니다."));
 
         return new GPTSummaryResponseDTO(todayGptSummary.getSummary());
 

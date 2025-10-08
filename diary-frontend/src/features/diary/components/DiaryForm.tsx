@@ -8,8 +8,9 @@ import FeedbackTypeSelect from './FeedbackTypeSelect';
 import SubmitButton from './SubmitButton';
 import GPTFeedbackModal from '@/features/gpt/components/GPTFeedbackModal';
 import { FeedbackType } from '@/features/gpt/types/feedbackTypes';
-import axiosInstance from "@/lib/axios/axiosInstance";
+import axiosDiary from "@/lib/axios/axiosDiary";
 import { format } from 'date-fns';
+import axiosLang from '@/lib/axios/axiosLang';
 
 const DiaryForm: React.FC = () => {
   const [emotion, setEmotion] = useState<number>(0);
@@ -26,21 +27,33 @@ const DiaryForm: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const fetchGptFeedback = async (content: string, feedbackType: FeedbackType): Promise<string> => {
-    setGptMessage('🤖 GPT 피드백 생성 중입니다...');
-    setShowModal(true); // 모달 먼저 띄우기
+  const fetchGptFeedback = async (
+  content: string,
+  feedbackType: FeedbackType
+): Promise<string> => {
+  setGptMessage('🤖 GPT 피드백 생성 중입니다...');
+  setShowModal(true); // 모달 먼저 띄우기
 
-    try {
-      const response = await axiosInstance.post('/diary/gpt/feedback', {
-        content,
-        feedbackType,
-      });
-      return response.data.feedback;
-    } catch (error) {
+  // ⏱️ 3초 후 fallback 문구를 반환하는 Promise
+  const timeoutPromise = new Promise<string>((resolve) => {
+    setTimeout(() => {
+      console.warn('GPT 피드백 응답 지연으로 타임아웃 처리됨');
+      resolve('응답이 지연되어 생략합니다.');
+    }, 4000);
+  });
+
+  // ⚙️ 실제 GPT API 요청 Promise
+  const requestPromise = axiosLang
+    .post('/diary/gpt/feedback', { content, feedbackType })
+    .then((res) => res.data.feedback)
+    .catch((error) => {
       console.error('GPT 피드백 실패:', error);
-      return '오늘도 수고했어요. 내일은 더 잘할 수 있을 거예요!'; // fallback
-    }
-  };
+      return '오늘도 수고했어요. 내일은 더 잘할 수 있을 거예요!';
+    });
+
+  // 🧩 race: 둘 중 먼저 끝난 Promise 결과 사용
+  return Promise.race([requestPromise, timeoutPromise]);
+};
 
   const handleSubmit = async () => {
     if (!emotion || !diary.trim()) {
@@ -54,6 +67,7 @@ const DiaryForm: React.FC = () => {
     try {
       // 1. GPT 피드백 생성
       const gptFeedback = await fetchGptFeedback(diary, feedbackType);
+      
       setGptMessage(gptFeedback); // ✅ 모달 내 문구 교체
 
       // 2. 회고 저장 요청
@@ -67,14 +81,16 @@ const DiaryForm: React.FC = () => {
         feedback: gptFeedback,
       };
 
-      await axiosInstance.post('/user/diary', payload);
+      await axiosDiary.post('/diary/diaries', payload);
       setIsSaveSuccess(true);
+      
     } catch (e) {
       console.error('저장 중 오류 발생:', e);
       setGptMessage('저장에 실패했어요. 다시 시도해주세요. 😢');
       setIsSaveSuccess(false);
     } finally {
       setIsSaving(false);
+      
     }
   };
 
@@ -99,12 +115,13 @@ const DiaryForm: React.FC = () => {
           message={gptMessage}
           type={feedbackType}
           onClose={() => {
+            
             setShowModal(false);
             if (isSaveSuccess) {
               navigate('/user/calendar');
             }
           }}
-          duration={3000}
+          duration={5000}
         />
       )}
     </div>

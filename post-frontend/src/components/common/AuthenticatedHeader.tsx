@@ -44,6 +44,14 @@ function AuthenticatedHeader() {
           >
             게시글
           </a>
+
+          <a
+            href={`${SERVICE_URLS.DIARY}/user/home`}
+            className="text-gray-700 hover:text-blue-600"
+          >
+            감정 일기
+          </a>
+
           <button
             type="button"
             onClick={handleLogout}

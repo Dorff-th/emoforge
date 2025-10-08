@@ -1,4 +1,4 @@
-import axiosInstance from "@/lib/axios/axiosInstance";
+import axiosDiary from "@/lib/axios/axiosDiary";
 
 
 export type EmotionLevel = 1 | 2 | 3 | 4 | 5;
@@ -23,7 +23,7 @@ export type DailyDiaryData = {
 //  월별 다이어리 목록을 가져오는 API
 //selectedDate : YYYY-MM-DD 형식의 날짜 문자열
 export const fetchMonthDiaryList = async (selectedDate:string) => {
-  const response = await axiosInstance.get<DailyDiaryData[]>(
+  const response = await axiosDiary.get<DailyDiaryData[]>(
     `/diary/diaries/monthly?yearMonth=${selectedDate}`
   );
 

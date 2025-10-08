@@ -3,6 +3,7 @@ package dev.emoforge.diary.service;
 
 import dev.emoforge.diary.domain.DiaryEntry;
 import dev.emoforge.diary.domain.GptSummary;
+import dev.emoforge.diary.global.exception.DataNotFoundException;
 import dev.emoforge.diary.repository.DiaryEntryRepository;
 import dev.emoforge.diary.repository.GptSummaryRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class GptService {
     private final DiaryGptClient diaryGptClient;
     private final DiaryEntryRepository diaryEntryRepository;
     private final GptSummaryRepository gptSummaryRepository;
+    private final LangGraphClient langGraphClient; // ✅ 새로 주입되는 클라이언트
 
 
     /**
@@ -88,21 +90,26 @@ public class GptService {
                 .map(DiaryEntry::getContent)
                 .collect(Collectors.joining("\n"));
 
-        // 3. GPT 요청
-        String prompt = String.format("%s에 작성한 회고입니다. 요약해 주세요.\n%s", date, fullContent);
-        //String summary = diaryGptClient.requestSummary(prompt);
-        String summary = diaryGptClient.chat(prompt, GptRole.DIARY_SUMMARIZER);
+        // 3. LangGraph-Service에 요약 요청
+        try {
+            String summary = langGraphClient.requestSummary(date, fullContent);
 
-        // 4. DB 저장
-        GptSummary entity = new GptSummary();
-        entity.setMemberUuid(memberUuid);
-        entity.setDiaryDate(date);
-        entity.setSummary(summary);
-        //entity.setDiaryEntryId(null); // 전체 요약은 null로
+            // 4. DB 저장
+            GptSummary entity = new GptSummary();
+            entity.setMemberUuid(memberUuid);
+            entity.setDiaryDate(date);
+            entity.setSummary(summary);
+            gptSummaryRepository.save(entity);
 
-        gptSummaryRepository.save(entity);
-        return summary;
+            log.info("✅ LangGraph 요약 저장 완료: {}", summary);
+            return summary;
+
+        } catch (Exception e) {
+            log.error("❌ LangGraph 요약 요청 실패", e);
+            throw new RuntimeException("LangGraph-Service 요약 요청 실패", e);
+        }
     }
+
 
 
     @Transactional
@@ -110,7 +117,7 @@ public class GptService {
         LocalDate today = LocalDate.now();
 
         DiaryEntry diary = diaryEntryRepository.findTopByMemberUuidAndDiaryDateOrderByCreatedAtDesc(memberUuid, today)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "오늘 회고가 없습니다."));
+                .orElseThrow(() -> new DataNotFoundException("오늘 회고가 없습니다."));
 
         String prompt = buildSummaryPrompt(diary);
 
@@ -133,7 +140,7 @@ public class GptService {
         LocalDate today = LocalDate.now();
 
         DiaryEntry diary = diaryEntryRepository.findTopByMemberUuidAndDiaryDateOrderByCreatedAtDesc(memberUuid, today)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"오늘 회고가 없습니다."));
+                .orElseThrow(() -> new DataNotFoundException("오늘 회고가 없습니다."));
 
         String prompt = buildFeedbackPrompt(diary);
 

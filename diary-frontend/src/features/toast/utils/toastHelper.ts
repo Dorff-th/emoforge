@@ -2,27 +2,12 @@
 import { useEmotionToast } from '@/features/toast/hooks/useEmotionToast';
 
 
+let toastGlobal: ReturnType<typeof useEmotionToast> | null = null;
+
 export const useToastHelper = () => {
-  const { showToast } = useEmotionToast()
+  const toast = useEmotionToast();
+  toastGlobal = toast; // ✅ 전역에 저장
+  return toast;
+};
 
-  return {
-    showSuccess: (msg: string) =>
-      showToast({ type: 'success', message: msg }),
-
-    showError: (msg: string) =>
-      showToast({ type: 'error', message: msg }),
-
-    showWarning: (msg: string) =>
-      showToast({ type: 'warn', message: msg }),
-
-    showInfo: (msg: string) =>
-      showToast({ type: 'info', message: msg }),
-
-    showGPT: (msg: string) =>
-      showToast({ type: 'gpt', message: msg }),
-
-    // 필요 시 사용자 정의
-    showCustom: (msg: string) =>
-      showToast({ type: 'custom', message: msg }),
-  }
-}
+export const getToastHelper = () => toastGlobal;

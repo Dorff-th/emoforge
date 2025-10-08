@@ -7,7 +7,11 @@ interface Props {
 }
 
 const PrivateRoute = ({ children }: Props) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>🔄 로그인 상태 확인 중...</div>; // 로딩 표시
+  }
 
   if (!isAuthenticated) {
     // ✅ Auth-Service의 로그인 페이지로 전체 리디렉트

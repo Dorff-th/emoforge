@@ -34,6 +34,13 @@ Thumbs.db
 /*/vite.config.ts.timestamp*
 
 ### Env files ###
-*/.env
-*/.env.*
-!*/.env.example
+# Root-level .env
+.env
+.env.*
+
+# Any nested envs
+**/.env
+**/.env.*
+
+# Allow example templates
+!**/.env.example

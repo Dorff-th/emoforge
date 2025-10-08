@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api/diary/gpt")
+/**
+ *  해당 Controller는 Python FastAPI 로 대채함.
+ */
+//@RestController
+//@RequestMapping("/api/diary/gpt")
 @RequiredArgsConstructor
 public class GptController {
 

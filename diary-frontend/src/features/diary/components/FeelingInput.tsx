@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import axiosInstance from "@/lib/axios/axiosInstance";
+import axiosDiary from '@/lib/axios/axiosDiary';
+import axiosLang from '@/lib/axios/axiosLang';
 import clsx from 'clsx';
-import { useToastHelper } from '@/features/toast/utils/toastHelper';
+import { getToastHelper } from '@/features/toast/utils/toastHelper';
 import GptFeelingLoadingModal from '@/features/ui/components/GptFeelingLoadingModal'; 
 
 interface FeelingInputProps {
@@ -18,7 +19,7 @@ const FeelingInput: React.FC<FeelingInputProps> = ({
   onEnglishSelect
 }) => {
 
-  const { showError } = useToastHelper();
+  const toast = getToastHelper();
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,14 +28,14 @@ const FeelingInput: React.FC<FeelingInputProps> = ({
     if (!feelingKo.trim()) return;
     setLoading(true);
     try {
-      const response = await axiosInstance.post(
+      const response = await axiosLang.post(
         '/diary/gpt/feeling', 
         {feelingKo},
         { meta: { skipGlobalLoading: true } } as any// 요게 핵심! 👈
       );
       setSuggestions(response.data.suggestions || []);
     } catch (error) {
-      showError('GPT 영어 표현 추천 실패');
+      toast?.showToast({ message:'GPT 추천 실패', type: 'error' });
       console.error('GPT 추천 실패:', error);
       setSuggestions([]);
     } finally {

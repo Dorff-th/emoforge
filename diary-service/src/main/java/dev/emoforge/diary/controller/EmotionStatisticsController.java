@@ -28,7 +28,7 @@ public class EmotionStatisticsController {
             Authentication authentication
 
     ) {
-        String memberUuid = authentication.toString();
+        String memberUuid = authentication.getPrincipal().toString();
         return emotionStatisticsService.getEmotionStatistics(memberUuid, startDate, endDate);
     }
 }

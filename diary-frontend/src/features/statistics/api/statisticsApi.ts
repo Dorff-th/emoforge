@@ -1,5 +1,5 @@
 // src/api/statisticsApi.ts
-import axiosInstance from "@/lib/axios/axiosInstance";
+import axiosDiary from "@/lib/axios/axiosDiary";
 
 export interface EmotionStatisticsResponse {
   averageEmotion: number;
@@ -15,7 +15,7 @@ export const fetchEmotionStatistics = async (
   startDate: string,
   endDate: string
 ): Promise<EmotionStatisticsResponse> => {
-  const res = await axiosInstance.get('/diary/statistics/emotion', {
+  const res = await axiosDiary.get('/diary/statistics/emotion', {
     params: { startDate, endDate },
   });
   return res.data;

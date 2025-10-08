@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { useToastHelper } from '@/features/toast/utils/toastHelper';
+import { getToastHelper } from '@/features/toast/utils/toastHelper';
 import ThemeToggle from '@/features/ui/components/ThemeToggle';
-import bunnyIcon from '@/assets/characters/loading_bunny_gpt.png';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
+import { SERVICE_URLS } from '@/config/constants';
+import Avatar from '@/features/user/components/Avatar';
 
 const Header = () => {
-  const { logout } = useAuth();
-  const { showInfo } = useToastHelper();
+  const { logout, user } = useAuth();
+  //const { showInfo } = useToastHelper();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const toast = getToastHelper();
+  const showInfo = (message: string) => {
+    toast?.showToast({ message, type: 'info' });
+  };
 
   const handleLogout = () => {
     showInfo('로그아웃 완료 👋');
@@ -41,16 +47,12 @@ const Header = () => {
       <header className="bg-sky-100 dark:bg-gray-800 px-4 py-2">
         <div className="flex items-center justify-center flex-wrap gap-3">
           {/* 프로필 */}
-          <button
+          <a
             className="w-10 h-10 rounded-full overflow-hidden hover:ring-2 hover:ring-pink-300 transition"
-            onClick={() => console.log('MyPage 이동 예정')}
+            href={`${SERVICE_URLS.AUTH}/profile`}
           >
-            <img
-              src={bunnyIcon}
-              alt="프로필"
-              className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-700 shadow"
-            />
-          </button>
+            <Avatar src={user?.profileImageUrl} alt={user?.nickname} size={32} />
+          </a>
 
           {/* ── 프로필 ↔ 메뉴 구분선 */}
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 opacity-60" />

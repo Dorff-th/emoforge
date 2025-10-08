@@ -4,7 +4,7 @@ import { emotionEmojiMap, EmotionLevel } from '@/features/diary/types/emotionMap
 import { X } from 'lucide-react';
 import { DiaryEntry} from '@/features/calendar/api/calendarApi';
 import { generateGptSummary } from '@/features/gpt/api/gptSummaryApi'; // ✅ 추가
-import { useToastHelper } from '@/features/toast/utils/toastHelper';
+import { getToastHelper } from '@/features/toast/utils/toastHelper';
 
 
 interface DiaryListForDateModalProps {
@@ -26,7 +26,8 @@ const DiaryListForDateModal = ({ date, onClose, diaryEntries, summary, onSummary
   // 최신순 정렬
   const sortedList = [...diaryList].sort((a, b) => Number(b.id) - Number(a.id));
 
-  const { showError, showSuccess } = useToastHelper();
+  const toast = getToastHelper();
+  
 
   const handleGptSummaryClick = async() => {
     try {
@@ -34,9 +35,11 @@ const DiaryListForDateModal = ({ date, onClose, diaryEntries, summary, onSummary
       const result = await generateGptSummary(date);
       setGptSummary(result);
       onSummaryGenerated?.(result);
-      showSuccess('GPT 요약 생성 완료!');
+      //showSuccess('GPT 요약 생성 완료!');
+      toast?.showToast({ message:'GPT 요약 생성 완료!', type: 'info' });
     } catch (error) {
-      showError('GPT 요약 생성 중 오류 발생!');
+      //showError('GPT 요약 생성 중 오류 발생!');
+      toast?.showToast({ message:'GPT 요약 생성 중 오류 발생!', type: 'error' });
     } finally {
       setLoading(false);
     }

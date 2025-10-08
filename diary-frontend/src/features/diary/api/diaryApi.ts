@@ -1,4 +1,4 @@
-import axiosInstance from "@/lib/axios/axiosInstance";
+import axiosDiary from "@/lib/axios/axiosDiary";
 
 export interface DiaryItemType {
   id: number;
@@ -42,7 +42,7 @@ export interface DiaryGroup {
 
 
 export const fetchDiaryList = async (page: number, size = 10) => {
-  const response = await axiosInstance.get<DiaryListResponse>(
+  const response = await axiosDiary.get<DiaryListResponse>(
     `/diary/diaries?page=${page-1}&size=${size}`
   );
 
