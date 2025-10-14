@@ -1,4 +1,4 @@
-# graph_feedback.py (수정본)
+# graph_feedback.py (개선본)
 import os
 import random
 from dotenv import load_dotenv
@@ -14,53 +14,81 @@ llm = ChatOpenAI(
     temperature=0.7
 )
 
+# 🧩 상태 정의 (입력 파라미터 확장)
 class FeedbackState(dict):
-    content: str
-    feedbackType: str
-    style: str
-    result: str
+    emotionScore: int
+    habitTags: list
+    feelingKo: str
+    feelingEn: str
+    diaryContent: str
+    feedbackStyle: str
+    stylePrompt: str
+    result: dict  # JSON 구조로 반환 예정
 
+# 🎨 스타일 선택 노드
 def select_style(state: FeedbackState) -> FeedbackState:
-    feedbackType = state["feedbackType"]
+    style = state.get("feedbackStyle", "encourage")
 
     styles = {
-        "encourage": "[피드백 스타일: 따뜻하고 긍정적이며 응원하는 말투]",
-        "scold": "[피드백 스타일: 엄격하고 직설적으로 지적하는 말투]",
-        "roast": "[피드백 스타일: 유머를 섞어 가볍게 놀리면서 지적하는 말투]",
-        "coach": "[피드백 스타일: 냉정하고 목표지향적인 조언자 말투]",
+        "encourage": "따뜻하고 긍정적이며 응원하는 말투로, 감정을 공감하며 위로해주세요.",
+        "scold": "단호하지만 애정 어린 말투로, 개선할 점을 명확히 짚어주세요.",
+        "roast": "유머러스하고 재치있게, 가볍게 놀리며 개선점을 알려주세요.",
+        "coach": "냉정하지만 진심 어린 코치처럼 목표 중심의 조언을 해주세요.",
         "random": random.choice([
-            "[피드백 스타일: 따뜻하고 긍정적이며 응원하는 말투]",
-            "[피드백 스타일: 엄격하고 직설적으로 지적하는 말투]",
-            "[피드백 스타일: 유머를 섞어 가볍게 놀리면서 지적하는 말투]",
-            "[피드백 스타일: 냉정하고 목표지향적인 조언자 말투]",
+            "따뜻하고 긍정적이며 응원하는 말투로, 감정을 공감하며 위로해주세요.",
+            "단호하지만 애정 어린 말투로, 개선할 점을 명확히 짚어주세요.",
+            "유머러스하고 재치있게, 가볍게 놀리며 개선점을 알려주세요.",
+            "냉정하지만 진심 어린 코치처럼 목표 중심의 조언을 해주세요."
         ]),
-        "default": "[피드백 스타일: 무난한 말투]"
+        "default": "무난한 말투로 간결하게 답변해주세요."
     }
 
-    # ✅ state 업데이트 후 반드시 반환
-    state["style"] = styles.get(feedbackType, styles["encourage"])
+    state["stylePrompt"] = styles.get(style, styles["encourage"])
     return state
 
+
+# 🧠 GPT 피드백 생성 노드
 def generate_feedback(state: FeedbackState) -> FeedbackState:
-    style = state["style"]
-    content = state["content"]
+    emotion = state["emotionScore"]
+    habits = ", ".join(state["habitTags"]) if state["habitTags"] else "없음"
+    feelingKo = state["feelingKo"]
+    feelingEn = state["feelingEn"]
+    content = state["diaryContent"]
+    stylePrompt = state["stylePrompt"]
 
     prompt = f"""
-    아래 회고 내용을 {style}로 피드백 해줘.
-    회고: {content}
-    조건: 
-    - 스타일에 맞춰 반드시 한두 문장만 줄 것
-    - 스타일에 따라 말투가 명확하게 구분되어야 함
-    - 지시된 스타일과 다르게 응답하면 안 됨
+    아래의 감정 및 회고 데이터를 기반으로 {stylePrompt} 피드백을 생성해주세요.
+
+    [감정 점수] {emotion}/5
+    [완료한 습관] {habits}
+    [오늘의 한마디] {feelingKo} ({feelingEn})
+    [회고 내용] {content}
+
+    출력은 반드시 아래 JSON 형식으로 해주세요:
+    {{
+      "summary": "오늘 하루를 한 문장으로 요약",
+      "encouragement": "감정 기반 격려 문장",
+      "next_tip": "내일을 위한 제안 한 문장"
+    }}
     """
 
     response = llm.invoke([
-        SystemMessage(content="You are a feedback coach that adjusts tone based on the requested style."),
+        SystemMessage(content="You are an empathetic AI coach generating feedback based on the user's mood and habits."),
         HumanMessage(content=prompt)
     ])
-    state["result"] = response.content
+
+    # LLM의 응답 파싱
+    try:
+        import json
+        state["result"] = json.loads(response.content)
+    except Exception:
+        # 파싱 실패 시 문자열 통째로 저장
+        state["result"] = {"summary": "", "encouragement": response.content.strip(), "next_tip": ""}
+
     return state
 
+
+# ⚙️ LangGraph 구성
 graph = StateGraph(FeedbackState)
 graph.add_node("select_style", select_style)
 graph.add_node("generate_feedback", generate_feedback)
