@@ -1,23 +1,18 @@
-# app.py (개선본)
-from fastapi import FastAPI, Depends
-from pydantic import BaseModel, Field
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
-from auth_dependency import verify_jwt_from_cookie, require_role
-from graph_feeling import compiled_graph
-from graph_feedback import compiled_feedback_graph
-from graph_summary import compiled_summary_graph
+from routes.gpt_routes import router as gpt_router
+from routes.youtube_routes import router as youtube_router
 
 app = FastAPI(title="LangGraph-Service with Cookie-based Auth")
 
 # ✅ CORS 설정
 origins = [
-    "http://app1.127.0.0.1.nip.io",  # Emoforge 프론트
+    "http://app1.127.0.0.1.nip.io",
     "http://post.127.0.0.1.nip.io",
     "http://diary.127.0.0.1.nip.io",
     "http://auth.127.0.0.1.nip.io",
     "https://*.nip.io",
-    "http://app3.127.0.0.1.nip.io:5175"
+    "http://app3.127.0.0.1.nip.io:5175",
 ]
 
 app.add_middleware(
@@ -28,71 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ 1) 로그인 없이 접근 가능한 엔드포인트
-class FeelingRequest(BaseModel):
-    feelingKo: str
+# ✅ 라우트 등록
+app.include_router(gpt_router)
+app.include_router(youtube_router)
 
-@app.post("/api/diary/gpt/feeling")
-async def get_feeling_suggestions(req: FeelingRequest):
-    result = await compiled_graph.ainvoke({"feelingKo": req.feelingKo})
-    lines = [line.strip() for line in result["result"].split("\n") if line.strip()]
-    return {"suggestions": lines}
+@app.get("/")
+def root():
+    return {"message": "LangGraph-Service is running"}
 
-
-# ✅ 2) 감정·습관·회고 기반 GPT 피드백 생성 (JWT 인증 필요)
-class FeedbackRequest(BaseModel):
-    emotionScore: int = Field(..., description="감정 점수 (1~5)")
-    habitTags: Optional[List[str]] = Field(default_factory=list, description="오늘 수행한 습관 목록")
-    feelingKo: Optional[str] = Field(default="", description="오늘의 한마디 (한글)")
-    feelingEn: Optional[str] = Field(default="", description="오늘의 한마디 (영문)")
-    diaryContent: str = Field(..., description="회고 일기 내용")
-    feedbackStyle: str = Field("encourage", description="피드백 스타일 (encourage, scold, roast, coach, random)")
-
-@app.post("/api/diary/gpt/feedback")
-async def get_diary_feedback(req: FeedbackRequest, user=Depends(verify_jwt_from_cookie)):
-    """
-    ✅ LangGraph 기반 감정·습관·회고 통합 피드백 생성
-    - emotionScore, habitTags, feelingKo, feelingEn, diaryContent, feedbackStyle 종합
-    - feedbackStyle에 따라 말투 자동 전환
-    """
-    member_uuid = user.get("member_uuid") or user.get("uuid")
-
-    result = await compiled_feedback_graph.ainvoke({
-        "emotionScore": req.emotionScore,
-        "habitTags": req.habitTags,
-        "feelingKo": req.feelingKo,
-        "feelingEn": req.feelingEn,
-        "diaryContent": req.diaryContent,
-        "feedbackStyle": req.feedbackStyle
-    })
-
-    # result["result"]는 graph_feedback.py의 state["result"] JSON 구조
-    return {
-        "member_uuid": member_uuid,
-        "feedback": result["result"]
-    }
-
-
-# ✅ 3) 감정일기 요약
-class SummaryRequest(BaseModel):
-    date: str
-    content: str
-
-@app.post("/api/diary/gpt/summary")
-async def summarize_diary(req: SummaryRequest):
-    result = await compiled_summary_graph.ainvoke({
-        "date": req.date,
-        "content": req.content
-    })
-
-    return {
-        "summary": result["result"]
-    }
-
-
-# ✅ 4) 관리자 전용 테스트 엔드포인트
-@app.get("/api/admin/test")
-def admin_test(user=Depends(require_role("ADMIN"))):
-    return {
-        "message": f"관리자 접근 성공 ✅ - {user['member_uuid']}"
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

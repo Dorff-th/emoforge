@@ -1,6 +1,6 @@
 # auth_dependency.py
 from fastapi import Request, HTTPException, status, Depends
-from auth_utils import decode_jwt
+from core.auth_utils import decode_jwt
 
 def verify_jwt_from_cookie(request: Request):
     token = request.cookies.get("access_token")
