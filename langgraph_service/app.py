@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.gpt_routes import router as gpt_router
-from routes.youtube_routes import router as youtube_router
+#from routes.youtube_routes import router as youtube_router
+from routes.music_router import router as music_router
 
 app = FastAPI(title="LangGraph-Service with Cookie-based Auth")
 
@@ -25,7 +26,8 @@ app.add_middleware(
 
 # ✅ 라우트 등록
 app.include_router(gpt_router)
-app.include_router(youtube_router)
+#app.include_router(youtube_router)
+app.include_router(music_router)
 
 @app.get("/")
 def root():

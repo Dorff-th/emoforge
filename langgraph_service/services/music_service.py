@@ -1,11 +1,11 @@
 import os
 import asyncio
-from ytmusicapi import YTMusic
+import requests
 from openai import OpenAI
 
 # ✅ 초기화
-ytmusic = YTMusic()  # 또는 YTMusic("headers_auth.json") 로 로그인 세션 사용
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 
 # 🔹 Step 1. 아티스트 영어 변환 (GPT 기반)
@@ -38,7 +38,7 @@ async def normalize_artists_gpt(artist_prefs: list[str]) -> list[str]:
     return await asyncio.to_thread(_sync_gpt_call)
 
 
-# 🔹 Step 2. 감정 기반 음악 추천 (아티스트 연관 강화)
+# 🔹 Step 2. 감정 기반 음악 추천 (YouTube API 기반)
 async def recommend_music_simple(
     emotionScore: int,
     feelingKo: str,
@@ -54,7 +54,7 @@ async def recommend_music_simple(
         artist_text = ", ".join(artist_preferences) if artist_preferences else "없음"
         prompt = f"""
         아래 데이터를 바탕으로 사용자의 감정을 영어 키워드 2~3개로 만들어줘.
-        단, 반드시 선호 아티스트({artist_text})의 음악 스타일을 참고하고,
+        반드시 선호 아티스트({artist_text})의 음악 스타일을 참고하고,
         아티스트 이름도 포함된 검색어로 만들어야 해.
         예: IU emotional ballad / Coldplay chill acoustic / BTS energetic pop
 
@@ -86,46 +86,45 @@ async def recommend_music_simple(
     mood_keywords = mood_keywords.replace("\n", " ").replace("-", " ").replace('"', "").strip()
     print(f"🎧 GPT mood keywords → {mood_keywords}")
 
-    # ✅ 2️⃣ YouTube Music 검색
+    # ✅ 2️⃣ YouTube 공식 API 검색
     async def _search_youtube():
         def _sync_yt_search():
             try:
                 queries = []
-                # 아티스트별로 개별 검색 쿼리 구성
                 if artist_preferences:
                     for artist in artist_preferences:
-                        # 아티스트 이름을 앞뒤로 반복해 강조
-                        queries.append(f"{artist} {mood_keywords} song {artist}")
+                        queries.append(f"{artist} {mood_keywords} song")
                 else:
                     queries.append(f"{mood_keywords} song")
 
                 results = []
                 for q in queries:
-                    print(f"🔍 Searching YouTubeMusic: {q}")
-                    items = ytmusic.search(query=q, filter="videos")
-                    results.extend(items or [])
-
-                # 🔎 아티스트 이름 필터링 (정확도 향상)
-                filtered = [
-                    item for item in results
-                    if any(
-                        artist.lower() in (item.get("title") or "").lower()
-                        or artist.lower() in ", ".join([a["name"].lower() for a in item.get("artists", [])])
-                        for artist in artist_preferences
-                    )
-                ]
-
-                # 중복 제거
-                seen = set()
-                unique_results = []
-                for item in filtered:
-                    vid = item.get("videoId")
-                    if vid and vid not in seen:
-                        seen.add(vid)
-                        unique_results.append(item)
-                return unique_results
+                    print(f"🔍 Searching YouTube API: {q}")
+                    url = "https://www.googleapis.com/youtube/v3/search"
+                    params = {
+                        "part": "snippet",
+                        "q": q,
+                        "type": "video",
+                        "videoCategoryId": "10",  # 🎵 Music category
+                        "key": YOUTUBE_API_KEY,
+                        "maxResults": 5,
+                        "regionCode": "KR",
+                    }
+                    res = requests.get(url, params=params, timeout=10)
+                    if res.status_code == 200:
+                        data = res.json()
+                        for item in data.get("items", []):
+                            results.append({
+                                "title": item["snippet"]["title"],
+                                "artist": item["snippet"]["channelTitle"],
+                                "url": f"https://www.youtube.com/watch?v={item['id']['videoId']}",
+                                "thumbnail": item["snippet"]["thumbnails"]["medium"]["url"],
+                            })
+                    else:
+                        print(f"[YouTube API ERROR] {res.status_code}: {res.text}")
+                return results
             except Exception as e:
-                print(f"[YTMUSIC ERROR] {e}")
+                print(f"[YouTube Search ERROR] {e}")
                 return []
 
         return await asyncio.to_thread(_sync_yt_search)
@@ -133,19 +132,9 @@ async def recommend_music_simple(
     search_results = await _search_youtube()
 
     # ✅ 3️⃣ 결과 정리
-    recommendations = []
-    for item in search_results[:5]:
-        try:
-            recommendations.append({
-                "title": item.get("title"),
-                "artist": ", ".join([a["name"] for a in item.get("artists", [])]),
-                "url": f"https://music.youtube.com/watch?v={item.get('videoId')}"
-            })
-        except Exception:
-            continue
-
-    if not recommendations:
-        recommendations = [{"title": "No results found", "artist": "N/A", "url": ""}]
+    recommendations = search_results[:5] if search_results else [
+        {"title": "No results found", "artist": "N/A", "url": ""}
+    ]
 
     # ✅ 최종 응답
     return {
