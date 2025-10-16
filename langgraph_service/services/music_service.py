@@ -138,7 +138,7 @@ async def recommend_music_simple(
 
     # ✅ 최종 응답
     return {
-        "mood_keywords": mood_keywords,
+        "keyword": mood_keywords,
         "recommendations": recommendations,
         "used_artists": artist_preferences
     }

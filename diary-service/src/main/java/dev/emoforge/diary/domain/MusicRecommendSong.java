@@ -30,6 +30,9 @@ public class MusicRecommendSong {
     @Column(name = "youtube_url", length = 500)
     private String youtubeUrl;
 
+    @Column(name = "thumbnail_url", length = 500)
+    private String thumbnailUrl;
+
     @Column(nullable = false)
     private boolean liked = false;
 }
