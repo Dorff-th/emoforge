@@ -14,16 +14,19 @@ import dev.emoforge.diary.repository.MemberArtistPreferenceRepository;
 import dev.emoforge.diary.repository.MusicRecommendHistoryRepository;
 import dev.emoforge.diary.repository.MusicRecommendSongRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MusicRecommendService {
 
     private final DiaryEntryRepository diaryEntryRepo;
@@ -52,6 +55,24 @@ public class MusicRecommendService {
 
         LangGraphResponse res = langGraphClient.requestMusicRecommendations(req); // 타임아웃/예외 처리 내장
 
+        // ✅ 추천 결과 DTO로 변환
+        RecommendResultDTO dto = RecommendResultDTO.from(res);
+
+        // ✅ 추천 결과가 없거나 "No results found"일 경우 DB 저장 생략
+        if (dto.getSongs() == null
+                || dto.getSongs().isEmpty()
+                || (dto.getSongs().size() == 1
+                && "No results found".equalsIgnoreCase(dto.getSongs().get(0).getTitle()))) {
+
+            log.warn("추천 음악이 없어 DB 저장을 생략합니다. diaryEntryId={}", diaryEntryId);
+
+            // ✅ keyword는 유지, songs만 비운 상태로 반환
+            return RecommendResultDTO.builder()
+                    .keyword(dto.getKeyword())
+                    .songs(Collections.emptyList())
+                    .build();
+        }
+
         // 3) DB 저장 (history + songs)
         MusicRecommendHistory history = historyRepo.save(
                 MusicRecommendHistory.builder()
@@ -64,14 +85,6 @@ public class MusicRecommendService {
                         .build()
         );
 
-        /*res.getRecommendations().forEach(song ->
-                songRepo.save(MusicRecommendSong.builder()
-                        .history(history)
-                        .artistName(song.getArtist())
-                        .songTitle(song.getTitle())
-                        .youtubeUrl(song.getUrl())
-                        .build())
-        );*/
         List<MusicRecommendSong> songs = res.getRecommendations().stream()
                 .map(song -> songRepo.save(MusicRecommendSong.builder()
                         .history(history)

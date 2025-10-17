@@ -5,6 +5,10 @@ import { X } from 'lucide-react';
 import { DiaryEntry} from '@/features/calendar/api/calendarApi';
 import { generateGptSummary } from '@/features/gpt/api/gptSummaryApi'; // ✅ 추가
 import { getToastHelper } from '@/features/toast/utils/toastHelper';
+// ✅ 음악 추천 관련 import 추가
+import { MusicRecommendModal } from '@/features/music/components/MusicRecommendModal';
+import { getMusicRecommendations, requestMusicRecommendations } from '@/features/music/api/musicApi';
+
 
 
 interface DiaryListForDateModalProps {
@@ -52,6 +56,11 @@ const DiaryListForDateModal = ({ date, onClose, diaryEntries, summary, onSummary
       return [];
     }
   });
+
+  // ✅ 추가
+  const [openMusicModal, setOpenMusicModal] = useState(false);
+  const [selectedDiaryId, setSelectedDiaryId] = useState<string | null>(null);
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -103,6 +112,19 @@ const DiaryListForDateModal = ({ date, onClose, diaryEntries, summary, onSummary
                 <div>🤖 GPT 피드백: {entry.feedback}</div>
               </div>
             )}
+            {/* ✅ 음악 추천 버튼 추가 */}
+            <div className="mt-3">
+              <button
+                onClick={() => {
+                  setSelectedDiaryId(entry.id);
+                  setOpenMusicModal(true);
+                }}
+                className="px-3 py-1 bg-pink-500 text-white text-xs rounded hover:bg-pink-600"
+              >
+            🎵 음악 추천
+            </button>
+          </div>
+
           </div>
         ))}
 
@@ -110,6 +132,17 @@ const DiaryListForDateModal = ({ date, onClose, diaryEntries, summary, onSummary
           <p className="text-center text-gray-500">해당 날짜에 작성된 회고가 없습니다.</p>
         )}
       </div>
+      {/* ✅ 음악 추천 모달 */}
+      {openMusicModal && selectedDiaryId && (
+        <MusicRecommendModal
+          diaryEntryId={selectedDiaryId}
+          onClose={() => {
+          setOpenMusicModal(false);
+          setSelectedDiaryId(null);
+        }}
+      />
+    )}
+
     </div>
   );
 };

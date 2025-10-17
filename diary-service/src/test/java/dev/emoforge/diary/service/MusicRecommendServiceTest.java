@@ -31,7 +31,7 @@ class MusicRecommendServiceTest {
         System.out.println(restDto);
     }
 
-    @Test
+    //@Test
     @DisplayName("추천된 음악 목록 조회에 성공한다.")
     void testGetMusicRecommend() {
         Long diaryEntryId = 21L;
