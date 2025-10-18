@@ -44,6 +44,10 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/api/auth/members/{uuid}/profile").permitAll()
+                        // ✅ 관리자 로그인 페이지 및 인증 API는 공개 허용
+                        .requestMatchers("/api/auth/admin/login").permitAll()
+                        // ✅ 관리자 전용 API는 ADMIN 권한만 접근 가능
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").authenticated()
                         .anyRequest().authenticated()
                 )

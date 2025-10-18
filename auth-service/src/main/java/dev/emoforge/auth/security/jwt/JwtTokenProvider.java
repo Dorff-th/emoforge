@@ -31,6 +31,9 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
+    @Value("${jwt.admin-token-expiration}")
+    private long adminTokenExpiration;
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
@@ -153,6 +156,21 @@ public class JwtTokenProvider {
                 new UsernamePasswordAuthenticationToken(principal, token, authorities);
 
         return authentication;
+    }
+
+    /**
+     * 관리자 전용 JWT 발급
+     */
+    public String generateAdminToken(String uuid, String username) {
+        return Jwts.builder()
+                .claim("uuid", uuid)
+                .claim("username", username)
+                .claim("role", "ADMIN")
+                .claim("type", "ADMIN_LOGIN") // 선택: 토큰 구분용
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + adminTokenExpiration))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
 }

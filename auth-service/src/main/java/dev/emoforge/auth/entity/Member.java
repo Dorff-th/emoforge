@@ -43,6 +43,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MemberStatus status;
+
+    @Column(nullable = false)
+    private Integer deleted;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

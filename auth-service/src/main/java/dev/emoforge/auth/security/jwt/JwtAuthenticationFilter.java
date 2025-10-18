@@ -54,6 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if ("access_token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
+                // ✅ 추가: 관리자 전용 쿠키(admin_token)도 허용
+                if ("admin_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
             }
         }
 
