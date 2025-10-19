@@ -37,7 +37,7 @@ public class MemberAdminController {
      */
     @PatchMapping("/{uuid}/status")
     public ResponseEntity<Void> updateStatus(
-            @PathVariable String uuid,
+            @PathVariable("uuid") String uuid,
             @RequestParam MemberStatus status
     ) {
         memberAdminService.updateStatus(uuid, status);
@@ -51,7 +51,7 @@ public class MemberAdminController {
      */
     @PatchMapping("/{uuid}/deleted")
     public ResponseEntity<Void> updateDeleted(
-            @PathVariable String uuid,
+            @PathVariable("uuid") String uuid,
             @RequestParam boolean deleted
     ) {
         memberAdminService.updateDeleted(uuid, deleted);

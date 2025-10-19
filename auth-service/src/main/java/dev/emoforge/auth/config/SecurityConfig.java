@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Arrays;
 
 
+import dev.emoforge.auth.security.jwt.JwtAuthenticationFilter;
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import dev.emoforge.auth.security.oauth.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import dev.emoforge.auth.service.CustomOAuth2UserService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -43,14 +45,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
-                        .requestMatchers("/api/auth/members/{uuid}/profile").permitAll()
+                        .requestMatchers("/api/auth/members/{uuid}/profile").authenticated()
                         // ✅ 관리자 로그인 페이지 및 인증 API는 공개 허용
                         .requestMatchers("/api/auth/admin/login").permitAll()
                         // ✅ 관리자 전용 API는 ADMIN 권한만 접근 가능
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/**").authenticated()
                         .anyRequest().authenticated()
                 )
+                // ✅ 필터 등록
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo ->
                                 userInfo.userService(customOAuth2UserService)
@@ -121,7 +126,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(Arrays.asList(
                 "http://app1.127.0.0.1.nip.io:5173",
                 "http://app2.127.0.0.1.nip.io:5174",
-                "http://app3.127.0.0.1.nip.io:5175"
+                "http://app3.127.0.0.1.nip.io:5175",
+                "http://app4.127.0.0.1.nip.io:5176"
         ));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));

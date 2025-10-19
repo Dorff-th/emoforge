@@ -26,6 +26,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // ✅ ① 로그인 요청은 필터 건너뛰기
+        if (path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/auth/admin/login") ||
+                path.startsWith("/api/auth/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+
         String token = resolveToken(request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {

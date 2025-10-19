@@ -163,8 +163,9 @@ public class JwtTokenProvider {
      */
     public String generateAdminToken(String uuid, String username) {
         return Jwts.builder()
+                .setSubject(username)
                 .claim("uuid", uuid)
-                .claim("username", username)
+                //.claim("username", username)
                 .claim("role", "ADMIN")
                 .claim("type", "ADMIN_LOGIN") // 선택: 토큰 구분용
                 .setIssuedAt(new Date())
