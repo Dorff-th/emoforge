@@ -5,6 +5,8 @@ import java.time.Duration;
 import java.util.Arrays;
 
 
+import dev.emoforge.auth.entity.Member;
+import dev.emoforge.auth.enums.MemberStatus;
 import dev.emoforge.auth.security.jwt.JwtAuthenticationFilter;
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import dev.emoforge.auth.security.oauth.CustomOAuth2User;
@@ -46,7 +48,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/admin/login").permitAll()
+                        .requestMatchers("/api/auth/admin/login", "/api/auth/admin/logout").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
                 // ✅ 관리자 전용 토큰 필터
@@ -90,6 +92,18 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
 
+                            Member member = principal.getMember();
+                            // ✅ 로그인 차단 조건
+                            if (member.getStatus() == MemberStatus.INACTIVE) {
+                                response.sendRedirect("http://app1.127.0.0.1.nip.io:5173/login?error=inactive");
+                                return;
+                            }
+
+                            if (member.isDeleted()) {
+                                response.sendRedirect("http://app1.127.0.0.1.nip.io:5173/login?error=deleted");
+                                return;
+                            }
+
                             // AccessToken 발급
                             String accessToken = jwtTokenProvider.generateAccessToken(
                                     principal.getUsername(),
@@ -130,7 +144,6 @@ public class SecurityConfig {
                             response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
                             try {
-                                System.out.println("\n\n\n========SecurityConfig  try~");
                                 response.sendRedirect("http://app1.127.0.0.1.nip.io:5173/profile");
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
@@ -157,7 +170,7 @@ public class SecurityConfig {
                 "http://app3.127.0.0.1.nip.io:5175",
                 "http://app4.127.0.0.1.nip.io:5176"
         ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -12,10 +12,10 @@ import java.util.List;
 
 /**
  * 관리자 전용 회원관리 API
- * /api/admin/members/**
+ * /api/auth/admin/members/**
  */
 @RestController
-@RequestMapping("/api/admin/members")
+@RequestMapping("/api/auth/admin/members")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class MemberAdminController {
@@ -38,9 +38,9 @@ public class MemberAdminController {
     @PatchMapping("/{uuid}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable("uuid") String uuid,
-            @RequestParam MemberStatus status
+            @RequestParam("status") String status
     ) {
-        memberAdminService.updateStatus(uuid, status);
+        memberAdminService.updateStatus(uuid, MemberStatus.valueOf(status.toUpperCase()));
         return ResponseEntity.noContent().build();
     }
 
@@ -50,11 +50,14 @@ public class MemberAdminController {
      * @param deleted true or false
      */
     @PatchMapping("/{uuid}/deleted")
-    public ResponseEntity<Void> updateDeleted(
+    public ResponseEntity<Member> updateDeleted(
             @PathVariable("uuid") String uuid,
-            @RequestParam boolean deleted
+            @RequestParam("deleted") boolean deleted
     ) {
-        memberAdminService.updateDeleted(uuid, deleted);
-        return ResponseEntity.noContent().build();
+        Member updated = memberAdminService.updateDeleted(uuid, deleted);
+        return ResponseEntity.ok(updated); // ✅ 변경된 회원 반환
     }
+
+
+
 }

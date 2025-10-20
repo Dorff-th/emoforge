@@ -45,9 +45,10 @@ public class AdminAuthController {
 
         // ✅ 3. 쿠키 설정
         ResponseCookie cookie = ResponseCookie.from("admin_token", token)
-                .httpOnly(true)
+                .httpOnly(false)
                 .secure(false)           // 배포 시 true
-                .sameSite("Strict")
+                //.sameSite("Strict")
+                .domain(".127.0.0.1.nip.io") // ✅ 모든 서브도메인 공유
                 .path("/")
                 .maxAge(30 * 60)
                 .build();

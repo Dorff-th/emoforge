@@ -4,6 +4,7 @@ import dev.emoforge.auth.dto.LoginRequest;
 import dev.emoforge.auth.dto.LoginResponse;
 import dev.emoforge.auth.dto.SignUpRequest;
 import dev.emoforge.auth.entity.Member;
+import dev.emoforge.auth.enums.MemberStatus;
 import dev.emoforge.auth.repository.MemberRepository;
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,5 @@
 // src/pages/LoginPage.tsx
+import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
 import { addToast } from "@/store/slices/toastSlice";
@@ -10,6 +11,16 @@ export default function LoginPage() {
   const handleKakaoLogin = () => {
     window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
   };
+
+   const [params] = useSearchParams();
+   useEffect(() => {
+    const error = params.get("error");
+    if (error === "inactive") {
+      addToast({type:"error", text: "비활성화된 계정입니다. 관리자에게 문의하세요."});
+    } else if (error === "deleted") {
+      addToast({type:"error", text: "탈퇴된 계정입니다. 로그인할 수 없습니다."});
+    }
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

@@ -46,7 +46,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 "id",                     // 카카오의 nameAttributeKey
                 member.getUsername(),     // username
                 member.getUuid(),         // String 타입 그대로
-                member.getRole()
+                member.getRole(),
+                member
         );
     }
 }

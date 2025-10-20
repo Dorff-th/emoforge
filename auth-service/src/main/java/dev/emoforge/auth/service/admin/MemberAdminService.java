@@ -36,10 +36,16 @@ public class MemberAdminService {
     /**
      * 탈퇴 여부 변경 (deleted = true/false)
      */
-    public void updateDeleted(String uuid, boolean deleted) {
-        int updated = memberRepository.updateDeletedByUuid(uuid, deleted);
-        if (updated == 0) {
-            throw new IllegalArgumentException("해당 회원을 찾을 수 없습니다: " + uuid);
-        }
+    @Transactional
+    public Member updateDeleted(String uuid, boolean deleted) {
+        Member member = memberRepository.findByUuid(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다: " + uuid));
+
+        member.setDeleted(deleted);
+        // ✅ 즉시 반영 (JPA 자동 dirty checking)
+        memberRepository.save(member);
+
+        return member;
     }
+
 }
