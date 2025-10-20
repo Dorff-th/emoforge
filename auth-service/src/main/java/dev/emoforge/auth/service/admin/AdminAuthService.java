@@ -37,8 +37,6 @@ public class AdminAuthService {
         }
 
         // 4. JWT 생성 (관리자 전용 토큰)
-        System.out.println("\n\n\n=====admin's member.getUuid() : " + member.getUuid());
-        System.out.println("admin's member.getUsername() : " + member.getUsername());
         return jwtTokenProvider.generateAdminToken(member.getUuid(), member.getUsername());
     }
 }

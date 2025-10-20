@@ -11,6 +11,7 @@ import dev.emoforge.auth.security.oauth.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,8 +37,31 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // ✅ (변경) admin / user 전용 체인 분리
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1) // 우선순위 높게
+    public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/api/auth/admin/**") // 관리자 API만 적용
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/admin/login").permitAll()
+                        .anyRequest().hasRole("ADMIN")
+                )
+                // ✅ 관리자 전용 토큰 필터
+                .addFilterBefore(new JwtAuthenticationFilter(
+                        token -> jwtTokenProvider.validateToken(token, true),
+                        token -> jwtTokenProvider.getAuthentication(token)
+                ), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .csrf(csrf -> csrf.disable())
@@ -54,8 +78,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // ✅ 필터 등록
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class)
+                // ✅ 사용자 전용 토큰 필터
+                .addFilterBefore(new JwtAuthenticationFilter(
+                        token -> jwtTokenProvider.validateToken(token, false),
+                        token -> jwtTokenProvider.getAuthentication(token)
+                ), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo ->
                                 userInfo.userService(customOAuth2UserService)
@@ -103,6 +130,7 @@ public class SecurityConfig {
                             response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
 
                             try {
+                                System.out.println("\n\n\n========SecurityConfig  try~");
                                 response.sendRedirect("http://app1.127.0.0.1.nip.io:5173/profile");
                             } catch (IOException e) {
                                 throw new RuntimeException(e);

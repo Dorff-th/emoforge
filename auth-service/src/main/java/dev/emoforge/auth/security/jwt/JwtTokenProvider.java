@@ -3,6 +3,7 @@ package dev.emoforge.auth.security.jwt;
 import dev.emoforge.auth.security.CustomUserPrincipal;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,8 +23,30 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+    // ✅ (변경) 사용자 / 관리자 secret 분리
+    @Value("${jwt.secret.user}")
+    private String userSecret;
+
+    @Value("${jwt.secret.admin}")
+    private String adminSecret;
+
+  /*  @PostConstruct
+    public void debugSecrets() {
+        log.info("🔐 userSecret: {}", userSecret);
+        log.info("🔐 adminSecret: {}", adminSecret);
+    }
+    @PostConstruct
+    public void userSecret() {
+        log.info("🔍 userSecret bytes: {}", userSecret.getBytes(StandardCharsets.UTF_8).length);
+        log.info("🔍 adminSecret bytes: {}", adminSecret.getBytes(StandardCharsets.UTF_8).length);
+    }
+    @PostConstruct
+    public void debugSecretExact() {
+        log.info("🧩 adminSecret visible='{}'", adminSecret);
+        log.info("🧩 adminSecret length={}", adminSecret.length());
+        log.info("🧩 adminSecret bytes={}", adminSecret.getBytes(StandardCharsets.UTF_8).length);
+    }*/
+
 
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpiration;
@@ -34,12 +57,21 @@ public class JwtTokenProvider {
     @Value("${jwt.admin-token-expiration}")
     private long adminTokenExpiration;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    // ✅ (변경) getSigningKey() → user/admin 모두 대응 가능하도록 오버로드
+    private SecretKey getSigningKey(String secret) {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private SecretKey getUserKey() {
+        return getSigningKey(userSecret);
+    }
+
+    private SecretKey getAdminKey() {
+        return getSigningKey(adminSecret);
     }
 
     /**
-     * Access Token 생성
+     * Access Token 생성 (User)
      */
     public String generateAccessToken(String username, String role, String uuid) {
         return Jwts.builder()
@@ -49,12 +81,13 @@ public class JwtTokenProvider {
                 .claim("type", "access")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                // ✅ (변경) userSecret으로 서명
+                .signWith(getUserKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     /**
-     * Refresh Token 생성
+     * Refresh Token 생성 (User)
      */
     public String generateRefreshToken(String username, String uuid) {
         return Jwts.builder()
@@ -63,17 +96,40 @@ public class JwtTokenProvider {
                 .claim("type", "refresh")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                // ✅ (변경) userSecret으로 서명
+                .signWith(getUserKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * 관리자 전용 JWT 발급
+     */
+    public String generateAdminToken(String uuid, String username) {
+
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("uuid", uuid)
+                //.claim("username", username)
+                .claim("role", "ADMIN")
+                .claim("type", "ADMIN_LOGIN") // 선택: 토큰 구분용
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + adminTokenExpiration))
+                // ✅ (변경) adminSecret으로 서명
+                .signWith(getAdminKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     /**
      * 토큰 유효성 검증
      */
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, boolean isAdmin) {
+
         try {
+            String which = isAdmin ? "ADMIN" : "USER";
+            log.info("🔑 validateToken(): using {} secret", which);
+            // ✅ (변경) isAdmin 여부에 따라 다른 secret으로 검증
             Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
+                    .setSigningKey(isAdmin ? getAdminKey() : getUserKey())
                     .build()
                     .parseClaimsJws(token);
             return true;
@@ -89,12 +145,18 @@ public class JwtTokenProvider {
      * Claims 추출
      */
     public Claims getClaims(String token) {
+        // 우선 Base64로 payload만 잠깐 파싱 (검증은 하지 않음)
+        String[] parts = token.split("\\.");
+        String payloadJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+        boolean isAdmin = payloadJson.contains("\"role\":\"ADMIN\"");
+
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(isAdmin ? getAdminKey() : getUserKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 
     /**
      * username 추출
@@ -128,19 +190,6 @@ public class JwtTokenProvider {
         }
     }
 
-    /**
-     * Authentication 생성 (Spring Security 연동)
-     */
-    /*public Authentication getAuthentication(String token) {
-        String username = getUsernameFromToken(token);
-        String role = getRoleFromToken(token);
-
-        return new UsernamePasswordAuthenticationToken(
-                username,
-                null,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
-        );
-    }*/
     public Authentication getAuthentication(String token) {
 
         String username = getUsernameFromToken(token);
@@ -158,20 +207,6 @@ public class JwtTokenProvider {
         return authentication;
     }
 
-    /**
-     * 관리자 전용 JWT 발급
-     */
-    public String generateAdminToken(String uuid, String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("uuid", uuid)
-                //.claim("username", username)
-                .claim("role", "ADMIN")
-                .claim("type", "ADMIN_LOGIN") // 선택: 토큰 구분용
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + adminTokenExpiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+
 
 }

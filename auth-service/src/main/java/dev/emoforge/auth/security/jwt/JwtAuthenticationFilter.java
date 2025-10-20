@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.function.Function;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -14,12 +16,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@Component
-@RequiredArgsConstructor
+
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    // ✅ (변경) 기존: JwtTokenProvider 직접 의존 → 함수형으로 주입받도록 수정
+    //    SecurityConfig에서 user/admin 여부를 람다로 넘길 수 있게 함.
+    private final Function<String, Boolean> validateFunction;           // 토큰 검증 함수
+    private final Function<String, Authentication> authenticationFunction; // 인증 생성 함수
+
+    // ✅ (추가) 생성자 직접 정의 (제네릭 타입 명시)
+    public JwtAuthenticationFilter(Function<String, Boolean> validateFunction,
+                                   Function<String, Authentication> authenticationFunction) {
+        this.validateFunction = validateFunction;
+        this.authenticationFunction = authenticationFunction;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -28,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // ✅ ① 로그인 요청은 필터 건너뛰기
+        // ✅ (유지) 로그인/리프레시 경로는 필터 제외
         if (path.startsWith("/api/auth/login") ||
                 path.startsWith("/api/auth/admin/login") ||
                 path.startsWith("/api/auth/refresh")) {
@@ -36,16 +47,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-
         String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
+        // ✅ (변경) JwtTokenProvider 직접 호출 → 주입받은 함수 사용
+        if (token != null && validateFunction.apply(token)) {
             try {
-                Authentication auth = jwtTokenProvider.getAuthentication(token);
+                Authentication auth = authenticationFunction.apply(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception e) {
-                e.printStackTrace(); // 콘솔에 전체 stack trace 출력
-                throw e;             // 다시 던져서 Spring Security 흐름 유지
+                log.error("JWT 인증 중 오류 발생", e);
+                throw e;
             }
         }
 
@@ -53,19 +64,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        // 1. Authorization 헤더
+        // ✅ (유지) Authorization 헤더 우선
         String bearer = request.getHeader("Authorization");
         if (bearer != null && bearer.startsWith("Bearer ")) {
             return bearer.substring(7);
         }
 
-        // 2. 쿠키
+        // ✅ (유지) 쿠키에서 access_token / admin_token 둘 다 허용
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("access_token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
-                // ✅ 추가: 관리자 전용 쿠키(admin_token)도 허용
                 if ("admin_token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
@@ -75,4 +85,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
+
 

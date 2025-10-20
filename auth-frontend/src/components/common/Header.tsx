@@ -1,6 +1,6 @@
 // src/components/common/Header.tsx
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
 import { logoutThunk } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
@@ -9,7 +9,7 @@ import Avatar from '@/components/common/Avatar';
 
 function Header() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
   

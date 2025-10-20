@@ -74,8 +74,8 @@ public class AdminAuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getAdminInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> getAdminInfo(Authentication authentication) {
+        //Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("message", "인증되지 않았습니다."));

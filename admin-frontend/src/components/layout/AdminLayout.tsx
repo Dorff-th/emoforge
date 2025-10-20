@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '@store/store';
 import { addToast } from '@store/slices/toastSlice';
 import { useEffect, useState } from 'react';
-import axioxAuth from '@/api/axiosAuth';
+import axioxAdmin from '@/api/axiosAdmin';
 //import type { MenuTree } from '@/types/MenuTree';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axiosAuth from "@/api/axiosAuth";
+import axiosAuth from "@/api/axiosAdmin";
 import ReCAPTCHA from "react-google-recaptcha";
 import { addToast } from '@store/slices/toastSlice';
 import { useNavigate } from "react-router-dom";

@@ -70,15 +70,17 @@ public class AuthController {
             for (Cookie cookie : request.getCookies()) {
                 if ("refresh_token".equals(cookie.getName())) {
                     refreshToken = cookie.getValue();
+                    break;
                 }
             }
         }
 
-        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+        // ✅ (변경) validateToken(refreshToken, false) → userSecret으로 검증
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken, false)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
 
-        // ✅ refresh_token 안에 담긴 UUID 꺼냄
+        // ✅ (변경) getClaims(refreshToken, false) → userSecret 기반 claims 파싱
         String memberUuid = jwtTokenProvider.getClaims(refreshToken).get("uuid", String.class);
         Member member = memberRepository.findByUuid(memberUuid)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
@@ -91,12 +93,12 @@ public class AuthController {
                 member.getUsername(), member.getUuid()
         );
 
-        // ✅ 쿠키 다시 세팅
+        // ✅ (변경) domain을 auth 서브도메인으로 제한
         ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
                 .httpOnly(true)
                 .secure(false) // 운영은 true
                 //.sameSite("None")
-                .domain(".127.0.0.1.nip.io")
+                .domain("auth.127.0.0.1.nip.io") // (변경)
                 .path("/")
                 .maxAge(Duration.ofHours(1))
                 .build();
@@ -105,7 +107,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(false)
                 //.sameSite("None")
-                .domain(".127.0.0.1.nip.io")
+                .domain("auth.127.0.0.1.nip.io") // (변경)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .build();
@@ -115,6 +117,7 @@ public class AuthController {
 
         return ResponseEntity.ok("Token refreshed");
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
