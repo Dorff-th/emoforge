@@ -17,9 +17,8 @@ public record PostDetailResponse(
         LocalDateTime updatedAt,
         Long categoryId,
         String categoryName,
-
-
         String nickname,
+        String profileImageUrl,
         List<AttachmentResponse> editorImages,
         List<AttachmentResponse> attachments
 

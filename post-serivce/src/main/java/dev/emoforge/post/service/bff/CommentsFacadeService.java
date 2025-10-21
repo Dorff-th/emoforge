@@ -2,13 +2,10 @@ package dev.emoforge.post.service.bff;
 
 import dev.emoforge.post.domain.Comment;
 import dev.emoforge.post.dto.bff.CommentDetailResponse;
-import dev.emoforge.post.dto.external.AttachmentResponse;
 import dev.emoforge.post.repository.CommentRepository;
-import dev.emoforge.post.service.external.AttachClient;
 import dev.emoforge.post.service.external.AuthClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,33 +19,33 @@ import java.util.Map;
 public class CommentsFacadeService {
 
     private final CommentRepository commentRepository;
-    private final AuthClient authClient;
-    private final AttachClient attachClient;
+    private final AuthClient authClient; // ✅ 이제 Auth만 사용 (Attach 호출 제거)
 
+    /**
+     * 특정 게시글의 댓글 목록 조회
+     * - Auth-Service의 공개용 프로필 API(/public/members/{uuid}/profile)를 호출
+     * - 비로그인 상태에서도 닉네임 + 프로필 이미지 표시 가능
+     */
     @Transactional(readOnly = true)
     public List<CommentDetailResponse> getCommentsByPost(Long postId) {
         List<Comment> comments = commentRepository.findAllByPostId(postId);
 
-        Map<String, String> nicknameCache = new HashMap<>();
-        Map<String, String> profileImageCache = new HashMap<>();
+        Map<String, AuthClient.PublicProfileResponse> profileCache = new HashMap<>();
 
         return comments.stream()
             .map(comment -> {
                 String memberUuid = comment.getMemberUuid();
 
-                // 닉네임 캐싱
-                String nickname = nicknameCache.computeIfAbsent(
-                    memberUuid,
-                    uuid -> authClient.getMemberProfile(uuid).nickname()
-                );
-
-                // 프로필 이미지 캐싱
-                String profileImageUrl = profileImageCache.computeIfAbsent(
+                // ✅ 닉네임 + 프로필 이미지 한 번에 조회 (Auth-Service)
+                AuthClient.PublicProfileResponse profile = profileCache.computeIfAbsent(
                     memberUuid,
                     uuid -> {
-                        ResponseEntity<AttachmentResponse> response = attachClient.findLatestProfileImage(uuid);
-                        AttachmentResponse image = response.getBody();
-                        return image != null ? image.publicUrl() : null;
+                        try {
+                            return authClient.getPublicMemberProfile(uuid);
+                        } catch (Exception e) {
+                            log.warn("Failed to load public profile for uuid={}", uuid, e);
+                            return new AuthClient.PublicProfileResponse("익명", null);
+                        }
                     }
                 );
 
@@ -58,11 +55,10 @@ public class CommentsFacadeService {
                     comment.getMemberUuid(),
                     comment.getContent(),
                     comment.getCreatedAt(),
-                    nickname,
-                    profileImageUrl
+                    profile.nickname(),
+                    profile.profileImageUrl() // ✅ 닉네임 + 이미지 함께 전달
                 );
             })
             .toList();
     }
-
 }

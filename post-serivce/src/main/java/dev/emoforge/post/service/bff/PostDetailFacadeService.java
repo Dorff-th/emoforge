@@ -2,7 +2,6 @@ package dev.emoforge.post.service.bff;
 
 import dev.emoforge.post.dto.bff.PostDetailResponse;
 import dev.emoforge.post.dto.external.AttachmentResponse;
-import dev.emoforge.post.dto.external.MemberProfileResponse;
 import dev.emoforge.post.dto.internal.PostDetailDTO;
 import dev.emoforge.post.repository.CommentRepository;
 import dev.emoforge.post.repository.PostRepository;
@@ -22,41 +21,51 @@ import java.util.List;
 public class PostDetailFacadeService {
 
     private final PostRepository postRepository;
-    private final AuthClient authClient;
+    private final AuthClient authClient;   // ✅ 공개 API로 전환
     private final AttachClient attachClient;
     private final CommentRepository commentRepository;
 
+    /**
+     * 게시글 상세 조회
+     * - Auth-Service: 공개용 프로필 API 사용 (닉네임 + 프로필 이미지)
+     * - Attach-Service: 첨부파일 및 에디터 이미지 조회
+     */
     @Transactional(readOnly = true)
     public PostDetailResponse getPostDetail(Long postId) throws NotFoundException {
-        // 1. 게시글 조회
-        PostDetailDTO postDetailDTO = postRepository.findPostDetail(postId)
+
+        // 1️⃣ 게시글 조회
+        var postDetailDTO = postRepository.findPostDetail(postId)
             .orElseThrow(() -> new NotFoundException("게시글 없음"));
 
-        // 2. 작성자 정보
-        MemberProfileResponse profile = authClient.getMemberProfile(postDetailDTO.getMemberUuid());
+        // 2️⃣ 작성자 공개 프로필 조회 (비로그인 접근 가능)
+        AuthClient.PublicProfileResponse profile;
+        try {
+            profile = authClient.getPublicMemberProfile(postDetailDTO.getMemberUuid());
+        } catch (Exception e) {
+            log.warn("Failed to load public profile for uuid={}", postDetailDTO.getMemberUuid(), e);
+            profile = new AuthClient.PublicProfileResponse("익명", null);
+        }
 
-
-        // 3. 첨부파일 조회 (Attachment-Service)
+        // 3️⃣ 첨부파일 조회 (Attachment-Service)
         List<AttachmentResponse> editorImages =
             attachClient.findByPostId(postId, "EDITOR_IMAGE");
-
         List<AttachmentResponse> attachments =
             attachClient.findByPostId(postId, "ATTACHMENT");
 
-        // 4. 조립 후 반환
+        // 4️⃣ DTO 조립 후 반환
         return new PostDetailResponse(
             postDetailDTO.getId(),
             postDetailDTO.getTitle(),
             postDetailDTO.getContent(),
-            profile.uuid(),
+            postDetailDTO.getMemberUuid(),
             postDetailDTO.getCreatedAt(),
             postDetailDTO.getUpdatedAt(),
             postDetailDTO.getCategoryId(),
             postDetailDTO.getCategoryName(),
-            profile.nickname(),
+            profile.nickname(),        // ✅ 공개용 닉네임
+            profile.profileImageUrl(), // ✅ 프로필 이미지 URL 추가
             editorImages,
             attachments
         );
     }
 }
-

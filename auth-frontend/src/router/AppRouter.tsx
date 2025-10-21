@@ -15,7 +15,6 @@ export default function AppRouter() {
   const isAuthenticated = status === "authenticated";
 
   // Fetch profile only once on first load (avoid loop)
-  console.log("Auth status:", status);
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchProfile());

@@ -14,7 +14,12 @@ import java.util.List;
 )
 public interface AuthClient {
 
-    @GetMapping("/api/auth/members/{uuid}/profile")
-    MemberProfileResponse getMemberProfile(@PathVariable("uuid") String uuid);
+    /*@GetMapping("/api/auth/members/{uuid}/profile")
+    MemberProfileResponse getMemberProfile(@PathVariable("uuid") String uuid);*/
+
+    @GetMapping("/api/auth/public/members/{uuid}/profile")
+    PublicProfileResponse getPublicMemberProfile(@PathVariable("uuid") String uuid);
+
+    record PublicProfileResponse(String nickname, String profileImageUrl) {}
 
 }

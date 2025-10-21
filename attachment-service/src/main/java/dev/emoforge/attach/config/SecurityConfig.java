@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/attach/count/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/attach/post/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/attach/profile-images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/attach/public/profile").permitAll() // 사용자 프로필 이미지만을 조회할때 모두 접근 가능하게 설정
                         .requestMatchers(HttpMethod.POST,"/api/attach/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE,"/api/attach/**").authenticated()
                         .anyRequest().authenticated()

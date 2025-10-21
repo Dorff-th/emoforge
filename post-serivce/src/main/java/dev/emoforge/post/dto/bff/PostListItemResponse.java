@@ -12,6 +12,8 @@ public record PostListItemResponse(
     LocalDateTime createdAt,
     String categoryName,
     String nickname,
+    String profileImageUrl,  // ✅ 추가
     Long commentCount,
     int attachmentCount
+
 ) {}

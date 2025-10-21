@@ -8,16 +8,10 @@ import dev.emoforge.post.repository.PostRepository;
 import dev.emoforge.post.service.external.AttachClient;
 import dev.emoforge.post.service.external.AuthClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,19 +24,16 @@ public class PostListFacadeService {
     private final AuthClient authClient;
 
     public PageResponseDTO<PostListItemResponse> getPostList(String tagName, PageRequestDTO requestDTO) {
+
         Pageable pageable = PageRequest.of(
             requestDTO.page() - 1,
             requestDTO.size(),
             Sort.by(Sort.Direction.valueOf(requestDTO.direction().toString()), requestDTO.sort())
         );
 
-        Page<PostSimpleDTO> posts = null;
-        if(tagName == null) {
-            posts = postRepository.findAllPosts(pageable);
-        } else {
-            posts = postRepository.findAllPostsByTag(tagName, pageable);
-        }
-
+        Page<PostSimpleDTO> posts = (tagName == null)
+            ? postRepository.findAllPosts(pageable)
+            : postRepository.findAllPostsByTag(tagName, pageable);
 
         List<PostSimpleDTO> dtoList = posts.getContent();
         if (dtoList.isEmpty()) {
@@ -54,19 +45,29 @@ public class PostListFacadeService {
             ? Collections.emptyMap()
             : attachClient.countByPostIds(postIds);
 
-        Map<String, String> nicknameCache = new HashMap<>();
+        Map<String, AuthClient.PublicProfileResponse> profileCache = new HashMap<>();
+
         List<PostListItemResponse> responses = dtoList.stream()
             .map(post -> {
-                String nickname = nicknameCache.computeIfAbsent(
+                AuthClient.PublicProfileResponse profile = profileCache.computeIfAbsent(
                     post.memberUuid(),
-                    uuid -> authClient.getMemberProfile(uuid).nickname()
+                    uuid -> {
+                        try {
+                            return authClient.getPublicMemberProfile(uuid);
+                        } catch (Exception e) {
+                            // 비로그인 상태나 Auth 호출 실패 시 fallback
+                            return new AuthClient.PublicProfileResponse("익명", null);
+                        }
+                    }
                 );
+
                 return new PostListItemResponse(
                     post.id(),
                     post.title(),
                     post.createdAt(),
                     post.categoryName(),
-                    nickname,
+                    profile.nickname(),
+                    profile.profileImageUrl(),
                     post.commentCount(),
                     attachCounts.getOrDefault(post.id(), 0)
                 );

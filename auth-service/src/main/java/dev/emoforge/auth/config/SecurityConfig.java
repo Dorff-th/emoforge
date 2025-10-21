@@ -71,7 +71,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
-                        .requestMatchers("/api/auth/members/{uuid}/profile").authenticated()
+                        .requestMatchers("/api/auth/members/{uuid}/profile").authenticated()    // 민감한 개인정보가 들어간 사용자 프로필은 인증된 사용자만 조회
+                        .requestMatchers("/api/auth/public/members/{uuid}/profile").permitAll()   //  닉네임과  profile image url만 담긴 프로필 정보 조회는 모두 공개
                         // ✅ 관리자 로그인 페이지 및 인증 API는 공개 허용
                         .requestMatchers("/api/auth/admin/login").permitAll()
                         // ✅ 관리자 전용 API는 ADMIN 권한만 접근 가능

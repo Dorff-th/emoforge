@@ -72,4 +72,12 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
     //특정 Post 삭제될때 Attachment 삭제
     void deleteByPostId(Long postId);
 
+    /**
+     * 특정 사용자의 최신 프로필 이미지를 조회합니다.
+     * - memberUuid 기준
+     * - uploadType 기준 (예: PROFILE_IMAGE)
+     * - 업로드 시점(uploadedAt) 기준으로 최신 1건 반환
+     */
+    Optional<Attachment> findTopByMemberUuidAndUploadTypeOrderByUploadedAtDesc(String memberUuid, UploadType uploadType);
+
 }
