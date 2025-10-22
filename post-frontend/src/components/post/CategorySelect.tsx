@@ -16,6 +16,10 @@ export default function CategorySelect({ value, onChange }: CategorySelectProps)
       try {
         const data = await fetchCategories();
         setCategories(data);
+        // ✅ 첫 번째 카테고리를 기본 선택으로 설정
+        if (data.length > 0 && !value) {
+          onChange?.(data[0].id);
+        }
       } catch (err) {
         console.error('카테고리 불러오기 실패:', err);
       } finally {
@@ -37,8 +41,7 @@ export default function CategorySelect({ value, onChange }: CategorySelectProps)
         className="w-full border rounded-md px-3 py-2 focus:ring focus:ring-blue-200"
         value={value ?? ''}
         onChange={(e) => onChange?.(Number(e.target.value))}
-      >
-        <option value="">카테고리 선택</option>
+      > 
         {categories.map((cat) => (
           <option key={cat.id} value={cat.id}>
             {cat.name}

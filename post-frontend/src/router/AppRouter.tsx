@@ -87,7 +87,7 @@ export default function AppRouter() {
                 }
               />
 
-              <Route path="*" element={<Navigate to="/ui-test" replace />} />
+              <Route path="*" element={<Navigate to="/posts" replace />} />
             </Routes>
             </ConfirmDialogProvider>
         </BrowserRouter>
