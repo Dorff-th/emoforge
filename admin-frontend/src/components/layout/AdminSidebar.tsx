@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 export default function AdminSidebar() {
   const menuItems = [
-    { name: "대시보드", path: "/admin/dash" },
+    { name: "대시보드", path: "/admin/dashboard" },
     { name: "회원관리", path: "/admin/members" },
   ];
 

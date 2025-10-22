@@ -68,12 +68,6 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
     let content = editorInstance.getMarkdown();
     content = fixContentForSave(content);
 
-    // const basePayload = {
-    //   title: formData.title,
-    //   categoryId: formData.categoryId,
-    //   content,
-    //   tags: formData.tags.map((t) => t.name).join(','),
-    // };
     const basePayload = {
       title: formData.title,
       categoryId: formData.categoryId,

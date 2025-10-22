@@ -24,9 +24,6 @@ public class PublicAttachController {
             @RequestParam("memberUuid") String memberUuid,
             @RequestParam("uploadType") UploadType uploadType
     ) {
-        log.debug("\n\n\n=========PublicAttachController debuging");
-        log.debug("memberUuid : " + memberUuid);
-        log.debug("uploadType : " + uploadType);
 
         Attachment attach = attachmentRepository
                 .findTopByMemberUuidAndUploadTypeOrderByUploadedAtDesc(memberUuid, uploadType)
@@ -34,7 +31,7 @@ public class PublicAttachController {
 
         String url = attach != null ? attach.getPublicUrl() : null;
 
-        log.debug("url : " + url);
+        //log.debug("url : " + url);
 
         return ResponseEntity.ok(Map.of("publicUrl", url));
     }
