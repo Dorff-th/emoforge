@@ -1,11 +1,12 @@
 ﻿import axios from "axios";
 import setupInterceptors from "./setupInterceptors";
 
-const axiosAttach = axios.create({
-  baseURL: "http://post.127.0.0.1.nip.io:8083/api",
+const POST_BASE_URL = import.meta.env.VITE_API_POST_BASE_URL;
+const axiosPost = axios.create({
+  baseURL: `${POST_BASE_URL}/api`,
   withCredentials: true,
 });
 
-setupInterceptors(axiosAttach);
+setupInterceptors(axiosPost);
 
-export default axiosAttach;
+export default axiosPost;

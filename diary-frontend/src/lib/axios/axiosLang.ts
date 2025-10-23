@@ -2,8 +2,9 @@
 import axios from "axios";
 import setupInterceptors from "./setupInterceptors";
 
+const LANGGRAPH_BASE_URL = import.meta.env.VITE_API_LANGGRAPH_BASE_URL;
 const axiosLang = axios.create({
-  baseURL: "http://lang.127.0.0.1.nip.io:8000/api",
+  baseURL: `${LANGGRAPH_BASE_URL}/api`,
   withCredentials: true,
 });
 

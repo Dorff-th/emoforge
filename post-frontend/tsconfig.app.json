@@ -31,5 +31,7 @@
     "noUncheckedSideEffectImports": true,
     
   },
-  "include": ["src"]
+  "include": ["src",
+    "src/vite-env.d.ts"
+  ]
 }

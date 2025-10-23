@@ -73,7 +73,7 @@ export default function ProfilePage() {
 
   if (!user) return <p>Loading...</p>;
 
-  const ATTACH_BASE_URL = import.meta.env.VITE_ATTACH_BASE_URL;
+  const ATTACH_BASE_URL = import.meta.env.VITE_API_ATTACH_BASE_URL;
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-50">

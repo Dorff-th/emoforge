@@ -43,13 +43,13 @@ axiosInstance.interceptors.response.use(
       getLoadingControl().hideLoading();
     }
 
-    const { showError } = useToastHelper();
+    const toastHelper = useToastHelper() as any;
     
     const status = error.response?.status;
     console.log(status, error.response?.data);
      if (status === 401 || status === 403) {
       // ✅ 만료된 토큰이거나 권한 오류 → 자동 로그아웃 처리
-      showError('세션이 만료되어 로그아웃되었습니다.');
+      toastHelper.showError('세션이 만료되어 로그아웃되었습니다.');
       window.location.href = `${SERVICE_URLS.AUTH}/login`; // Redirect to Auth service login page
     }
 

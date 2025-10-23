@@ -8,7 +8,7 @@ export default function AdminHeader() {
     // ✅ admin_token 쿠키 완전 삭제
     Cookies.remove("admin_token", {
       path: "/",                    // 쿠키 생성 시와 동일한 path
-      domain: ".127.0.0.1.nip.io",  // 생성 시 domain과 반드시 일치해야 함
+      domain: import.meta.env.VITE_COOKIE_DOMAIN,  // 생성 시 domain과 반드시 일치해야 함
     });
 
     // ✅ 서버에도 로그아웃 요청 (optional)

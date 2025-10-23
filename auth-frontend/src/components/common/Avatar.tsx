@@ -8,7 +8,7 @@ interface AvatarProps {
 
 export default function Avatar({ src, alt, size = 40 }: AvatarProps) {
 
-  const ATTACH_BASE_URL = import.meta.env.VITE_ATTACH_BASE_URL;
+  const ATTACH_BASE_URL = import.meta.env.VITE_API_ATTACH_BASE_URL;
 
   const imageUrl = src
     ? `${ATTACH_BASE_URL + src}?t=${Date.now()}` // ✅ 캐싱 방지용 querystring

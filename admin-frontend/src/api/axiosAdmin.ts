@@ -1,8 +1,9 @@
 ﻿import axios from "axios";
 import setupInterceptors from "./setupInterceptors";
 
+const AUTH_BASE_URL = import.meta.env.VITE_API_AUTH_BASE_URL;
 const axiosAdmin = axios.create({
-  baseURL: "http://auth.127.0.0.1.nip.io:8081/api",
+  baseURL: `${AUTH_BASE_URL}/api`,
   withCredentials: true,
 });
 
