@@ -1,6 +1,9 @@
 package dev.emoforge.diary.global.security;
 
+import dev.emoforge.diary.config.AuthCorsProperties;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,13 +17,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 @Configuration
+@RequiredArgsConstructor
+@EnableConfigurationProperties(AuthCorsProperties.class)
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthCorsProperties corsProps;
 
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+    /*public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
-    }
+    }*/
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -50,9 +56,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true); // ✅ 쿠키 포함
-        config.setAllowedOrigins(Arrays.asList(
-                "http://app3.127.0.0.1.nip.io:5175"
-        ));
+        config.setAllowedOrigins(corsProps.allowedOrigins()); // ← 깔끔!
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
 

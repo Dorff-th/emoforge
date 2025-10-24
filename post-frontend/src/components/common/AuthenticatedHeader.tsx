@@ -7,9 +7,10 @@ import type { AppDispatch } from "@/store/store";
 import type { RootState } from '@store/store';
 import Avatar from '@/components/common/Avatar';
 
+
 function AuthenticatedHeader() {
   const dispatch = useDispatch<AppDispatch>();
-  //const navigate = useNavigate();
+  
   const user = useSelector((state: RootState) => state.auth.user);
 
   
@@ -18,8 +19,8 @@ function AuthenticatedHeader() {
     try {
       await dispatch(logoutThunk()).unwrap();
       dispatch(addToast({ type: "info", text: "로그아웃 되었습니다." }));
-      //navigate("/login");
-      window.location.href = `${SERVICE_URLS.AUTH}/login`; // Redirect to Auth service login page
+      
+      window.location.href = `${SERVICE_URLS.POST}/posts`; // 로그아웃 후 게시글 목록 페이지로 이동
     } catch {
       dispatch(addToast({ type: "error", text: "로그아웃 실패" }));
     }

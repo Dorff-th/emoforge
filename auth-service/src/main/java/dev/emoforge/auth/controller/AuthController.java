@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -35,7 +36,35 @@ public class AuthController {
     private final AuthService authService;
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    
+
+    @Value("${auth.cookie.access-domain}")
+    private String accessDomain;
+
+    @Value("${auth.cookie.refresh-domain}")
+    private String refreshDomain;
+
+    @Value("${auth.cookie.remove-domain}")
+    private String removeDomain;
+
+    @Value("${auth.cookie.secure}")
+    private boolean secure;
+
+    @Value("${auth.cookie.same-site}")
+    private String sameSite;
+
+    @Value("${auth.cookie.expiration.access-hours}")
+    private long accessHours;
+
+    @Value("${auth.cookie.expiration.refresh-days}")
+    private long refreshDays;
+
+    @Value("${auth.cookie.names.access}")
+    private String accessCookieName;
+
+    @Value("${auth.cookie.names.refresh}")
+    private String refreshCookieName;
+
+
     @PostMapping("/signup")
     public ResponseEntity<Member> signUp(@Valid @RequestBody SignUpRequest request) {
         Member member = authService.signUp(request);
@@ -94,23 +123,24 @@ public class AuthController {
         );
 
         // ✅ (변경) domain을 auth 서브도메인으로 제한
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", newAccessToken)
+        ResponseCookie accessCookie = ResponseCookie.from(accessCookieName, newAccessToken)
                 .httpOnly(true)
-                .secure(false) // 운영은 true
-                //.sameSite("None")
-                .domain("auth.127.0.0.1.nip.io") // (변경)
+                .secure(secure)
+                .sameSite(sameSite)
+                .domain(accessDomain)
                 .path("/")
-                .maxAge(Duration.ofHours(1))
+                .maxAge(Duration.ofHours(accessHours))
                 .build();
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken)
+        ResponseCookie refreshCookie = ResponseCookie.from(refreshCookieName, newRefreshToken)
                 .httpOnly(true)
-                .secure(false)
-                //.sameSite("None")
-                .domain("auth.127.0.0.1.nip.io") // (변경)
+                .secure(secure)
+                .sameSite(sameSite)
+                .domain(refreshDomain)
                 .path("/")
-                .maxAge(Duration.ofDays(7))
+                .maxAge(Duration.ofDays(refreshDays))
                 .build();
+
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -128,42 +158,42 @@ public class AuthController {
 
         // 1) 과거에 '.127.0.0.1.nip.io' 로 발급된 토큰 쿠키 제거 (옵션 동일)
         response.addHeader("Set-Cookie",
-                ResponseCookie.from("access_token", "")
-                        .domain(".127.0.0.1.nip.io") // 생성과 완전히 동일
+                ResponseCookie.from(accessCookieName, "")
+                        .domain(removeDomain)
                         .path("/")
                         .httpOnly(true)
-                        .sameSite("Lax")
-                        .secure(false)               // dev
-                        .maxAge(0)                   // 즉시 만료
+                        .sameSite(sameSite)
+                        .secure(secure)
+                        .maxAge(0)
                         .build().toString()
         );
         response.addHeader("Set-Cookie",
-                ResponseCookie.from("refresh_token", "")
-                        .domain(".127.0.0.1.nip.io")
+                ResponseCookie.from(refreshCookieName, "")
+                        .domain(removeDomain)
                         .path("/")
                         .httpOnly(true)
-                        .sameSite("Lax")
-                        .secure(false)
+                        .sameSite(sameSite)
+                        .secure(secure)
                         .maxAge(0)
                         .build().toString()
         );
 
         // 2) 혹시 모르는 변형들(호스트 전용/도메인 미지정)도 함께 정리
         response.addHeader("Set-Cookie",
-                ResponseCookie.from("access_token", "")
+                ResponseCookie.from(accessCookieName, "")
                         .path("/")
                         .httpOnly(true)
-                        .sameSite("Lax")
+                        .sameSite(sameSite)
                         .secure(false)
                         .maxAge(0)
                         .build().toString()
         );
         response.addHeader("Set-Cookie",
-                ResponseCookie.from("refresh_token", "")
+                ResponseCookie.from(refreshCookieName, "")
                         .path("/")
                         .httpOnly(true)
-                        .sameSite("Lax")
-                        .secure(false)
+                        .sameSite(sameSite)
+                        .secure(secure)
                         .maxAge(0)
                         .build().toString()
         );

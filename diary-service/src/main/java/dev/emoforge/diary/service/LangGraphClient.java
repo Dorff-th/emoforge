@@ -22,7 +22,7 @@ public class LangGraphClient {
 
     private final RestTemplate restTemplate;
 
-    @Value("${langgraph.base-url:http://lang.127.0.0.1.nip.io:8000/api}")
+    @Value("${langgraph.base-url}")
     private String baseUrl;
 
     @Value("${langgraph.api-key:local-dev-key}")
