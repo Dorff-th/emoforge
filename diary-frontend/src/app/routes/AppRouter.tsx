@@ -2,7 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import NotFoundPage from '@/features/layout/pages/NotFoundPage';
-import LoginPage from '@/features/auth/pages/LoginPage';
+//import LoginPage from '@/features/auth/pages/LoginPage';
 import UserHomePage from '@/features/user/pages/UserHomePage';
 import PrivateRoute from './PrivateRoute';
 import DiaryInputPage from '@/features/diary/pages/DiaryInputPage';
@@ -14,7 +14,7 @@ import SearchResultPage from '@/features/search/pages/SearchResultPage';
 const AppRouter = () => (
 
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      {/* <Route path="/login" element={<LoginPage />} /> */}
       {/* 루트에 접근했을 때 토큰 여부에 따라 분기 */}
       <Route
         path="/"

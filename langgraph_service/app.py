@@ -4,6 +4,9 @@ from routes.gpt_routes import router as gpt_router
 # from routes.youtube_routes import router as youtube_router
 from routes.music_router import router as music_router
 
+from fastapi.responses import JSONResponse   # ✅ 이 줄 추가
+from datetime import datetime
+
 # ✅ (추가) 환경설정 로드
 # 기존 하드코딩된 origins 대신 .env.dev 또는 .env.prod에서 로드
 from core.config import settings  # ← 새로 추가됨
@@ -61,4 +64,15 @@ if __name__ == "__main__":
         host=settings.APP_HOST,
         port=settings.APP_PORT,
         reload=(settings.APP_ENV == "dev")
+    )
+
+
+@app.get("/api/health")
+async def health():
+    return JSONResponse(
+        content={
+            "status": "OK",
+            "service": "langgraph-service",
+            "timestamp": datetime.now().isoformat()
+        }
     )

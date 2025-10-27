@@ -3,7 +3,7 @@
 import React from 'react';
 import { EmojiProvider } from '@/features/system/context/EmojiContext';
 import EmojiDisplay from '@/features/ui/components/EmojiDisplay';
-import LoginForm from '@/features/auth/components/LoginForm';
+//import LoginForm from '@/features/auth/components/LoginForm';
 import FooterMessage from '@/features/ui/components/FooterMessage';
 import ThemeToggle from '@/features/ui/components/ThemeToggle';
 
@@ -22,7 +22,7 @@ const LoginPage = () => {
 
           <EmojiDisplay />
           <h2 className="text-2xl font-semibold mt-4 mb-6">오늘 하루 어땠나요?</h2>
-          <LoginForm />
+          {/* <LoginForm /> */}
           <FooterMessage />
         </div>
       </EmojiProvider>

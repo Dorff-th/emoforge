@@ -1,16 +1,16 @@
 // src/pages/NotFoundPage.tsx
 
-import { useEffect } from 'react';
+//import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useToastHelper } from '@/features/toast/utils/toastHelper';
+//import { useToastHelper } from '@/features/toast/utils/toastHelper';
 
 const NotFoundPage = () => {
 
-    const { showCustom } = useToastHelper()
+    // const { showCustom } = useToastHelper()
 
-    useEffect(() => {
-        showCustom('존재하지 않는 페이지예요 🥲');
-    }, [])
+    // useEffect(() => {
+    //     showCustom('존재하지 않는 페이지예요 🥲');
+    // }, [])
 
     
   return (

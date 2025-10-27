@@ -11,7 +11,7 @@ interface Props {
 const FeedbackCard = ({ feedback, onFeedbackUpdated }: Props) => {
   const [loading, setLoading] = useState(false);
   const toast = useToastHelper();
-  const { showSuccess, showError } = useToastHelper();
+  //const { showSuccess, showError } = useToastHelper();
 
   // const handleGenerateFeedback = async () => {
   //   try {

@@ -20,16 +20,24 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.upload.path.editor-images.public-url}")
     private String imagePublicUrl;
 
-
-    //application.yml에 지정한 경로가 실제 URL로 노출되도록 아래 설정을 추가해야 해.
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(imagePublicUrl + "**")  // 브라우저 요청 경로
-                .addResourceLocations("file:///" + imageBaseDir);  // 실제 물리 경로 (주의: 맨 끝에 / 꼭!)
 
-        // 프로필 이미지
+        // 🧱 에디터 이미지 (예: /uploads/editor_images/**)
+        registry.addResourceHandler(imagePublicUrl + "**")
+                .addResourceLocations("file:" + ensureTrailingSlash(imageBaseDir));
+
+        // 🧱 프로필 이미지 (예: /uploads/profile_image/**)
         registry.addResourceHandler(profileImagePublicUrl + "**")
-                .addResourceLocations("file:///" + profileImageBaseDir);
+                .addResourceLocations("file:" + ensureTrailingSlash(profileImageBaseDir));
+    }
+
+    /**
+     * 경로 마지막에 '/' 없을 때 자동으로 추가해줌
+     */
+    private String ensureTrailingSlash(String path) {
+        return path.endsWith("/") ? path : path + "/";
     }
 }
+
 

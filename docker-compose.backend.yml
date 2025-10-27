@@ -1,0 +1,194 @@
+version: "3.9"
+
+services:
+  # =============================
+  # 🧠 Auth Service
+  # =============================
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      # ✅ DB 접속 정보 (로컬 MariaDB)
+      SPRING_DATASOURCE_URL: jdbc:mariadb://host.docker.internal:3306/nfe_auth_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # ✅ JWT 시크릿 키
+      JWT_SECRET_USER: ${JWT_SECRET_USER}
+      JWT_SECRET_ADMIN: ${JWT_SECRET_ADMIN}
+
+      # ✅ OAuth2 Kakao
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI}
+
+      # ✅ reCAPTCHA
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
+      RECAPTCHA_ENABLED: "false"
+
+      # ✅ attachment-service URL
+      SERVICE_ATTACH_URL: http://attachment-service:8082
+
+      # ✅ 로그 레벨
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_DEV_EMOFORGE_AUTH: DEBUG
+
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 📎 Attachment Service
+  # =============================
+  attachment-service:
+    build:
+      context: ./attachment-service
+      dockerfile: Dockerfile
+    container_name: attachment-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      # ✅ DB 접속 정보
+      SPRING_DATASOURCE_URL: jdbc:mariadb://host.docker.internal:3306/nfe_file_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # ✅ JWT Secret
+      JWT_SECRET: ${JWT_SECRET_USER}
+
+      # ✅ 파일 업로드 경로
+      FILE_UPLOAD_PATH_EDITOR_IMAGES_BASE_DIR: /uploads/editor_images/
+      FILE_UPLOAD_PATH_EDITOR_IMAGES_PUBLIC_URL: /uploads/images/
+      FILE_UPLOAD_PATH_ATTACHMENTS: /uploads/attachment/
+      FILE_UPLOAD_PATH_PROFILE_IMAGE_BASE_DIR: /uploads/profile_image/
+      FILE_UPLOAD_PATH_PROFILE_IMAGE_PUBLIC_URL: /uploads/profile_image/
+
+    volumes:
+       - C:\devtools\zmylong\MSA\upload:/uploads
+
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 📝 Post Service
+  # =============================
+  post-service:
+    build:
+      context: ./post-service
+      dockerfile: Dockerfile
+    container_name: post-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      # ✅ DB 접속 정보
+      SPRING_DATASOURCE_URL: jdbc:mariadb://host.docker.internal:3306/nfe_post_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # ✅ JWT Secret
+      JWT_SECRET: ${JWT_SECRET_USER}
+
+      # ✅ 외부 서비스 연동 (Auth / Attach)
+      SERVICE_AUTH_URL: http://auth-service:8081
+      SERVICE_ATTACH_URL: http://attachment-service:8082
+
+      # ✅ MyBatis 설정
+      MYBATIS_CONFIGURATION_MAP_UNDERSCORE_TO_CAMEL_CASE: true
+      MYBATIS_MAPPER_LOCATIONS: classpath:mapper/**/*.xml
+      MYBATIS_TYPE_ALIASES_PACKAGE: dev.emoforge.post.dto.bff,dev.emoforge.post.dto.internal
+
+    depends_on:
+      - auth-service
+      - attachment-service
+    networks:
+      - emoforge-net
+      
+  # =============================
+  # 🌿 Diary Service
+  # =============================
+  diary-service:
+    build:
+      context: ./diary-service
+      dockerfile: Dockerfile
+    container_name: diary-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      # ✅ DB 접속 정보
+      SPRING_DATASOURCE_URL: jdbc:mariadb://host.docker.internal:3306/nfe_diary_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # ✅ JWT Secret
+      JWT_SECRET: ${JWT_SECRET_USER}
+
+      # ✅ OpenAI API Key
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+      # ✅ LangGraph 연동
+      LANGGRAPH_BASE_URL: http://langgraph_service:8000/api
+      LANGGRAPH_API_KEY: ${LANGGRAPH_API_KEY}
+
+    depends_on:
+      - langgraph_service
+      - auth-service
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🤖 LangGraph (FastAPI)
+  # =============================
+  langgraph_service:
+    build:
+      context: ./langgraph_service
+      dockerfile: Dockerfile
+    container_name: langgraph_service
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: dev
+      APP_NAME: langgraph_Service (Dev)
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      BASE_URL: http://langgraph_service:8000
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: gpt-4o-mini
+
+      JWT_SECRET: ${JWT_SECRET_USER}
+      JWT_ALGORITHM: HS256
+      API_KEY: ${LANGGRAPH_API_KEY}
+
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+      YOUTUBE_BASE_URL: https://www.googleapis.com/youtube/v3
+      YOUTUBE_WATCH_URL: https://www.youtube.com/watch
+      YOUTUBE_MUSIC_URL: https://music.youtube.com
+
+      CORS_ALLOW_ORIGINS: >-
+        ["http://app1.127.0.0.1.nip.io", "http://post.127.0.0.1.nip.io",
+         "http://diary.127.0.0.1.nip.io", "http://auth.127.0.0.1.nip.io",
+         "https://*.nip.io", "http://app3.127.0.0.1.nip.io:5175"]
+
+      LOG_LEVEL: DEBUG
+      LOG_FILE: logs/langgraph_dev.log
+
+    volumes:
+      - ./langgraph_service/logs:/app/logs
+
+    networks:
+      - emoforge-net
+
+networks:
+  emoforge-net:
+    external: true

@@ -1,4 +1,5 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react';
+﻿//import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Editor } from '@toast-ui/react-editor';
@@ -55,9 +56,9 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
     }
   }, [mode, existingPostId]);
 
-  const handleAttachmentChange = useCallback((items: AttachmentItem[]) => {
-    setAttachments(items);
-  }, []);
+  // const handleAttachmentChange = useCallback((items: AttachmentItem[]) => {
+  //   setAttachments(items);
+  // }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,0 +1,84 @@
+version: "3.9"
+
+services:
+  # =============================
+  # 🧠 Auth Frontend (로그인/회원)
+  # =============================
+  auth-frontend:
+    build:
+      context: ./auth-frontend
+      dockerfile: Dockerfile
+    container_name: auth-frontend
+    ports:
+      - "5173:80"
+    environment:
+      VITE_API_AUTH_BASE_URL: http://auth-service:8081
+      VITE_API_ATTACH_BASE_URL: http://attachment-service:8082
+      VITE_APP_AUTH_URL: http://auth-frontend:5173
+      VITE_APP_POST_URL: http://post-frontend:5174
+      VITE_APP_DIARY_URL: http://diary-frontend:5175
+      #VITE_APP_ADMIN_URL: http://admin-frontend:5176
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 📝 Post Frontend (게시판)
+  # =============================
+  post-frontend:
+    build:
+      context: ./post-frontend
+      dockerfile: Dockerfile
+    container_name: post-frontend
+    ports:
+      - "5174:80"
+    environment:
+      VITE_API_POST_BASE_URL: http://post-service:8083
+      VITE_API_AUTH_BASE_URL: http://auth-service:8081
+      VITE_API_ATTACH_BASE_URL: http://attachment-service:8082
+      VITE_APP_POST_URL: http://post-frontend:5174
+      VITE_APP_AUTH_URL: http://auth-frontend:5173
+      VITE_APP_DIARY_URL: http://diary-frontend:5175
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🌿 Diary Frontend (감정일기)
+  # =============================
+  diary-frontend:
+    build:
+      context: ./diary-frontend
+      dockerfile: Dockerfile
+    container_name: diary-frontend
+    ports:
+      - "5175:80"
+    environment:
+      VITE_API_DIARY_BASE_URL: http://diary-service:8084
+      VITE_API_AUTH_BASE_URL: http://auth-service:8081
+      VITE_API_ATTACH_BASE_URL: http://attachment-service:8082
+      VITE_API_LANGGRAPH_BASE_URL: http://langgraph_service:8000
+      VITE_APP_DIARY_URL: http://diary-frontend:5175
+      VITE_APP_AUTH_URL: http://auth-frontend:5173
+      VITE_APP_POST_URL: http://post-frontend:5174
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🛠️ Admin Frontend (관리자)
+  # =============================
+  admin-frontend:
+    build:
+      context: ./admin-frontend
+      dockerfile: Dockerfile
+    container_name: admin-frontend
+    ports:
+      - "5176:80"
+    environment:
+      VITE_API_AUTH_BASE_URL: http://auth-service:8081
+      VITE_APP_ADMIN_URL: http://admin-frontend:5176
+      VITE_APP_AUTH_URL: http://auth-frontend:5173
+    networks:
+      - emoforge-net
+
+networks:
+  emoforge-net:
+    external: true

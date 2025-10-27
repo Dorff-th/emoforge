@@ -1,10 +1,10 @@
 // src/store/slices/index.ts
 import { combineReducers } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
+//import authReducer from "./authSlice";
 import loadingReducer from './loadingSlice';
 
 const rootReducer = combineReducers({
-  auth: authReducer,
+  //auth: authReducer,
   loading: loadingReducer,
   // 추후 다른 slice도 추가 가능
 });
