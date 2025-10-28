@@ -46,10 +46,12 @@ export const fetchProfile = createAsyncThunk<
         profileImageUrl,
       };
     } catch (err: any) {
+       
       if (err.response && [401, 403].includes(err.response.status)) {
         return rejectWithValue("unauthenticated");
       }
-      return rejectWithValue("error");
+      //return rejectWithValue("error");
+      return rejectWithValue("unauthenticated");
     }
   }
 );
