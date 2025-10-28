@@ -101,6 +101,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        // ✅ 추가: 공개 프로필 조회, 비로그인 허용 엔드포인트
+                        .requestMatchers("/api/auth/public/**").permitAll()
                         .requestMatchers("/api/auth/**").authenticated()
                         .anyRequest().authenticated()
                 )

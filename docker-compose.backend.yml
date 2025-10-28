@@ -87,7 +87,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: docker
 
       # ✅ DB 접속 정보
       SPRING_DATASOURCE_URL: jdbc:mariadb://host.docker.internal:3306/nfe_post_db
