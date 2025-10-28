@@ -26,8 +26,10 @@ export default function ProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const [profile, setProfile] = useState<Profile | null>(null);
-  console.log(profile);
+  
+  //const [profile, setProfile] = useState<Profile | null>(null);
+  const [_profile, setProfile] = useState<Profile | null>(null);
+  
   const [openNicknameModal, setOpenNicknameModal] = useState(false);
   const [openEmailModal, setOpenEmailModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
