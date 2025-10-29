@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
-RUN npm run build
+# ✅ 기존 dist 폴더를 완전히 삭제
+RUN rm -rf dist && npm run build
 
 # nginx로 서빙
 FROM nginx:alpine
