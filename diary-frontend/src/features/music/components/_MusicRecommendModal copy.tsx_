@@ -54,6 +54,7 @@ const handleRecommend = async () => {
       .filter(Boolean);
 
     const res = await requestMusicRecommendations(diaryEntryId, artistList);
+    console.log("🎵 추천 결과:", res);
 
     // ✅ 추천된 노래가 없으면 DB 저장도 안 되고, 입력 화면 유지
     if (!res || !Array.isArray(res.songs) || res.songs.length === 0) {
@@ -61,12 +62,14 @@ const handleRecommend = async () => {
       return; // ❌ setHistory() 호출하지 않음 → 입력 폼 그대로 유지
     }
 
+    // ✅ 추천 결과 있으면 바로 리스트로 전환
+    //setHistory(res.songs);
+    //toast?.showToast({ message: "음악 추천 완료!", type: "info" });
+
     // ✅ 변경: setHistory 이후 링크 활성화 보장
     if (res && Array.isArray(res.songs) && res.songs.length > 0) {
         setHistory(res.songs);
         toast?.showToast({ message: "음악 추천 완료!", type: "info" });
-
-        console.log("✅ 추천된 노래:", res.songs);
 
         // ✅ 링크 클릭 안되는 문제 방지용 - 렌더 이후 pointer-events 복구
         setTimeout(() => {
@@ -98,7 +101,6 @@ const handleRecommend = async () => {
   <div className="space-y-2 max-h-64 overflow-y-auto">
     {history.map((item) => (
       <div key={item.id} className="flex items-center gap-3 p-2 border rounded">
-        
         {/* ✅ 썸네일 영역 추가 */}
         {item.thumbnailUrl ? (
           <img

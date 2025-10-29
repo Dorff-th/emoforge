@@ -26,14 +26,15 @@ public class RecommendResultDTO {
     public static class SongDTO {
         private String artist;
         private String title;
-        private String url;
+        private String youtubeUrl;
+        private String thumbnailUrl;
     }
 
     public static RecommendResultDTO from(LangGraphResponse response) {
         return RecommendResultDTO.builder()
                 .keyword(response.getKeyword())
                 .songs(response.getRecommendations().stream()
-                        .map(r -> new SongDTO(r.getArtist(), r.getTitle(), r.getUrl()))
+                        .map(r -> new SongDTO(r.getArtist(), r.getTitle(), r.getUrl(), r.getThumbnail()))
                         .collect(Collectors.toList()))
                 .build();
     }

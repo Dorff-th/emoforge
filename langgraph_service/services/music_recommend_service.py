@@ -47,7 +47,7 @@ async def recommend_music_simple(
 ):
     # ✅ 아티스트명 정규화
     artist_preferences = await normalize_artists_gpt(artist_preferences)
-    print(f"🎤 정규화된 아티스트 목록 → {artist_preferences}")
+    print(f"🎤 정규화된 아티스트 목록(music_recommend_service.py) → {artist_preferences}")
 
     # ✅ 1️⃣ GPT로 감정 + 아티스트 기반 키워드 생성
     async def _generate_keywords():
