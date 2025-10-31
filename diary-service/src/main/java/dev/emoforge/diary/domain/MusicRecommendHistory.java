@@ -23,8 +23,8 @@ public class MusicRecommendHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // DiaryEntry와 N:1 관계 (여러 추천 세션이 한 일기에서 발생 가능)
-    @ManyToOne(fetch = FetchType.LAZY)
+    // DiaryEntry와 1:1 관계
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diary_entry_id", nullable = false)
     private DiaryEntry diaryEntry;
 

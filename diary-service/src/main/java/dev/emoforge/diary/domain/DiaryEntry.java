@@ -53,4 +53,8 @@ public class DiaryEntry {
     @OneToOne(mappedBy = "diaryEntry", fetch = FetchType.LAZY)
     private GptSummary gptSummary;      // 회고요약(하루에 1개)
 
+    // 회고와 음악추천History는 1:1 관계.
+    @OneToOne(mappedBy = "diaryEntry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MusicRecommendHistory musicRecommendHistory;
+
 }

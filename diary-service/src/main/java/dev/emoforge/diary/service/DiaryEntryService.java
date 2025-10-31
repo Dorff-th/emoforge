@@ -13,6 +13,7 @@ import dev.emoforge.diary.dto.response.DiaryGroupPageResponseDTO;
 import dev.emoforge.diary.dto.response.DiaryGroupResponseDTO;
 import dev.emoforge.diary.repository.DiaryEntryRepository;
 import dev.emoforge.diary.repository.GptSummaryRepository;
+import dev.emoforge.diary.repository.MusicRecommendHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -34,6 +36,7 @@ public class DiaryEntryService {
     private final DiaryEntryRepository diaryEntryRepository;
     private final GptSummaryRepository gptSummaryRepository;
     private final ObjectMapper objectMapper;
+    private final MusicRecommendHistoryRepository musicRecommendHistoryRepository;
 
     public PageResponseDTO<DiaryEntryDTO> getDiarySummaries(String memberUuid, PageRequestDTO requestDTO) {
 
@@ -167,6 +170,48 @@ public class DiaryEntryService {
                 .build();
 
         diaryEntryRepository.save(entry);
+    }
+
+    /**
+     * 회고 1건 삭제
+     * - 관련 음악 추천 히스토리 및 곡은 Cascade 로 자동 삭제
+     * - withSummary=true 인 경우, GPT 요약도 함께 삭제
+     * - 하루 회고가 전부 삭제된 경우 GPT 요약 자동 삭제
+     */
+    @Transactional
+    public void deleteDiaryEntry(Long diaryEntryId, boolean withSummary) {
+
+        // 1️⃣ 회고 엔티티 조회
+        DiaryEntry entry = diaryEntryRepository.findById(diaryEntryId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회고를 찾을 수 없습니다. id=" + diaryEntryId));
+
+        String memberUuid = entry.getMemberUuid();
+        LocalDate date = entry.getDiaryDate();
+
+        // 2️⃣ 회고 삭제 (cascade 로 music_recommend_* 자동 삭제)
+        diaryEntryRepository.delete(entry);
+
+        // 3️⃣ 남은 회고 수 확인
+        long remainingCount = diaryEntryRepository.countByMemberUuidAndDiaryDate(memberUuid, date);
+
+        // 4️⃣ GPT 요약 삭제 조건
+        if (withSummary || remainingCount == 0) {
+            gptSummaryRepository.deleteByMemberUuidAndDiaryDate(memberUuid, date);
+        }
+    }
+
+    /**
+     * 특정 회원의 특정 날짜 회고 전체 삭제
+     * (예: 하루 전체 기록 초기화)
+     */
+    @Transactional
+    public void deleteAllByDate(String memberUuid, LocalDate date) {
+
+        // 1️⃣ 모든 회고 삭제 (cascade 로 음악 추천 및 곡 삭제)
+        diaryEntryRepository.deleteAllByMemberUuidAndDate(memberUuid, date);
+
+        // 2️⃣ GPT 요약도 함께 삭제
+        gptSummaryRepository.deleteByMemberUuidAndDiaryDate(memberUuid, date);
     }
 
 

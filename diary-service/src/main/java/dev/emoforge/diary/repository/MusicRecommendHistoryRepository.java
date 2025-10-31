@@ -2,6 +2,7 @@ package dev.emoforge.diary.repository;
 
 import dev.emoforge.diary.domain.MusicRecommendHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,4 +26,12 @@ public interface  MusicRecommendHistoryRepository extends JpaRepository<MusicRec
         WHERE h.diaryEntry.id = :diaryEntryId
     """)
     Optional<MusicRecommendHistory> findWithSongsByDiaryEntryId(@Param("diaryEntryId") Long diaryEntryId);
+
+    /**
+     * @param diaryEntryId
+     * 단일 회고에 해당하는 음악 추천 히스토리를 모두 제거
+     */
+    @Modifying
+    @Query("DELETE FROM MusicRecommendHistory h WHERE h.diaryEntry.id = :diaryEntryId")
+    void deleteByDiaryEntryId(Long diaryEntryId);
 }
