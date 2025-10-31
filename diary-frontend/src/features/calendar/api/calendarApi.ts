@@ -4,7 +4,7 @@ import axiosDiary from "@/lib/axios/axiosDiary";
 export type EmotionLevel = 1 | 2 | 3 | 4 | 5;
 
 export type DiaryEntry = {
-  id: string;
+  id: number;
   date: string;
   emotion: EmotionLevel;
   habitTags: string;

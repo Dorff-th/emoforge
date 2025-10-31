@@ -71,6 +71,14 @@ const Calendar = () => {
     }
   };
 
+  const handleSummaryDeleted = (date: string) => {
+    setMonthlyData((prev) =>
+      prev.map((item) =>
+        item.date === date ? { ...item, summary: undefined } : item
+      )
+    );
+  };
+
  return (
   <div className="w-full">
     {/* 월 이동 헤더 */}
@@ -156,12 +164,13 @@ const Calendar = () => {
           onClose={() => setSelectedDate(null)}
           diaryEntries={diaryMapByDate[selectedDate].entries ?? []}
           summary={diaryMapByDate[selectedDate].summary || ''}
-          onSummaryGenerated={(newSummary: string) => {
+          onSummaryDeleted={(date) => handleSummaryDeleted(date)} // ✅ 새 콜백 추가
+          onSummaryGenerated={(newSummary: string | null) => {
             // ✅ monthlyData 업데이트
             setMonthlyData((prev) =>
               prev.map((item) =>
                 item.date === selectedDate
-                ? { ...item, summary: newSummary }: item
+                ? { ...item, summary: newSummary ?? undefined }: item
                 )
               );
             }}

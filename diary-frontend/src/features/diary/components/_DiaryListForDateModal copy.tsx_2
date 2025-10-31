@@ -17,23 +17,19 @@ interface DiaryListForDateModalProps {
   onSummaryGenerated?: (newSummary: string | null) => void; // ✅ 수정!
 }
 
-const DiaryListForDateModal = ({
-  date,
-  onClose,
-  diaryEntries,
-  summary,
-  onSummaryDeleted,
-  onSummaryGenerated,
-}: DiaryListForDateModalProps) => {
+const DiaryListForDateModal = ({ date, onClose, diaryEntries, summary, onSummaryDeleted, onSummaryGenerated }: DiaryListForDateModalProps) => {
   const [openEntryId, setOpenEntryId] = useState<number | null>(null);
   const [gptSummary, setGptSummary] = useState<string | null>(summary || null);
   const [loading, setLoading] = useState(false);
   const [entries, setEntries] = useState(diaryEntries ?? []);
 
-  // ✅ 타입 통일: id는 number
-  type PendingDeleteState = { type: 'gpt' } | { type: 'diary'; id: number };
+  type PendingDeleteState =
+    | { type: "gpt" }
+    | { type: "diary"; id: number };
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<PendingDeleteState | null>(null);
+
 
   const toast = getToastHelper();
 
@@ -52,12 +48,64 @@ const DiaryListForDateModal = ({
   };
 
   const handleGptSummaryDeleteClick = () => {
-    setPendingDelete({ type: 'gpt' });
+    setPendingDelete({ type: "gpt" });
     setConfirmOpen(true);
   };
+  
 
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setLoading(true); // ✅ 로딩 시작
+
+    try {
+      if (pendingDelete.type === "gpt") {
+        await deleteGptSummaryOnly(date);
+        setGptSummary(null);
+        // ✅ 부모 상태 갱신
+        onSummaryDeleted?.(date);
+        toast?.showToast({ message: "GPT 요약이 삭제되었습니다.", type: "success" });
+      } else if (pendingDelete.type === "diary" && pendingDelete.id) {
+        const entryId = pendingDelete.id;
+        await handleDiaryDelete(entryId);
+        setEntries((prev) => prev.filter((e) => e.id !== entryId));
+        toast?.showToast({ message: "회고가 삭제되었습니다.", type: "success" });
+      }
+    } finally {
+       setLoading(false); // ✅ 로딩 종료 
+      setConfirmOpen(false);
+      setPendingDelete(null);
+    }
+  };
+
+  // ✅ GPT 요약 삭제
+  // const handleGptSummaryDelete = async () => {
+  //   if (!confirm("이 날짜의 GPT 요약을 삭제하시겠습니까?")) return;
+  //   try {
+  //     await deleteGptSummaryOnly(date);
+  //     setGptSummary(null);
+  //     onSummaryGenerated?.(null);
+  //     toast?.showToast({ message: 'GPT 요약이 삭제되었습니다.', type: 'success' });
+  //   } catch (error) {
+  //     toast?.showToast({ message: 'GPT 요약 삭제 중 오류 발생', type: 'error' });
+  //   }
+  // };
+
+
+  // ✅ 단일 회고 삭제
+  // const handleDiaryDelete = async (entryId: string) => {
+  //   if (!confirm("이 회고를 삭제하시겠습니까?")) return;
+  //   try {
+  //     await deleteDiaryEntry(entryId, false);
+  //     setEntries((prev) => prev.filter((e) => e.id !== entryId));
+  //     toast?.showToast({ message: '회고가 삭제되었습니다.', type: 'success' });
+  //   } catch (error) {
+  //     toast?.showToast({ message: '회고 삭제 중 오류 발생', type: 'error' });
+  //   }
+  // };
+
+  // 🗑️ 단일 회고 삭제 버튼 클릭 시 다이얼로그 열기
   const handleDiaryDeleteClick = (entryId: number) => {
-    setPendingDelete({ type: 'diary', id: entryId });
+    setPendingDelete({ type: "diary", id: entryId });
     setConfirmOpen(true);
   };
 
@@ -65,31 +113,12 @@ const DiaryListForDateModal = ({
     try {
       await deleteDiaryEntry(entryId, false);
       setEntries((prev) => prev.filter((e) => e.id !== entryId));
-      toast?.showToast({ message: '회고가 삭제되었습니다.', type: 'success' });
+      toast?.showToast({ message: "회고가 삭제되었습니다.", type: "success" });
     } catch (error) {
-      toast?.showToast({ message: '회고 삭제 중 오류 발생', type: 'error' });
+      toast?.showToast({ message: "회고 삭제 중 오류 발생", type: "error" });
     }
   };
 
-  const handleConfirmDelete = async () => {
-    if (!pendingDelete) return;
-    setLoading(true); // ✅ 로딩 시작
-
-    try {
-      if (pendingDelete.type === 'gpt') {
-        await deleteGptSummaryOnly(date);
-        setGptSummary(null);
-        onSummaryDeleted?.(date); // ✅ 부모 상태 갱신
-        toast?.showToast({ message: 'GPT 요약이 삭제되었습니다.', type: 'success' });
-      } else if (pendingDelete.type === 'diary' && pendingDelete.id) {
-        await handleDiaryDelete(pendingDelete.id);
-      }
-    } finally {
-      setLoading(false);
-      setConfirmOpen(false);
-      setPendingDelete(null);
-    }
-  };
 
   const parsedHabits = (habitTags: string) => {
     try {
@@ -119,13 +148,30 @@ const DiaryListForDateModal = ({
         {gptSummary ? (
           <div className="mb-4 p-3 bg-yellow-100 text-sm rounded leading-relaxed text-yellow-800 relative">
             <strong>GPT 요약:</strong> {gptSummary}
+            {/* 🗑️ 삭제 버튼 */}
             <button
               onClick={handleGptSummaryDeleteClick}
               className="absolute top-2 right-2 text-red-500 hover:text-red-700"
               title="GPT 요약 삭제"
-            >
-              <Trash2 size={16} />
-            </button>
+           >
+            <Trash2 size={16} />
+          </button>
+          {/* ✅ 확인 다이얼로그 */}
+          <ConfirmDialog
+            open={confirmOpen}
+            title={
+              pendingDelete?.type === "gpt"
+              ? "GPT 요약 삭제"
+              : "회고 삭제"
+            }
+            message={
+              pendingDelete?.type === "gpt"
+                ? "이 날짜의 GPT 요약을 삭제하시겠습니까?"
+                : "이 회고를 삭제하시겠습니까?"
+              }
+              onConfirm={handleConfirmDelete}
+              onCancel={() => setConfirmOpen(false)}
+            />
           </div>
         ) : (
           <button
@@ -189,24 +235,6 @@ const DiaryListForDateModal = ({
           <p className="text-center text-gray-500">해당 날짜에 작성된 회고가 없습니다.</p>
         )}
       </div>
-
-      {/* ✅ 수정된 부분: ConfirmDialog를 GPT 요약 블록 바깥으로 이동 (항상 렌더링되도록) */}
-      <ConfirmDialog
-        open={confirmOpen}
-        title={
-          pendingDelete?.type === 'gpt'
-            ? 'GPT 요약 삭제'
-            : '회고 삭제'
-        }
-        message={
-          pendingDelete?.type === 'gpt'
-            ? '이 날짜의 GPT 요약을 삭제하시겠습니까?'
-            : '이 회고를 삭제하시겠습니까?'
-        }
-        loading={loading}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setConfirmOpen(false)}
-      />
 
       {openMusicModal && selectedDiaryId !== null && (
         <MusicRecommendModal

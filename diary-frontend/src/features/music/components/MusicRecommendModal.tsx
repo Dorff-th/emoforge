@@ -4,7 +4,7 @@ import { getMusicRecommendations, requestMusicRecommendations } from "@/features
 import { getToastHelper } from "@/features/toast/utils/toastHelper";
 
 interface MusicRecommendModalProps {
-  diaryEntryId: string;
+  diaryEntryId: number;
   onClose: () => void;
 }
 
@@ -21,7 +21,6 @@ useEffect(() => {
   (async () => {
     try {
       const res = await getMusicRecommendations(diaryEntryId);
-      console.log('getMusicRecommendations data:', res); // 🔍 응답 구조 확인용
 
       if (isMounted) {
         // ✅ 응답이 객체이고 songs 배열이 있으면 그것만 history로 세팅

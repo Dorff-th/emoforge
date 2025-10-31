@@ -49,7 +49,7 @@ export const fetchDiaryList = async (page: number, size = 10) => {
   return response.data;
 };
 
-export const deleteDiaryEntry = async (entryId: string, withSummary = false) => {
+export const deleteDiaryEntry = async (entryId: number, withSummary = false) => {
   await axiosDiary.delete(`/diary/${entryId}?withSummary=${withSummary}`);
 };
 
