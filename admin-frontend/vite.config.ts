@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     : undefined
 
   return {
-    base: "/",
+    base: "/admin/",  //EC2 배포 경로 설정
     plugins: [react()],
     server: {
       host: true,       

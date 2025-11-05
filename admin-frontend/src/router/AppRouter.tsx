@@ -28,6 +28,7 @@ export default function AppRouter() {
               </ProtectedAdminRoute>
             }
         >
+        <Route index element={<Navigate to="dashboard" />} /> {/* ✅ 기본 이동 */}
         <Route path="dashboard" element={<AdminDashboardPage />} />
         <Route path="members" element={<AdminMemberPage />} />
       </Route>

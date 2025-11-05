@@ -5,8 +5,10 @@ import dev.emoforge.auth.dto.admin.AdminLoginResponse;
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import dev.emoforge.auth.service.admin.AdminAuthService;
 import dev.emoforge.auth.service.admin.RecaptchaService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth/admin")
 @RequiredArgsConstructor
+@Slf4j
 public class AdminAuthController {
 
     private final AdminAuthService adminAuthService;
@@ -82,16 +85,23 @@ public class AdminAuthController {
 
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        // ✅ 쿠키 삭제
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+
+        log.debug("\n\n\n======/api/auth/admin/logout");
+        String adminCookieName = "admin_token";
+
         ResponseCookie deleteCookie = ResponseCookie.from(adminCookieName, "")
-                .path("/")
-                .maxAge(0)
+                .domain(adminCookieDomain)     // 로그인 시 설정과 동일해야 함
+                .path("/")                   // 동일하게
+                .httpOnly(httpOnly)
+                .secure(secure)
+                .sameSite(sameSite)            // 크로스사이트 쿠키 허용
+                .maxAge(0)                   // 즉시 만료
                 .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")

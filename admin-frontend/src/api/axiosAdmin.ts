@@ -3,7 +3,7 @@ import setupInterceptors from "./setupInterceptors";
 
 const AUTH_BASE_URL = import.meta.env.VITE_API_AUTH_BASE_URL;
 const axiosAdmin = axios.create({
-  baseURL: `${AUTH_BASE_URL}/api`,
+  baseURL: `${AUTH_BASE_URL}`,
   withCredentials: true,
 });
 

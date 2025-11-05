@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
 
     try {
       setLoading(true);
-      const res = await axiosAuth.post("/auth/admin/login", {
+      const res = await axiosAuth.post("/admin/login", {
         username,
         password,
         captchaToken, // ✅ reCAPTCHA 토큰 전달

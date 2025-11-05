@@ -12,7 +12,7 @@ export default function AdminHeader() {
     });
 
     // ✅ 서버에도 로그아웃 요청 (optional)
-    axiosAdmin.post("/auth/admin/logout").finally(() => {
+    axiosAdmin.post("/admin/logout").finally(() => {
       navigate("/admin/login");
     });
   };
