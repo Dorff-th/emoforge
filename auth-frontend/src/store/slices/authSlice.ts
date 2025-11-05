@@ -58,7 +58,7 @@ export const fetchProfile = createAsyncThunk<
 
 
 export const logoutThunk = createAsyncThunk<void>("auth/logout", async () => {
-  await axiosAuth.post("/auth/logout", {}); // 204 ????
+  await axiosAuth.post("/logout", {}); // 204 ????
 });
 
 const initialState: AuthState = {

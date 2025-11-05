@@ -56,7 +56,7 @@ export default function EmailModal({ onClose }: Props) {
     }
     try {
       setSaving(true);
-      await axiosAuth.put(`/auth/members/email`, { email });
+      await axiosAuth.put(`/members/email`, { email });
       dispatch(addToast({ type: "success", text: "이메일이 변경되었습니다." }));
       onClose();
       dispatch(fetchProfile());
