@@ -32,7 +32,7 @@ export default function EmailModal({ onClose }: Props) {
     }
     try {
       setIsChecking(true);
-      const res = await axiosAuth.get(`/auth/members/check-email`, {
+      const res = await axiosAuth.get(`/members/check-email`, {
         params: { email },
       });
       if (res.data.available) {

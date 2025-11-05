@@ -27,7 +27,7 @@ export const fetchProfile = createAsyncThunk<
   "auth/fetchProfile",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosAuth.get<AuthUser>("/auth/me", {});
+      const res = await axiosAuth.get<AuthUser>("/me", {});
       const profile = res.data;
 
       let profileImageUrl: string | null = profile.profileImageUrl ?? null;

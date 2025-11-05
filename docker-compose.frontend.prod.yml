@@ -1,0 +1,104 @@
+version: "3.9"
+
+services:
+  # =============================
+  # 🧠 Auth Frontend (로그인/회원)
+  # =============================
+  auth-frontend:
+    build:
+      context: ./auth-frontend
+      dockerfile: Dockerfile
+    container_name: auth-frontend
+    ports:
+      - "8180:80"  # 🔸 변경: dev에서는 5173, 운영에서는 nginx 내부 80포트만 사용
+    environment:
+      # 🔸 변경: 내부 서비스 URL → 외부 HTTPS 기반
+      VITE_API_AUTH_BASE_URL: https://emoforge.dev/api/auth
+      VITE_API_ATTACH_BASE_URL: https://emoforge.dev/api/attach
+      VITE_APP_AUTH_URL: https://emoforge.dev
+      VITE_APP_DIARY_URL: https://emoforge.dev/diary
+      # 🗑️ 제거: VITE_APP_POST_URL (post-frontend 제거로 불필요)
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🌿 Diary Frontend (감정일기)
+  # =============================
+  diary-frontend:
+    build:
+      context: ./diary-frontend
+      dockerfile: Dockerfile
+    container_name: diary-frontend
+    ports:
+      - "8181:80"  # 🔸 변경: dev에서는 5175, 운영에서는 내부 nginx로 통합 가능
+    environment:
+      # 🔸 변경: 내부 도커 네트워크 주소 → HTTPS 외부 주소
+      VITE_API_DIARY_BASE_URL: https://emoforge.dev/api/diary
+      VITE_API_AUTH_BASE_URL: https://emoforge.dev/api/auth
+      VITE_API_ATTACH_BASE_URL: https://emoforge.dev/api/attach
+      VITE_API_LANGGRAPH_BASE_URL: https://emoforge.dev/api/langgraph
+      VITE_APP_DIARY_URL: https://emoforge.dev/diary
+      VITE_APP_AUTH_URL: https://emoforge.dev
+      # 🗑️ 제거: VITE_APP_POST_URL (post-frontend 제거로 불필요)
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🛠️ Admin Frontend (관리자)
+  # =============================
+  admin-frontend:
+    build:
+      context: ./admin-frontend
+      dockerfile: Dockerfile
+    container_name: admin-frontend
+    ports:
+      - "8182:80"  # 🔸 변경: dev에서는 5176, 운영 nginx 내부 포트로 통일
+    environment:
+      VITE_API_AUTH_BASE_URL: https://emoforge.dev/api/auth
+      VITE_APP_ADMIN_URL: https://emoforge.dev/admin
+      VITE_APP_AUTH_URL: https://emoforge.dev
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🌐 Nginx (정적 파일 서빙 + HTTPS 리버스 프록시)
+  # =============================
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_frontend_gateway
+    restart: always  # ✅ 추가
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d  # 🔸 변경: 운영용 nginx 설정 파일 경로
+      - /home/ec2-user/emoforge/certbot/www:/var/www/certbot  # ✅ 추가: certbot용 웹 루트
+      - /home/ec2-user/emoforge/certbot/conf:/etc/letsencrypt  # ✅ 추가: 인증서 저장소
+      # ✅ 추가: 정적 파일 매핑 (빌드 결과물 nginx로 전달)
+      - ./auth-frontend/dist:/usr/share/nginx/html/auth
+      - ./diary-frontend/dist:/usr/share/nginx/html/diary
+      - ./admin-frontend/dist:/usr/share/nginx/html/admin
+    depends_on:
+      - auth-frontend
+      - diary-frontend
+      - admin-frontend
+    networks:
+      - emoforge-net
+
+  # =============================
+  # 🔐 Certbot (Let's Encrypt 자동 갱신)
+  # =============================
+  certbot:
+    image: certbot/certbot
+    container_name: certbot_frontend
+    volumes:
+      - /home/ec2-user/emoforge/certbot/conf:/etc/letsencrypt
+      - /home/ec2-user/emoforge/certbot/www:/var/www/certbot
+    entrypoint: >
+      sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
+    networks:
+      - emoforge-net
+
+networks:
+  emoforge-net:
+    external: true

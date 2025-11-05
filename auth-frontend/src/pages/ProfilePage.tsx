@@ -56,7 +56,7 @@ export default function ProfilePage() {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const res = await axiosAuth.get("/auth/me", {});
+      const res = await axiosAuth.get("/me", {});
       setProfile(res.data);
     } catch {
       dispatch(addToast({ type: "error", text: "프로필 조회 실패" }));

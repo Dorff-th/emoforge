@@ -9,6 +9,8 @@ export default function LoginPage() {
   const dispatch = useAppDispatch();
 
   const handleKakaoLogin = () => {
+    console.log("Kakao login initiated");
+    console.log("Redirecting to:", import.meta.env.VITE_KAKAO_AUTH_URL);
     window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
   };
 

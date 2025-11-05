@@ -1,11 +1,11 @@
 ﻿import axios from "axios";
 import setupInterceptors from "./setupInterceptors";
 
-const backendApiAuthUrl = import.meta.env.VITE_API_AUTH_BASE_URL;
+const baseUrl = import.meta.env.VITE_API_AUTH_BASE_URL; // 도메인만 들어있음
+
 const axiosAuth = axios.create({
-  //baseURL: "http://auth.127.0.0.1.nip.io:8081/api",
-  baseURL: backendApiAuthUrl + "/api",
-  withCredentials: true,
+  baseURL: `${baseUrl}`, 
+  withCredentials: import.meta.env.VITE_WITH_CREDENTIALS === "true",
 });
 
 setupInterceptors(axiosAuth);

@@ -6,5 +6,6 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "auth.cors")
 public record AuthCorsProperties(
-        List<String> allowedOrigins
+        List<String> allowedOrigins,
+        List<String> allowedOriginPatterns
 ) {}

@@ -41,6 +41,9 @@ dependencies {
     // === Test ===
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    //mysql db (aws rds 접속)
+    runtimeOnly 'com.mysql:mysql-connector-j:8.2.0'
 }
 
 dependencyManagement {

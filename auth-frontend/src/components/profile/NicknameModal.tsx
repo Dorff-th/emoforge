@@ -25,7 +25,7 @@ export default function NicknameModal({ onClose }: Props) {
     }
     try {
       setIsChecking(true);
-      const res = await axiosAuth.get(`/auth/members/check-nickname`, {
+      const res = await axiosAuth.get(`/members/check-nickname`, {
         params: { nickname },
       });
       if (res.data.available) {
@@ -49,7 +49,7 @@ export default function NicknameModal({ onClose }: Props) {
     }
     try {
       setSaving(true);
-      await axiosAuth.put(`/auth/members/nickname`, { nickname });
+      await axiosAuth.put(`/members/nickname`, { nickname });
       dispatch(addToast({ type: "success", text: "닉네임이 변경되었습니다." }));
       onClose();
       dispatch(fetchProfile());

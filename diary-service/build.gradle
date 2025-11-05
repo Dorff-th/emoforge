@@ -48,6 +48,9 @@ dependencies {
     /* --- ✅ 테스트용 Lombok (Junit에서도 Slf4j 인식되게) --- */
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    //mysql db (aws rds 접속)
+    runtimeOnly 'com.mysql:mysql-connector-j:8.2.0'
 }
 
 dependencyManagement {

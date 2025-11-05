@@ -15,7 +15,7 @@ export interface ProfileImageResponse {
 
 export const fetchProfileImage = async (memberUuid: string) => {
   const response = await axiosAttach.get<ProfileImageResponse>(
-    `/attach/profile/${memberUuid}`
+    `/profile/${memberUuid}`
   );
    const data = response.data;
   return {
@@ -41,7 +41,7 @@ export const uploadProfileImage = async (
   if (postId) formData.append("postId", postId.toString());
 
   const response = await axiosAttach.post<ProfileImageResponse>(
-    "/attach",
+    "",
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -51,5 +51,5 @@ export const uploadProfileImage = async (
 };
 
 export const deleteProfileImage = async (attachmentId: number) => {
-  await axiosAttach.delete(`/attach/profile/${attachmentId}`);
+  await axiosAttach.delete(`/profile/${attachmentId}`);
 };
