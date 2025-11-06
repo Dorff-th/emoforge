@@ -1,0 +1,123 @@
+# ==========================================
+# 🌍 Emoforge Nginx Gateway - 2025-11-05
+# ==========================================
+
+server {
+    listen 80;
+    server_name emoforge.dev www.emoforge.dev;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ==========================================
+# 🔁 Redirect non-www → www (HTTPS)
+# ==========================================
+server {
+    listen 443 ssl;
+    server_name emoforge.dev;
+
+    ssl_certificate /etc/letsencrypt/live/emoforge.dev/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/emoforge.dev/privkey.pem;
+
+    return 301 https://www.emoforge.dev$request_uri;
+}
+
+# ==========================================
+# 🔒 HTTPS (www.emoforge.dev)
+# ==========================================
+server {
+    listen 443 ssl;
+    server_name www.emoforge.dev;
+
+    ssl_certificate /etc/letsencrypt/live/emoforge.dev/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/emoforge.dev/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # ==========================================
+    # 🧠 API Gateway (API 먼저!)
+    # ==========================================
+
+    # ✅ Auth Service
+    location /api/auth/ {
+        proxy_pass http://auth-service:8081;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+
+    # ✅ Diary Service
+    location /api/diary/ {
+        proxy_pass http://diary-service:8084;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+
+    # ✅ Attachment Service
+    location /api/attach/ {
+        proxy_pass http://attachment-service:8082;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+
+    # ✅ LangGraph Service
+    location /api/langgraph/ {
+        proxy_pass http://langgraph_service:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+
+    # ==========================================
+    # 🎨 Static Frontends (API보다 아래!)
+    # ==========================================
+
+    location / {
+        root /usr/share/nginx/html/auth;
+        index index.html;
+        try_files $uri $uri/ /index.html =404;
+    }
+
+    location /diary {
+        alias /usr/share/nginx/html/diary;
+        index index.html;
+        try_files $uri $uri/ /diary/index.html =404;
+    }
+
+    location /admin {
+        alias /usr/share/nginx/html/admin;
+        index index.html;
+        try_files $uri $uri/ /admin/index.html =404;
+    }
+
+    # ==========================================
+    # 🧱 보안 헤더
+    # ==========================================
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    add_header Referrer-Policy "strict-origin-when-cross-origin";
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+}
+

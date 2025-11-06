@@ -1,0 +1,87 @@
+# ============================
+# 🌐 HTTP → HTTPS 리다이렉트
+# ============================
+server {
+    listen 80;
+    server_name emoforge.dev www.emoforge.dev;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ============================
+# 🔒 HTTPS 설정 (Certbot + Reverse Proxy)
+# ============================
+server {
+    listen 443 ssl;
+    server_name emoforge.dev www.emoforge.dev;
+
+    # ✅ SSL 인증서 경로 (Certbot 자동 발급 경로)
+    ssl_certificate /etc/letsencrypt/live/emoforge.dev/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/emoforge.dev/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # ============================
+    # 🎨 정적 파일 (프론트엔드)
+    # ============================
+    location / {
+        root /usr/share/nginx/html;   # 기본 진입점: auth-frontend
+        index index.html;
+        try_files $uri $uri/ /index.html =404;
+    }
+
+    location /diary {
+        alias /usr/share/nginx/html/diary;
+        index index.html;
+        try_files $uri $uri/ /diary/index.html =404;
+    }
+
+    location /admin {
+        alias /usr/share/nginx/html/admin;
+        index index.html;
+        try_files $uri $uri/ /admin/index.html =404;
+    }
+
+    # ============================
+    # 🧠 API Gateway (백엔드 프록시)
+    # ============================
+    location /api/auth/ {
+    proxy_pass http://auth-service:8081/;
+
+    	# ✅ 필수 헤더 4종 세트
+    	proxy_set_header Host $host;
+    	proxy_set_header X-Real-IP $remote_addr;
+    	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    	proxy_set_header X-Forwarded-Proto $scheme;
+
+	# (선택) 응답 헤더 정리용
+	proxy_redirect off;
+    	proxy_http_version 1.1;
+    }
+    location /api/attach/ {
+        proxy_pass http://attachment-service:8082/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /api/diary/ {
+        proxy_pass http://diary-service:8084/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /api/langgraph/ {
+        proxy_pass http://langgraph_service:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+	

@@ -69,10 +69,10 @@ services:
 
       # ✅ 파일 업로드 경로 (EC2용으로 수정)
       FILE_UPLOAD_PATH_EDITOR_IMAGES_BASE_DIR: /home/ec2-user/emoforge/uploads/editor_images/
-      FILE_UPLOAD_PATH_EDITOR_IMAGES_PUBLIC_URL: /uploads/images/
+      FILE_UPLOAD_PATH_EDITOR_IMAGES_PUBLIC_URL: /api/attach/uploads/images/
       FILE_UPLOAD_PATH_ATTACHMENTS: /home/ec2-user/emoforge/uploads/attachment/
       FILE_UPLOAD_PATH_PROFILE_IMAGE_BASE_DIR: /home/ec2-user/emoforge/uploads/profile_image/
-      FILE_UPLOAD_PATH_PROFILE_IMAGE_PUBLIC_URL: /uploads/profile_image/
+      FILE_UPLOAD_PATH_PROFILE_IMAGE_PUBLIC_URL: /api/attach/uploads/profile_image/
 
     # 🔸 변경: 로컬 C:\ 경로 제거 → EC2 내부 디렉토리 사용
     volumes:
