@@ -14,7 +14,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   title = "확인",
   message,
-  imageSrc = "/assets/toast/toast_char_3.png", // ✅ 토끼 이미지 (public 폴더에 넣기)
+  imageSrc = "./assets/toast/toast_char_3.png", // ✅ 토끼 이미지 (public 폴더에 넣기)
   loading,
   onConfirm,
   onCancel,

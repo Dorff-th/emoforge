@@ -9,12 +9,12 @@ interface Props {
 }
 
 export const toastImageMap: Record<string, string> = {
-  success: '/assets/toast/toast_char_1.png',
-  error: '/assets/toast/toast_char_2.png',
-  warn: '/assets/toast/toast_char_3.png',
-  info: '/assets/toast/toast_char_4.png',
-  gpt: '/assets/toast/toast_char_5.png',
-  custom: '/assets/toast/toast_char_6.png',
+  success: './assets/toast/toast_char_1.png',
+  error: './assets/toast/toast_char_2.png',
+  warn: './assets/toast/toast_char_3.png',
+  info: './assets/toast/toast_char_4.png',
+  gpt: './assets/toast/toast_char_5.png',
+  custom: './assets/toast/toast_char_6.png',
 };
 
 
