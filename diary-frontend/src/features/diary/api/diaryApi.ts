@@ -43,21 +43,21 @@ export interface DiaryGroup {
 
 export const fetchDiaryList = async (page: number, size = 10) => {
   const response = await axiosDiary.get<DiaryListResponse>(
-    `/diary/diaries?page=${page-1}&size=${size}`
+    `/diaries?page=${page-1}&size=${size}`
   );
 
   return response.data;
 };
 
 export const deleteDiaryEntry = async (entryId: number, withSummary = false) => {
-  await axiosDiary.delete(`/diary/${entryId}?withSummary=${withSummary}`);
+  await axiosDiary.delete(`/${entryId}?withSummary=${withSummary}`);
 };
 
 export const deleteGptSummaryOnly = async (date: string) => {
-  await axiosDiary.delete(`/diary/summary?date=${date}`);
+  await axiosDiary.delete(`/summary?date=${date}`);
 };
 
 export const deleteDiarySummaryByDate = async (date: string) => {
-  await axiosDiary.delete(`/diary/all?date=${date}`);
+  await axiosDiary.delete(`/all?date=${date}`);
 };
 

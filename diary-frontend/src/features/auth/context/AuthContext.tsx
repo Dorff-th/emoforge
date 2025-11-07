@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const checkAuth = async () => {
     try {
-      const res = await axiosAuth.get('/auth/me', { withCredentials: true });
+      const res = await axiosAuth.get('/me', { withCredentials: true });
       const profile = res.data;
 
       let profileImageUrl: string | null = profile.profileImageUrl ?? null;
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   /** ✅ 로그아웃 (쿠키 만료 처리) */
   const logout = async () => {
     try {
-      await axiosAuth.post('/auth/logout', {}, { withCredentials: true });
+      await axiosAuth.post('/logout', {}, { withCredentials: true });
     } catch (e) {
       console.warn('Logout request failed (이미 만료되었을 수 있음)');
     } finally {

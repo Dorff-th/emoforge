@@ -95,7 +95,7 @@ const DiaryForm: React.FC = () => {
         feedback: gptFeedback,
       };
 
-      await axiosDiary.post('/diary/diaries', payload);
+      await axiosDiary.post('/diaries', payload);
       setIsSaveSuccess(true);
     } catch (e) {
       console.error('저장 중 오류 발생:', e);

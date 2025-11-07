@@ -6,7 +6,8 @@ from services.gpt_summary_service import summarize_diary
 from services.gpt_feedback_service import generate_feedback
 from services.gpt_feeling_service import translate_feeling
 
-router = APIRouter(prefix="/api/diary/gpt", tags=["GPT Diary"])
+#router = APIRouter(prefix="/api/diary/gpt", tags=["GPT Diary"])
+router = APIRouter(prefix="/api/langgraph/diary/gpt", tags=["GPT Diary"])
 
 # ✅ 감정 영어 표현
 class FeelingRequest(BaseModel):

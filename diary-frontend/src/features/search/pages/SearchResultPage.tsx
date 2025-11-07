@@ -46,7 +46,7 @@ const SearchResultPage = () => {
 
   const fetchResults = async () => {
     try {
-      const response = await axiosDiary.post(`/diary/diaries/search?page=${page - 1}&size=${size}`, {
+      const response = await axiosDiary.post(`/diaries/search?page=${page - 1}&size=${size}`, {
         query,
         fields: effectiveFields,
         emotionMap: {

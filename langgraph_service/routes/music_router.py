@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from schemas.music_schema import MusicRecommendRequest, MusicRecommendResponse
 from services.music_service import recommend_music_simple   # ✅ 변경됨
 
-router = APIRouter(prefix="/api/diary/gpt/music", tags=["Music Recommendation"])
+router = APIRouter(prefix="/api/langgraph/diary/gpt/music", tags=["Music Recommendation"])
 
 
 # ✅ FastAPI router

@@ -24,7 +24,7 @@ export type DailyDiaryData = {
 //selectedDate : YYYY-MM-DD 형식의 날짜 문자열
 export const fetchMonthDiaryList = async (selectedDate:string) => {
   const response = await axiosDiary.get<DailyDiaryData[]>(
-    `/diary/diaries/monthly?yearMonth=${selectedDate}`
+    `/diaries/monthly?yearMonth=${selectedDate}`
   );
 
   return response.data;

@@ -15,7 +15,7 @@ export const fetchEmotionStatistics = async (
   startDate: string,
   endDate: string
 ): Promise<EmotionStatisticsResponse> => {
-  const res = await axiosDiary.get('/diary/statistics/emotion', {
+  const res = await axiosDiary.get('/statistics/emotion', {
     params: { startDate, endDate },
   });
   return res.data;

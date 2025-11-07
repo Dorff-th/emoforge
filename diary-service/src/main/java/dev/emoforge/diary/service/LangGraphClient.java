@@ -3,6 +3,7 @@ package dev.emoforge.diary.service;
 import dev.emoforge.diary.dto.music.LangGraphRequest;
 import dev.emoforge.diary.dto.music.LangGraphResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class LangGraphClient {
 
     private final RestTemplate restTemplate;
@@ -61,6 +63,8 @@ public class LangGraphClient {
      */
     public LangGraphResponse requestMusicRecommendations(LangGraphRequest request) {
         String url = baseUrl + "/diary/gpt/music/recommendations/simple";
+
+        System.out.println("\n\n\n====url : " + url);
 
         Map<String, Object> body = Map.of(
                 "emotionScore", request.getEmotionScore(),

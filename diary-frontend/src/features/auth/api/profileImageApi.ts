@@ -15,7 +15,7 @@ export interface ProfileImageResponse {
 
 export const fetchProfileImage = async (memberUuid: string) => {
   const response = await axiosAttach.get<ProfileImageResponse>(
-    `/attach/profile/${memberUuid}`
+    `/profile/${memberUuid}`
   );
    const data = response.data;
   return {
@@ -23,33 +23,4 @@ export const fetchProfileImage = async (memberUuid: string) => {
     //publicUrl:  `${ATTACH_BASE_URL}${data.publicUrl}`,
     publicUrl:  data.publicUrl,
   };
-};
-
-export const uploadProfileImage = async (
-  file: File,
-  uploadType: string,
-  attachmentStatus: string,
-  memberUuid?: string,
-  postId?: number
-) => {
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("uploadType", uploadType);
-  formData.append("attachmentStatus", attachmentStatus);
-  if (memberUuid) formData.append("memberUuid", memberUuid);
-  if (postId) formData.append("postId", postId.toString());
-
-  const response = await axiosAttach.post<ProfileImageResponse>(
-    "/attach",
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
-  );
-  return response.data;
-};
-
-export const deleteProfileImage = async (attachmentId: number) => {
-  await axiosAttach.delete(`/attach/profile/${attachmentId}`);
 };

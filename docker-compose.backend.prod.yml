@@ -109,7 +109,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
 
       # ✅ LangGraph 연동 (내부 네트워크 유지)
-      LANGGRAPH_BASE_URL: http://langgraph_service:8000/api
+      LANGGRAPH_BASE_URL: http://langgraph_service:8000/api/langgraph
       LANGGRAPH_API_KEY: ${LANGGRAPH_API_KEY}
 
     depends_on:
@@ -135,7 +135,7 @@ services:
       APP_NAME: langgraph_Service (Prod)
       APP_HOST: 0.0.0.0
       APP_PORT: 8000
-      BASE_URL: http://langgraph_service:8000
+      BASE_URL: http://langgraph_service:8000/api/langgraph
 
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: gpt-4o-mini

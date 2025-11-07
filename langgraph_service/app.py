@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.gpt_routes import router as gpt_router
-# from routes.youtube_routes import router as youtube_router
 from routes.music_router import router as music_router
 
 from fastapi.responses import JSONResponse   # ✅ 이 줄 추가
@@ -16,17 +15,6 @@ from core.config import settings  # ← 새로 추가됨
 # app = FastAPI(title="LangGraph-Service with Cookie-based Auth")
 app = FastAPI(title=settings.APP_NAME)  # ← 수정됨
 
-
-# ✅ (기존 CORS 하드코딩 제거)
-# origins = [
-#     "http://app1.127.0.0.1.nip.io",
-#     "http://post.127.0.0.1.nip.io",
-#     "http://diary.127.0.0.1.nip.io",
-#     "http://auth.127.0.0.1.nip.io",
-#     "https://*.nip.io",
-#     "http://app3.127.0.0.1.nip.io:5175",
-# ]
-
 # ✅ CORS 설정 (.env에서 읽어옴)
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +27,6 @@ app.add_middleware(
 
 # ✅ 라우트 등록
 app.include_router(gpt_router)
-# app.include_router(youtube_router)
 app.include_router(music_router)
 
 
@@ -67,7 +54,7 @@ if __name__ == "__main__":
     )
 
 
-@app.get("/api/health")
+@app.get("/api/langgraph/health")
 async def health():
     return JSONResponse(
         content={
