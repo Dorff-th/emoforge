@@ -75,8 +75,8 @@ server {
 
     # ✅ Attachment Service
     location /api/attach {
-        rewrite ^/api/attach/(.*)$ /$1 break;    
         proxy_pass http://attachment-service:8082;
+	rewrite ^/api/attach/(uploads/.*)$ /$1 break;  # ✅ uploads만 rewrite
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -87,13 +87,27 @@ server {
 
     # ✅ LangGraph Service
     location /api/langgraph/ {
-        proxy_pass http://langgraph_service:8000/api/;
+        proxy_pass http://langgraph_service:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+
+	# ✅ 타임아웃 (FastAPI 응답 대기 여유)
+    	proxy_connect_timeout 60s;
+    	proxy_read_timeout 120s;
+    }
+
+    location /api/posts/ {
+    	proxy_pass http://post-service:8083;
+	proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;	
     }
 
     # ==========================================
@@ -106,10 +120,26 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # ================================
+    # 🎨 Diary Frontend (SPA)
+    # ================================
+
     location /diary {
-        alias /usr/share/nginx/html/diary;
-        index index.html;
-        try_files $uri $uri/ /diary/index.html;
+    	alias /usr/share/nginx/html/diary/;
+	index index.html;
+
+
+    	# ✅ 정적파일(js/css 등)은 먼저 처리
+    	location ~ ^/diary/.+\.(js|css|ico|png|jpg|jpeg|svg|woff2?)$ {
+            root /usr/share/nginx/html;
+            access_log off;
+            expires 1M;
+            try_files $uri =404;
+        }
+
+
+    	# ✅ SPA React 라우팅
+    	try_files $uri $uri/ /diary/index.html;
     }
 
     location /admin {
@@ -126,6 +156,23 @@ server {
         try_files $uri $uri/ /admin/index.html;
     }
 
+    # -------------------------
+    # 🧱 post-frontend (확정판)
+    # -------------------------
+    location /posts {
+        alias /usr/share/nginx/html/posts/;
+        index index.html;
+
+        # ✅ 정적 파일 먼저 처리
+        location ~* \.(?:js|css|ico|png|jpg|jpeg|svg|woff2?)$ {
+            try_files $uri =404;
+            access_log off;
+            expires 1M;
+        }
+
+        try_files $uri $uri/ /posts/index.html;
+    }
+ 
     # ==========================================
     # 🧱 보안 헤더
     # ==========================================
