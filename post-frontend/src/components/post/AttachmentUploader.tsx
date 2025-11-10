@@ -93,7 +93,7 @@ const AttachmentUploader = ({
       if (att.isNew) {
         // 신규 첨부 → 즉시 삭제
         try {
-          await axiosAttach.delete(`/attach/${att.id}`);
+          await axiosAttach.delete(`/${att.id}`);
           setItems(items.filter((a) => a.id !== att.id));
           dispatch(showToast({ type: "success", text: "첨부파일이 삭제되었습니다." }));
         } catch (error) {

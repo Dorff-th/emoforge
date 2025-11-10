@@ -2,6 +2,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { EmotionToast } from '@/features/toast/hooks/useEmotionToast';
 import clsx from 'clsx';
+import toastChar1 from '@/assets/toast/toast_char_1.png';
+import toastChar2 from '@/assets/toast/toast_char_2.png';
+import toastChar3 from '@/assets/toast/toast_char_3.png';
+import toastChar4 from '@/assets/toast/toast_char_4.png';
+import toastChar5 from '@/assets/toast/toast_char_5.png';
+import toastChar6 from '@/assets/toast/toast_char_6.png';
 
 interface Props {
   toast: EmotionToast;
@@ -9,12 +15,12 @@ interface Props {
 }
 
 export const toastImageMap: Record<string, string> = {
-  success: './assets/toast/toast_char_1.png',
-  error: './assets/toast/toast_char_2.png',
-  warn: './assets/toast/toast_char_3.png',
-  info: './assets/toast/toast_char_4.png',
-  gpt: './assets/toast/toast_char_5.png',
-  custom: './assets/toast/toast_char_6.png',
+  success: toastChar1,
+  error: toastChar2,
+  warn: toastChar3,
+  info: toastChar4,
+  gpt: toastChar5,
+  custom: toastChar6,
 };
 
 

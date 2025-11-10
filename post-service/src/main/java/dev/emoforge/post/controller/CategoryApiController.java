@@ -12,7 +12,7 @@ import java.util.List;
 
 // 카테고리 API
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/api/posts/categories")
 @RequiredArgsConstructor
 public class CategoryApiController {
 

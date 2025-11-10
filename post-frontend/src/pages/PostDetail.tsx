@@ -108,7 +108,7 @@ export default function PostDetail() {
             {post.attachments.map((att) => (
               <li key={att.id}>
                 <a
-                  href={`${backendBaseUrl}/api/attach/download/${att.id}`}
+                  href={`${backendBaseUrl}/download/${att.id}`}
                   className="text-blue-600 hover:underline transition-colors"
                 >
                   {att.originFileName} ({att.fileSizeText})

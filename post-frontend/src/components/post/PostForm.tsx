@@ -48,7 +48,7 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
   // 수정 모드일 경우 기존 첨부 로드
   useEffect(() => {
     if (mode === 'edit' && existingPostId) {
-      axiosAttach.get(`/attach/post/${existingPostId}`, { 
+      axiosAttach.get(`/post/${existingPostId}`, { 
         params: { uploadType: 'ATTACHMENT' },
       }).then((res) => {
         setAttachments(res.data.map((a: any) => ({ ...a, isNew: false })));
@@ -103,7 +103,7 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
 
       // 1) 신규 첨부 확정
       if (attachmentGroupTempKeyRef.current) {
-        await axiosAttach.post('/attach/confirm', {
+        await axiosAttach.post('/confirm', {
           groupTempKey: attachmentGroupTempKeyRef.current,
           postId,
         });
@@ -111,7 +111,7 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
 
       // 2) 기존 첨부 일괄 삭제
       if (deleteAttachmentIds.length > 0) {
-        await axiosAttach.post('/attach/delete/batch', {
+        await axiosAttach.post('/delete/batch', {
           attachmentIds: deleteAttachmentIds,
         });
       }
@@ -123,7 +123,7 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
         const url = (match as RegExpMatchArray).groups?.url ?? (match as RegExpMatchArray)[1];
         if (url && !url.startsWith('blob:')) fileUrls.push(url);
       }
-      await axiosAttach.post('/attach/cleanup/editor', {
+      await axiosAttach.post('/cleanup/editor', {
         postId,
         fileUrls,
       });

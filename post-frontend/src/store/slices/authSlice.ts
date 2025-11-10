@@ -27,7 +27,7 @@ export const fetchProfile = createAsyncThunk<
   "auth/fetchProfile",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosAuth.get<AuthUser>("/auth/me", {});
+      const res = await axiosAuth.get<AuthUser>("/me", {});
       const profile = res.data;
 
       let profileImageUrl: string | null = profile.profileImageUrl ?? null;
@@ -56,7 +56,7 @@ export const fetchProfile = createAsyncThunk<
 
 
 export const logoutThunk = createAsyncThunk<void>("auth/logout", async () => {
-  await axiosAuth.post("/auth/logout", {}); // 204 ????
+  await axiosAuth.post("/logout", {}); // 204 ????
 });
 
 const initialState: AuthState = {

@@ -52,7 +52,7 @@ function Header() {
 
         {/* Menu Links */}
         <a
-          href={`${SERVICE_URLS.POST}/posts`}
+          href={`${SERVICE_URLS.POST}`}
           className="flex items-center gap-1 hover:text-blue-600 hover:scale-[1.05] transition-all"
         >
           📚 게시글

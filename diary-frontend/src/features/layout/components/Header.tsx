@@ -40,7 +40,7 @@ const Header = () => {
   { path: '/user/calendar', label: '📆 회고 달력' },
   { path: '/user/diary-list', label: '📜 회고 목록' },
   // 🆕 게시판 메뉴 추가
-  { path: `${SERVICE_URLS.POST}/posts`, label: '🗂 게시판' },
+  { path: `${SERVICE_URLS.POST}`, label: '🗂 게시판' },
   { path: '/user/diary-insights', label: '📊 감정 분석' },
 ];
 
