@@ -184,6 +184,7 @@ services:
       - auth-service
       - diary-service
       - attachment-service
+      - post-service
     networks:
       - emoforge-net
 
@@ -198,6 +199,36 @@ services:
     networks:
       - emoforge-net
 
+  # =============================
+  # 📎 Post Service
+  # =============================
+  post-service:
+    build:
+      context: ./post-service
+      dockerfile: Dockerfile
+    container_name: post-service
+    env_file:
+      - ./post-service/.env.prod
+    ports:
+      - "8083:8083"   # ✅ Spring Boot가 8080으로 실행될 경우
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+
+      # ✅ DB 접속 정보 (RDS)
+      SPRING_DATASOURCE_URL: jdbc:mysql://emotion-diary-db.cnq2y8k4ebta.ap-northeast-2.rds.amazonaws.com:3306/nfe_post_db?useSSL=false&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # ✅ JWT Secret
+      JWT_SECRET: ${JWT_SECRET_USER}
+
+    depends_on:
+      - auth-service
+      - attachment-service
+    networks:
+      - emoforge-net
+
 networks:
   emoforge-net:
     external: true
+
