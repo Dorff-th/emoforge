@@ -6,6 +6,7 @@ import { addToast } from "@/store/slices/toastSlice";
 export default function setupInterceptors(instance: AxiosInstance) {
   instance.interceptors.request.use(
     (config) => {
+
       store.dispatch(startLoading());
       return config;
     },

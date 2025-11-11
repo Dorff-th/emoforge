@@ -13,7 +13,7 @@ export default function NewPostButton({ size = 'sm', position = 'left' }: NewPos
 
   return (
     <Link
-      to="/posts/new"
+      to="new"
       className={`inline-flex items-center space-x-1 border border-indigo-500 
                  text-indigo-500 rounded-md hover:bg-indigo-500 hover:text-white 
                  transition ${sizeClasses} w-fit ${positionClasses}`}

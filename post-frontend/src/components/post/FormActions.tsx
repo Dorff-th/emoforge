@@ -1,8 +1,16 @@
 // src/components/post/FormActions.tsx
+import { useNavigate  } from "react-router-dom";
 export default function FormActions() {
+
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1); // ✅ 브라우저 히스토리 상 한 단계 뒤로 이동
+  };
+
   return (
     <div className="flex justify-end gap-3">
-      <button type="button" className="px-4 py-2 border rounded-md hover:bg-gray-100">
+      <button type="button" onClick={handleGoBack} className="px-4 py-2 border rounded-md hover:bg-gray-100">
         취소
       </button>
       <button

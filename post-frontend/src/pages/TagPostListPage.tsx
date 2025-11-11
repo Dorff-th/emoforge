@@ -67,7 +67,7 @@ export default function TagPostListPage() {
               className="post-card bg-white rounded-lg shadow-md p-4
                          hover:shadow-lg hover:-translate-y-1 hover:scale-[1.01]
                          transform transition duration-300 cursor-pointer"
-              onClick={() => navigate(`/posts/${post.id}`)}
+              onClick={() => navigate(`/${post.id}`)}
             >
               {/* 제목 */}
               <h3 className="text-base font-semibold text-gray-900 mb-2">{post.title}</h3>

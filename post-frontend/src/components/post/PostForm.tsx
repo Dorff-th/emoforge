@@ -93,9 +93,9 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
     try {
       let res;
       if (mode === 'write') {
-        res = await axiosPost.post('/posts', payload);
+        res = await axiosPost.post('', payload);
       } else {
-        res = await axiosPost.put(`/posts/${existingPostId}`, payload);
+        res = await axiosPost.put(`/${existingPostId}`, payload);
       }
       const postId = res.data;
 
@@ -132,10 +132,10 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
         addToast({
           text: mode === 'write' ? '게시글이 등록되었습니다.' : '게시글이 수정되었습니다.',
           type: 'success',
-          duration: 4000,
+          duration: 2000,
         })
       );
-      navigate(`/posts/${postId}`);
+      navigate(`/${postId}`);
     } catch (error) {
       console.error('게시글 저장 실패', error);
       dispatch(

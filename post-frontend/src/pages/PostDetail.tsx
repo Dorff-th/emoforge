@@ -93,7 +93,7 @@ export default function PostDetail() {
             <span
               key={tag.id}
               className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-full cursor-pointer hover:underline"
-              onClick={() => navigate(`/posts/tags/${tag.name}`)}
+              onClick={() => navigate(`/tags/${tag.name}`)}
             >
               #{tag.name}
             </span>
@@ -122,7 +122,7 @@ export default function PostDetail() {
       {/* 버튼 영역 */}
       <div className="flex space-x-2">
         <button
-          onClick={() => navigate('/posts')}
+          onClick={() => navigate('/')}
           className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
         >
           To List
@@ -131,7 +131,7 @@ export default function PostDetail() {
         {isAuthor && (
           <div className="flex gap-2">
             <button
-              onClick={() => navigate(`/posts/${post.id}/edit`)}
+              onClick={() => navigate(`${post.id}/edit`)}
               className="px-4 py-2 rounded bg-blue-400 hover:bg-gray-300"
             >
               To Edit
