@@ -32,14 +32,14 @@ export default function AppRouter() {
   }
 
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/posts/">
             <ConfirmDialogProvider>
             <Routes>
-              <Route path="/ui-test" element={<UiTestPage />} />
+              <Route path="test/ui-test" element={<UiTestPage />} />
               
               {/* 게시글 목록 */}
               <Route
-                path="/posts"
+                path=""
                 element={
                   <ConditionalLayoutRoute status={status}>
                     <PageListPage />
@@ -49,7 +49,7 @@ export default function AppRouter() {
 
               {/* 태그별 게시글 목록 */}    
               <Route
-                path="/posts/tags/:tagName"
+                path="tags/:tagName"
                 element={
                   <ConditionalLayoutRoute status={status}>
                     <TagPostListPage />
@@ -59,7 +59,7 @@ export default function AppRouter() {
          
               {/* 게시글 상세 */}
               <Route
-                path="/posts/:id"
+                path=":id"
                 element={
                   <ConditionalLayoutRoute status={status}>
                     <PostDetail />
@@ -69,7 +69,7 @@ export default function AppRouter() {
 
               {/* 게시글 작성 */}
               <Route
-                path="/posts/new"
+                path="new"
                 element={
                   <ConditionalLayoutRoute status={status} authRequired>
                     <PostWritePage />
@@ -79,7 +79,7 @@ export default function AppRouter() {
 
               {/* 게시글 수정 */}
               <Route
-                path="/posts/:id/edit"
+                path=":id/edit"
                 element={ 
                   <ConditionalLayoutRoute status={status} authRequired>
                     <PostEditPage />
@@ -87,7 +87,7 @@ export default function AppRouter() {
                 }
               />
 
-              <Route path="*" element={<Navigate to="/posts" replace />} />
+              <Route path="*" element={<Navigate to="" replace />} />
             </Routes>
             </ConfirmDialogProvider>
         </BrowserRouter>

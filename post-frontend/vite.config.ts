@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     : undefined
 
   return {
-    base: "/note/",
+    base: "/posts/",
     plugins: [react()],
     server: {
       host: true,       

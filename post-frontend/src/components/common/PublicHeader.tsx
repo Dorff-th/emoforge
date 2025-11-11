@@ -22,7 +22,7 @@ export default function PublicHeader() {
         {/* Navigation */}
         <nav className="flex gap-6">
           <a
-            href={`${SERVICE_URLS.POST}/posts`}
+            href={`${SERVICE_URLS.POST}`}
             className="text-gray-700 hover:text-blue-600"
           >
             게시글

@@ -20,7 +20,7 @@ function AuthenticatedHeader() {
       await dispatch(logoutThunk()).unwrap();
       dispatch(addToast({ type: "info", text: "로그아웃 되었습니다." }));
       
-      window.location.href = `${SERVICE_URLS.POST}/posts`; // 로그아웃 후 게시글 목록 페이지로 이동
+      window.location.href = `${SERVICE_URLS.POST}`; // 로그아웃 후 게시글 목록 페이지로 이동
     } catch {
       dispatch(addToast({ type: "error", text: "로그아웃 실패" }));
     }
@@ -53,7 +53,7 @@ function AuthenticatedHeader() {
 
         {/* Menu Links */}
         <a
-          href={`${SERVICE_URLS.POST}/posts`}
+          href={`${SERVICE_URLS.POST}`}
           className="flex items-center gap-1 hover:text-blue-600 hover:scale-[1.05] transition-all"
         >
           📚 게시글
