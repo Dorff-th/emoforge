@@ -178,7 +178,7 @@ services:
       - /home/ec2-user/emoforge/auth-frontend/dist:/usr/share/nginx/html/auth
       - /home/ec2-user/emoforge/diary-frontend/dist:/usr/share/nginx/html/diary
       - /home/ec2-user/emoforge/admin-frontend/dist:/usr/share/nginx/html/admin
-      - /home/ec2-user/emoforge/post-frontend/dist:/usr/share/nginx/html/posts   #신규 추가
+      - /home/ec2-user/emoforge/post-frontend/dist:/usr/share/nginx/html/posts   ##신규 추가
       - /home/ec2-user/emoforge/certbot/www:/var/www/certbot
       - /home/ec2-user/emoforge/certbot/conf:/etc/letsencrypt
     depends_on:
