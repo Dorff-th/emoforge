@@ -63,7 +63,7 @@ const AttachmentUploader = ({
         formData.append("attachmentStatus", "TEMP");
 
         try {
-          const { data } = await axiosAttach.post<AttachmentItem>("/attach", formData, {
+          const { data } = await axiosAttach.post<AttachmentItem>("", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
 

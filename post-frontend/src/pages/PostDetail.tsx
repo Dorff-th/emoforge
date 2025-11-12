@@ -57,7 +57,7 @@ export default function PostDetail() {
     });
 
     if (result !== null) {
-      navigate('/posts');
+      navigate('/');
       return true;
     }
 
@@ -131,7 +131,7 @@ export default function PostDetail() {
         {isAuthor && (
           <div className="flex gap-2">
             <button
-              onClick={() => navigate(`${post.id}/edit`)}
+              onClick={() => navigate(`/${post.id}/edit`)}
               className="px-4 py-2 rounded bg-blue-400 hover:bg-gray-300"
             >
               To Edit

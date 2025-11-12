@@ -57,7 +57,7 @@ const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange, groupTem
 
       try {
         const { data } = await axiosAttach.post<AttachUploadResponseDto>(
-          "/attach",
+          "",
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },

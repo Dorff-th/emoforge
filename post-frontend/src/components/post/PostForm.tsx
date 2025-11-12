@@ -56,9 +56,6 @@ export default function PostForm({ mode, initialData, groupTempKey }: PostFormPr
     }
   }, [mode, existingPostId]);
 
-  // const handleAttachmentChange = useCallback((items: AttachmentItem[]) => {
-  //   setAttachments(items);
-  // }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
