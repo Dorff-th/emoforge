@@ -1,4 +1,4 @@
-package dev.emoforge.post.controller;
+package dev.emoforge.post.admin.controller;
 
 import dev.emoforge.post.config.CustomUserPrincipal;
 import org.springframework.security.core.Authentication;
@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class TestController {
+public class AdminTestController {
 
-    @GetMapping("/api/posts/test/jwt")
+    @GetMapping("/api/posts/admin/test/jwt")
     public String testJwt(Authentication authentication) {
         CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
         String memberUuid = principal.getUuid();
-        return "Post-Service : JWT member_uuid (USER ROLE) = " + memberUuid;
+        return "Post-Service : JWT member_uuid (ADMIN ROLE) = " + memberUuid;
     }
 }

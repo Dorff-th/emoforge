@@ -30,24 +30,6 @@ public class JwtTokenProvider {
     @Value("${jwt.secret.admin}")
     private String adminSecret;
 
-  /*  @PostConstruct
-    public void debugSecrets() {
-        log.info("🔐 userSecret: {}", userSecret);
-        log.info("🔐 adminSecret: {}", adminSecret);
-    }
-    @PostConstruct
-    public void userSecret() {
-        log.info("🔍 userSecret bytes: {}", userSecret.getBytes(StandardCharsets.UTF_8).length);
-        log.info("🔍 adminSecret bytes: {}", adminSecret.getBytes(StandardCharsets.UTF_8).length);
-    }
-    @PostConstruct
-    public void debugSecretExact() {
-        log.info("🧩 adminSecret visible='{}'", adminSecret);
-        log.info("🧩 adminSecret length={}", adminSecret.length());
-        log.info("🧩 adminSecret bytes={}", adminSecret.getBytes(StandardCharsets.UTF_8).length);
-    }*/
-
-
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpiration;
 

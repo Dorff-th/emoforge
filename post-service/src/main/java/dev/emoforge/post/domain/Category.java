@@ -4,11 +4,14 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "category")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+//@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class Category {
 
     @Id
@@ -21,7 +24,7 @@ public class Category {
     @Column(name = "is_default", nullable = false)
     private boolean defaultCategory = false;
 
-    private Category(String name, boolean defaultCategory) {
+    public Category(String name, boolean defaultCategory) {
         this.name = name;
         this.defaultCategory = defaultCategory;
     }
