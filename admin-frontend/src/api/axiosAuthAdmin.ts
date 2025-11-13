@@ -2,11 +2,11 @@
 import setupInterceptors from "./setupInterceptors";
 
 const AUTH_BASE_URL = import.meta.env.VITE_API_AUTH_BASE_URL;
-const axiosAdmin = axios.create({
+const axiosAuthAdmin = axios.create({   // 기존 axiosAdmin -> axiosAuthAdmin 으로 이름 변경
   baseURL: `${AUTH_BASE_URL}`,
   withCredentials: true,
 });
 
-setupInterceptors(axiosAdmin);
+setupInterceptors(axiosAuthAdmin);
 
-export default axiosAdmin;
+export default axiosAuthAdmin;

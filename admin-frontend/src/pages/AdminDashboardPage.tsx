@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axiosAdmin from "@/api/axiosAdmin";
+import axiosAuthAdmin from "@/api/axiosAuthAdmin";
 
 interface AdminInfo {
   username: string;
@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchAdminInfo = async () => {
       try {
-        const res = await axiosAdmin.get("/admin/me", {});
+        const res = await axiosAuthAdmin.get("/admin/me", {});
         setAdminInfo(res.data);
       } catch (err: any) {
         setError(err.response?.data?.message || "인증 실패");

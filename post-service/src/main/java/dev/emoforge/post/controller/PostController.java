@@ -1,5 +1,6 @@
 package dev.emoforge.post.controller;
 
+import dev.emoforge.post.config.CustomUserPrincipal;
 import dev.emoforge.post.domain.Post;
 import dev.emoforge.post.dto.bff.PageResponseDTO;
 import dev.emoforge.post.dto.bff.PostDetailResponse;
@@ -94,7 +95,9 @@ public class PostController {
         Authentication authentication,
         @Valid @RequestBody  PostRequestDTO dto
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
+        String memberUuid = principal.getUuid();
+
         Post saved = postService.createPost(dto, memberUuid);
 
         return ResponseEntity.ok(saved.getId()); // 일단 ID만 반환
@@ -113,7 +116,9 @@ public class PostController {
             .orElseThrow(() -> new IllegalArgumentException("Post가 존재하지 않습니다!"));
 
         // 2. 권한 체크 (본인만 수정 가능)
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
+        String memberUuid = principal.getUuid();
+
         if(!memberUuid.equals(dto.authorUuid())) {
             throw new AccessDeniedException("권한이 없습니다.");
         }
@@ -135,7 +140,9 @@ public class PostController {
             .orElseThrow(() -> new IllegalArgumentException("Post가 존재하지 않습니다!"));
 
         // 2. 권한 체크 (본인만 수정 가능)
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
+        String memberUuid = principal.getUuid();
+
         if(!memberUuid.equals(post.getMemberUuid())) {
             throw new AccessDeniedException("권한이 없습니다.");
         }

@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile
     container_name: auth-frontend
     ports:
-      - "8180:80"  # 🔸 변경: dev에서는 5173, 운영에서는 nginx 내부 80포트만 사용
+      - "8180:80" # 🔸 변경: dev에서는 5173, 운영에서는 nginx 내부 80포트만 사용
     environment:
       # 🔸 변경: 내부 서비스 URL → 외부 HTTPS 기반
       VITE_API_AUTH_BASE_URL: https://www.emoforge.dev/api/auth
@@ -30,7 +30,7 @@ services:
       dockerfile: Dockerfile
     container_name: diary-frontend
     ports:
-      - "8181:80"  # 🔸 변경: dev에서는 5175, 운영에서는 내부 nginx로 통합 가능
+      - "8181:80" # 🔸 변경: dev에서는 5175, 운영에서는 내부 nginx로 통합 가능
     environment:
       # 🔸 변경: 내부 도커 네트워크 주소 → HTTPS 외부 주소
       VITE_API_DIARY_BASE_URL: https://www.emoforge.dev/api/diary
@@ -52,9 +52,10 @@ services:
       dockerfile: Dockerfile
     container_name: admin-frontend
     ports:
-      - "8182:80"  # 🔸 변경: dev에서는 5176, 운영 nginx 내부 포트로 통일
+      - "8182:80" # 🔸 변경: dev에서는 5176, 운영 nginx 내부 포트로 통일
     environment:
       VITE_API_AUTH_BASE_URL: https://www.emoforge.dev/api/auth
+      VITE_API_POST_BASE_URL: https://www.emoforge.dev/api/posts
       VITE_APP_ADMIN_URL: https://www.emoforge.dev/admin
       VITE_APP_AUTH_URL: https://www.emoforge.dev
     networks:
@@ -69,7 +70,7 @@ services:
       dockerfile: Dockerfile
     container_name: post-frontend
     ports:
-      - "8183:80"  # 🔸 변경: dev에서는 5176, 운영 nginx 내부 포트로 통일
+      - "8183:80" # 🔸 변경: dev에서는 5176, 운영 nginx 내부 포트로 통일
     environment:
       VITE_API_AUTH_BASE_URL: https://www.emoforge.dev/api/auth
       VITE_APP_ADMIN_URL: https://www.emoforge.dev/admin
@@ -77,7 +78,6 @@ services:
     networks:
       - emoforge-net
 
-
 networks:
   emoforge-net:
-    external: true      
+    external: true

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axiosAdmin from "@/api/axiosAdmin";
+import axiosAuthAdmin from "@/api/axiosAuthAdmin";
 
 interface MemberDTO {
   uuid: string;
@@ -12,13 +12,13 @@ export default function AdminMemberPage() {
   const [members, setMembers] = useState<MemberDTO[]>([]);
 
   const fetchMembers = async () => {
-    const res = await axiosAdmin.get("/admin/members");
+    const res = await axiosAuthAdmin.get("/admin/members");
     setMembers(res.data);
   };
 
   const toggleStatus = async (uuid: string, current: string) => {
     const next = current === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-    await axiosAdmin.patch(`/admin/members/${uuid}/status`, null, {
+    await axiosAuthAdmin.patch(`/admin/members/${uuid}/status`, null, {
       params: { status: next },
     });
     fetchMembers();
@@ -26,7 +26,7 @@ export default function AdminMemberPage() {
 
   // ✅ 탈퇴 여부 토글 (백엔드: /{uuid}/deleted?deleted=true|false)
   const toggleDeleted = async (uuid: string, current: boolean) => {
-    const res = await axiosAdmin.patch(`/admin/members/${uuid}/deleted`, null, {
+    const res = await axiosAuthAdmin.patch(`/admin/members/${uuid}/deleted`, null, {
       params: { deleted: !current },
     });
 

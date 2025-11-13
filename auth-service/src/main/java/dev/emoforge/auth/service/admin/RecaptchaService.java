@@ -25,9 +25,11 @@ public class RecaptchaService {
     private static final String VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
     public boolean verify(String token) {
+
+        log.debug("\n\n\n===== recaptchaConfig.isRecaptchaEnabled() " + recaptchaConfig.isRecaptchaEnabled());
         // ✅ 개발환경에서는 바로 통과
         if (!recaptchaConfig.isRecaptchaEnabled()) {
-            log.debug("\n\n\n\n=======reCAPCHA 개발중 일때는 그냥 통과!  ");
+            //log.debug("\n\n\n\n=======reCAPCHA 개발중 일때는 그냥 통과!  ");
             return true;
         }
 

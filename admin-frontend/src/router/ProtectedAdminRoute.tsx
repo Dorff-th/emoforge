@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axiosAdmin from "@/api/axiosAdmin";
+import axiosAuthAdmin from "@/api/axiosAuthAdmin";
 import type { JSX } from "react";
 
 export default function ProtectedAdminRoute({ children }: { children: JSX.Element }) {
@@ -8,7 +8,7 @@ export default function ProtectedAdminRoute({ children }: { children: JSX.Elemen
 
   useEffect(() => {
     //axios.get("https://www.emoforge.dev/api/auth/admin/me", { withCredentials: true })
-      axiosAdmin
+      axiosAuthAdmin
       .get("/admin/me", {}) // ✅ baseURL 자동 적용됨
       .then((res) => {
         //console.log("✅ 관리자 인증 성공:", res.data);

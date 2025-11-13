@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile
     container_name: auth-service
     env_file:
-      - ./auth-service/.env.prod   # ✅ 이 경로에서 환경변수 읽음
+      - ./auth-service/.env.prod # ✅ 이 경로에서 환경변수 읽음
     ports:
       - "8081:8081"
     environment:
@@ -32,7 +32,7 @@ services:
       # ✅ reCAPTCHA
       RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY}
       RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY}
-      RECAPTCHA_ENABLED: "false"
+      RECAPTCHA_ENABLED: "true"
 
       # ✅ attachment-service 내부 URL (변경 없음)
       SERVICE_ATTACH_URL: http://attachment-service:8082
@@ -53,7 +53,7 @@ services:
       dockerfile: Dockerfile
     container_name: attachment-service
     env_file:
-      - ./attachment-service/.env.prod   # ✅ 이 경로에서 환경변수 읽음
+      - ./attachment-service/.env.prod # ✅ 이 경로에서 환경변수 읽음
     ports:
       - "8082:8082"
     environment:
@@ -76,8 +76,7 @@ services:
 
     # 🔸 변경: 로컬 C:\ 경로 제거 → EC2 내부 디렉토리 사용
     volumes:
-      - /home/ec2-user/emoforge/uploads:/home/ec2-user/emoforge/uploads  # 🔸 변경 (EC2 경로로 수정)
-      
+      - /home/ec2-user/emoforge/uploads:/home/ec2-user/emoforge/uploads # 🔸 변경 (EC2 경로로 수정)
 
     networks:
       - emoforge-net
@@ -91,7 +90,7 @@ services:
       dockerfile: Dockerfile
     container_name: diary-service
     env_file:
-      - ./diary-service/.env.prod   # ✅ 이 경로에서 환경변수 읽음
+      - ./diary-service/.env.prod # ✅ 이 경로에서 환경변수 읽음
     ports:
       - "8084:8084"
     environment:
@@ -131,7 +130,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      APP_ENV: prod  # 🔸 변경 (dev → prod)
+      APP_ENV: prod # 🔸 변경 (dev → prod)
       APP_NAME: langgraph_Service (Prod)
       APP_HOST: 0.0.0.0
       APP_PORT: 8000
@@ -153,12 +152,12 @@ services:
       CORS_ALLOW_ORIGINS: >-
         ["https://emoforge.dev", "https://www.emoforge.dev"]
 
-      LOG_LEVEL: INFO  # 🔸 변경 (DEBUG → INFO)
-      LOG_FILE: logs/langgraph_prod.log  # 🔸 변경 (prod 로그 분리)
+      LOG_LEVEL: INFO # 🔸 변경 (DEBUG → INFO)
+      LOG_FILE: logs/langgraph_prod.log # 🔸 변경 (prod 로그 분리)
 
     # ✅ 로그 보존 경로
     volumes:
-      - /home/ec2-user/emoforge/logs/langgraph:/app/logs  # 🔸 변경 (EC2 절대경로)
+      - /home/ec2-user/emoforge/logs/langgraph:/app/logs # 🔸 변경 (EC2 절대경로)
 
     networks:
       - emoforge-net
@@ -169,7 +168,7 @@ services:
   nginx:
     image: nginx:alpine
     container_name: nginx_gateway
-    restart: always  # ✅ 추가
+    restart: always # ✅ 추가
     ports:
       - "80:80"
       - "443:443"
@@ -178,7 +177,7 @@ services:
       - /home/ec2-user/emoforge/auth-frontend/dist:/usr/share/nginx/html/auth
       - /home/ec2-user/emoforge/diary-frontend/dist:/usr/share/nginx/html/diary
       - /home/ec2-user/emoforge/admin-frontend/dist:/usr/share/nginx/html/admin
-      - /home/ec2-user/emoforge/post-frontend/dist:/usr/share/nginx/html/posts   ##신규 추가
+      - /home/ec2-user/emoforge/post-frontend/dist:/usr/share/nginx/html/posts ##신규 추가
       - /home/ec2-user/emoforge/certbot/www:/var/www/certbot
       - /home/ec2-user/emoforge/certbot/conf:/etc/letsencrypt
     depends_on:
@@ -195,7 +194,7 @@ services:
     volumes:
       - /home/ec2-user/emoforge/certbot/conf:/etc/letsencrypt
       - /home/ec2-user/emoforge/certbot/www:/var/www/certbot
-    entrypoint: >  # ✅ 추가 (인증서 자동 발급용)
+    entrypoint: > # ✅ 추가 (인증서 자동 발급용)
       sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
     networks:
       - emoforge-net
@@ -211,7 +210,7 @@ services:
     env_file:
       - ./post-service/.env.prod
     ports:
-      - "8083:8083"   # ✅ Spring Boot가 8080으로 실행될 경우
+      - "8083:8083" # ✅ Spring Boot가 8080으로 실행될 경우
     environment:
       SPRING_PROFILES_ACTIVE: prod
 
@@ -219,9 +218,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://emotion-diary-db.cnq2y8k4ebta.ap-northeast-2.rds.amazonaws.com:3306/nfe_post_db?useSSL=false&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-
-      # ✅ JWT Secret
-      JWT_SECRET: ${JWT_SECRET_USER}
+      
+      # ✅ JWT 시크릿 키
+      JWT_SECRET_USER: ${JWT_SECRET_USER}
+      JWT_SECRET_ADMIN: ${JWT_SECRET_ADMIN}
 
     depends_on:
       - auth-service
@@ -232,4 +232,3 @@ services:
 networks:
   emoforge-net:
     external: true
-

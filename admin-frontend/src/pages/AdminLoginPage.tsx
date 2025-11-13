@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axiosAuth from "@/api/axiosAdmin";
+import axiosAuthAdmin from "@/api/axiosAuthAdmin";
 import ReCAPTCHA from "react-google-recaptcha";
 import { addToast } from '@store/slices/toastSlice';
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
 
     try {
       setLoading(true);
-      const res = await axiosAuth.post("/admin/login", {
+      const res = await axiosAuthAdmin.post("/admin/login", {
         username,
         password,
         captchaToken, // ✅ reCAPTCHA 토큰 전달

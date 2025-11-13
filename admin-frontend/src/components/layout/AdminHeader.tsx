@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import axiosAdmin from "@/api/axiosAdmin";
+import axiosAuthAdmin from "@/api/axiosAuthAdmin";
 export default function AdminHeader() {
   const navigate = useNavigate();
 
@@ -12,7 +12,7 @@ export default function AdminHeader() {
     });
 
     // ✅ 서버에도 로그아웃 요청 (optional)
-    axiosAdmin.post("/admin/logout").finally(() => {
+    axiosAuthAdmin.post("/admin/logout").finally(() => {
       navigate("/admin/login");
     });
   };

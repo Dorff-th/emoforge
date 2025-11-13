@@ -1,6 +1,7 @@
 package dev.emoforge.post.controller;
 
 
+import dev.emoforge.post.config.CustomUserPrincipal;
 import dev.emoforge.post.domain.Post;
 import dev.emoforge.post.dto.bff.CommentDetailResponse;
 import dev.emoforge.post.dto.internal.CommentRequest;
@@ -45,7 +46,8 @@ public class CommentController {
         Post post = postService.getPostById(postId)
             .orElseThrow(() -> new IllegalArgumentException("Post가 존재하지 않습니다!"));
 
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
+        String memberUuid = principal.getUuid();
 
         CommentResponse response = commentService.createComment(postId, memberUuid, request.getContent());
         return ResponseEntity.ok(response);
@@ -58,7 +60,8 @@ public class CommentController {
             @PathVariable("commentId") Long commentId,
             Authentication authentication
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
+        String memberUuid = principal.getUuid();
         commentService.deleteComment(postId, commentId, memberUuid);
         return ResponseEntity.noContent().build();
     }
