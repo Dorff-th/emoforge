@@ -94,6 +94,8 @@ export default function PostTagInput({ postId, value, onChange }: PostTagInputPr
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ',') {
               e.preventDefault();
+               const trimmed = inputValue.trim();
+               if (trimmed.length === 0) return; // 🚫 빈 태그 방지!
               addTag(inputValue.trim());
             }
           }}
