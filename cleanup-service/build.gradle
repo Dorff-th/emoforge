@@ -31,6 +31,9 @@ dependencies {
 
     // 테스트 필요하면 JUnit
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    //mysql db (aws rds 접속)
+    runtimeOnly 'com.mysql:mysql-connector-j:8.2.0'
 }
 
 test {
