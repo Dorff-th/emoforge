@@ -2,7 +2,11 @@ package dev.emoforge.attach.dto;
 
 import dev.emoforge.attach.domain.Attachment;
 /**
- * 변환 유틸 (엔티티 → DTO)
+ * Attachment 엔티티 → AttachmentResponse DTO 변환 전용 유틸 클래스.
+ *
+ * - Controller/Service 계층에서 엔티티를 직접 노출하지 않기 위해 사용됨.
+ * - 변환 규칙을 한 곳에 모아두어 재사용성과 유지보수성을 높임.
+ * - Swagger 문서화 대상은 아니며, DTO 변환 책임만 가짐.
  */
 public class AttachmentMapper {
 

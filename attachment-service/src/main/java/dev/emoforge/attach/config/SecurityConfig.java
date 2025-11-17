@@ -43,6 +43,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ 여기!
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/api/attach/welcome",  "/api/attach/test/**").permitAll()
                         .requestMatchers("/api/attach/uploads/profile_image/**").permitAll()
                         .requestMatchers("/api/attach/uploads/images/**").permitAll() //ec2운영환경
