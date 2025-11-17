@@ -119,6 +119,16 @@ export default function ProfilePage() {
             </button>
           </div>
 
+          {/* 가입일  */}
+          <div className="flex items-center gap-2 text-gray-500">
+            <p>가입일: {user?.createdAt}  </p>
+          </div>
+
+          {/* 정보 변경일  */}
+          <div className="flex items-center gap-2 text-gray-500">
+            <p>정보 변경일: {user?.updatedAt}  </p>
+          </div>
+
           {/* 로그아웃 버튼은 Header로 이동 */}
           {/**
            * <Button

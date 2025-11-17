@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import dev.emoforge.auth.enums.MemberStatus;
 import dev.emoforge.auth.enums.Role;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "member")
@@ -54,6 +55,10 @@ public class Member {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Column(name = "kakao_id", unique = true)
     private Long kakaoId; // ✅ 카카오 고유 ID

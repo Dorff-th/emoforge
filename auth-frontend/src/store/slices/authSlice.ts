@@ -12,6 +12,8 @@ interface AuthUser {
   status?: string;
   profileImageUrl?: string | null;
   [key: string]: unknown;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface AuthState {
