@@ -9,6 +9,10 @@ import dev.emoforge.auth.repository.MemberRepository;
 import dev.emoforge.auth.security.CustomUserPrincipal;
 import dev.emoforge.auth.service.AuthService;
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +31,23 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 
+/**
+ * AuthController
+ *
+ * 인증/인가 관련 핵심 기능을 제공하는 컨트롤러.
+ *
+ * 제공 기능:
+ * - 회원가입 (sign up)
+ * - 로그인 (login)
+ * - 현재 인증된 사용자 정보 조회 (me)
+ * - 토큰 재발급 (refresh)
+ * - 로그아웃 및 쿠키 삭제 (logout)
+ *
+ * JWT 기반 인증 시스템에서 AccessToken / RefreshToken을 발급 및 관리하며,
+ * 도메인·SameSite·Secure 옵션이 적용된 HttpOnly 쿠키 형태로 토큰을 전달한다.
+ * RefreshToken 유효성 검사 및 재발급, 세션 무효화 등 보안 처리를 모두 포함한다.
+ */
+@Tag(name = "Auth", description = "인증/인가 관련 API")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -64,19 +85,58 @@ public class AuthController {
     @Value("${auth.cookie.names.refresh}")
     private String refreshCookieName;
 
-
+    // ---------------------------------------------------------
+    // 🔹 회원가입 (not used)
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "회원가입 (not used)",
+            description = "새로운 회원을 생성합니다. 유효성 검증 후 Member 객체를 반환합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력 데이터")
+    })
     @PostMapping("/signup")
     public ResponseEntity<Member> signUp(@Valid @RequestBody SignUpRequest request) {
         Member member = authService.signUp(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(member);
     }
-    
+
+    // ---------------------------------------------------------
+    // 🔹 로그인 (not used)
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "로그인  (not used)",
+            description = """
+                    사용자 로그인 처리 후 AccessToken / RefreshToken을 포함한 응답을 반환합니다.
+                    토큰은 HttpOnly 쿠키에 저장되지 않으며 LoginResponse로 전달됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "401", description = "잘못된 로그인 정보")
+    })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
+    // ---------------------------------------------------------
+    // 🔹 현재 사용자 정보 조회
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "현재 로그인한 사용자 정보 조회",
+            description = """
+                    인증된 사용자의 UUID를 기반으로 Member 정보를 조회합니다.
+                    AccessToken이 유효해야 하며, 인증되지 않은 경우 예외가 발생합니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
     @GetMapping("/me")
     public MemberDTO getCurrentUser(@AuthenticationPrincipal CustomUserPrincipal user) {
         if (user == null ) {
@@ -90,7 +150,22 @@ public class AuthController {
         return new MemberDTO(member);
     }
 
-
+    // ---------------------------------------------------------
+    // 🔹 토큰 재발급 (Refresh)
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "토큰 재발급",
+            description = """
+                    RefreshToken 쿠키를 검증하여 새로운 AccessToken 및 RefreshToken을 발급합니다.
+                    RefreshToken이 유효하지 않으면 401(UnAuthorized)을 반환합니다.
+                    재발급된 토큰은 HttpOnly 쿠키로 클라이언트에 전달됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "재발급 성공"),
+            @ApiResponse(responseCode = "401", description = "RefreshToken 유효하지 않음"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = null;
@@ -148,7 +223,20 @@ public class AuthController {
         return ResponseEntity.ok("Token refreshed");
     }
 
-
+    // ---------------------------------------------------------
+    // 🔹 로그아웃
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "로그아웃",
+            description = """
+                    AccessToken · RefreshToken 쿠키를 모두 삭제하여 로그아웃 처리합니다.
+                    여러 도메인/환경에서 생성된 쿠키들을 제거하기 위해 다양한 Set-Cookie 변형을 함께 처리합니다.
+                    OAuth2Login 잔여 세션도 함께 무효화합니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "로그아웃 성공")
+    })
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
 

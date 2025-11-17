@@ -5,6 +5,10 @@ import dev.emoforge.auth.dto.admin.AdminLoginResponse;
 import dev.emoforge.auth.security.jwt.JwtTokenProvider;
 import dev.emoforge.auth.service.admin.AdminAuthService;
 import dev.emoforge.auth.service.admin.RecaptchaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +25,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * 관리자 로그인 컨트롤러
- * - Auth-Service 내부 전용 엔드포인트 (/api/auth/admin)
- * - JWT는 HttpOnly 쿠키(admin_token)에 담아 반환
+ * AdminAuthController
+ *
+ * 관리자 인증 전용 컨트롤러.
+ * - 일반 사용자 인증 API와 분리된 관리자용 로그인/로그아웃/인증 체크 기능을 제공한다.
+ * - 관리자 인증은 admin_token(HttpOnly 쿠키) 기반으로 처리된다.
+ * - reCAPTCHA 기반 자동화 방지 검증을 수행한다.
+ *
+ * 모든 엔드포인트는 운영상 민감하며, 관리자 페이지(admin-frontend)에서만 사용된다.
  */
+@Tag(name = "AdminAuth", description = "관리자 전용 인증 API (일반 사용자 접근 불가)")
 @RestController
 @RequestMapping("/api/auth/admin")
 @RequiredArgsConstructor
@@ -53,7 +63,24 @@ public class AdminAuthController {
     @Value("${admin.cookie.max-age-seconds}")
     private long maxAgeSeconds;
 
-
+    // ---------------------------------------------------------
+    // 🔹 관리자 로그인
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "관리자 로그인",
+            description = """
+                    관리자 계정 로그인 API입니다. (관리자 전용)
+                    1. reCAPTCHA 검증 수행
+                    2. 관리자 로그인 시도
+                    3. admin_token(HttpOnly 쿠키) 발급
+                    - 일반 사용자 로그인 API와 절대 혼용되지 않습니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "403", description = "reCAPTCHA 검증 실패"),
+            @ApiResponse(responseCode = "401", description = "잘못된 관리자 계정 정보")
+    })
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponse> login(@Valid @RequestBody AdminLoginRequest request) {
 
@@ -83,7 +110,19 @@ public class AdminAuthController {
                 .body(response);
     }
 
-
+    // ---------------------------------------------------------
+    // 🔹 관리자 로그아웃
+    // ---------------------------------------------------------
+    @Operation(
+            summary = "관리자 로그아웃",
+            description = """
+                    관리자 인증 쿠키(admin_token)를 삭제하여 로그아웃 처리합니다. (관리자 전용)
+                    쿠키는 동일한 domain/path/sameSite/secure 옵션으로 제거해야 정상적으로 삭제됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그아웃 완료")
+    })
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
 
