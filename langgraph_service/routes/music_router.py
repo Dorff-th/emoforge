@@ -7,7 +7,15 @@ router = APIRouter(prefix="/api/langgraph/diary/gpt/music", tags=["Music Recomme
 
 
 # ✅ FastAPI router
-@router.post("/recommendations/simple")
+@router.post(
+    "/recommendations/simple",
+    summary="감정 기반 간단 음악 추천",
+    description="""
+사용자의 감정 점수, 감정 문장, 회고 내용을 기반으로  
+LangGraph + GPT + YouTube Music API를 활용해 음악 추천을 생성합니다.
+""",
+    response_model=MusicRecommendResponse,
+)
 async def recommend_music(request: MusicRecommendRequest):
     print("🔥 라우터 진입 성공")
     result = await recommend_music_simple(
