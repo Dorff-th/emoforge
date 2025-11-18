@@ -6,6 +6,7 @@ import dev.emoforge.diary.dto.request.GptFeelingRequest;
 import dev.emoforge.diary.dto.response.GptFeedbackResponse;
 import dev.emoforge.diary.dto.response.GptFeelingResponse;
 import dev.emoforge.diary.service.GptService;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ import java.util.Map;
  */
 //@RestController
 //@RequestMapping("/api/diary/gpt")
+@Hidden
 @RequiredArgsConstructor
 public class GptController {
 

@@ -1,5 +1,6 @@
 package dev.emoforge.diary.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Hidden
 @RestController
 @Slf4j
 public class CustomErrorController implements ErrorController {
