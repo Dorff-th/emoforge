@@ -20,10 +20,4 @@ public record AttachmentResponse (
      long fileSize,
      String publicUrl,
     String fileSizeText
-
-    /*Long id,
-    String fileName,
-    String fileUrl,
-    String uploadType,
-    String publicUrl*/
 ) {}
