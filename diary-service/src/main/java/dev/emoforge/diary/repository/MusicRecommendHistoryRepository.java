@@ -34,4 +34,8 @@ public interface  MusicRecommendHistoryRepository extends JpaRepository<MusicRec
     @Modifying
     @Query("DELETE FROM MusicRecommendHistory h WHERE h.diaryEntry.id = :diaryEntryId")
     void deleteByDiaryEntryId(Long diaryEntryId);
+
+    //특정 사용자(memberUuid)의 추천 유튜브 음악영상 개수(auth-frontend의 프로필 화면에서 조회 용도)
+    int countByMemberUuid(@Param("memberUuid") String memberUuid);
 }
+

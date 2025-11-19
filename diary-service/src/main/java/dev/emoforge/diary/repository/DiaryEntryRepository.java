@@ -39,4 +39,7 @@ public interface DiaryEntryRepository extends JpaRepository<DiaryEntry, Long> {
     @Modifying
     @Query("DELETE FROM DiaryEntry d WHERE d.memberUuid = :memberUuid AND d.diaryDate = :date")
     void deleteAllByMemberUuidAndDate(@Param("memberUuid") String memberUuid, @Param("date") LocalDate date);
+
+    //특정 사용자(memberUuid)의 감정&회고 입력 개수 조회(auth-frontend의 프로필 화면에서 조회 용도)
+    int countByMemberUuid(@Param("memberUuid") String memberUuid);
 }

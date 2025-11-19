@@ -82,4 +82,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("UPDATE Post a SET a.title = :#{#dto.title}, a.content =:#{#dto.content}, categoryId =:#{#dto.categoryId}, a.updatedAt =:#{#dto.updatedAt} " +
         "WHERE a.id = :#{#dto.id}")
     int updatePostById(@Param("dto") PostUpdateDTO dto);
+
+    /**
+     * 특정 회원(member_uuid)이 작성한 post 개수를 조회한다.
+     */
+    int countByMemberUuid(@Param("memberUuid") String memberUuid);
 }

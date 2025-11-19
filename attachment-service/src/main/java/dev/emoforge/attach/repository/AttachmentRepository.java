@@ -3,6 +3,7 @@ package dev.emoforge.attach.repository;
 import dev.emoforge.attach.domain.Attachment;
 import dev.emoforge.attach.domain.AttachmentStatus;
 import dev.emoforge.attach.domain.UploadType;
+import dev.emoforge.attach.dto.UploadTypeCountResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -79,5 +80,23 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
      * - 업로드 시점(uploadedAt) 기준으로 최신 1건 반환
      */
     Optional<Attachment> findTopByMemberUuidAndUploadTypeOrderByUploadedAtDesc(String memberUuid, UploadType uploadType);
+
+    /**
+     * 특정 사용자(memberUuid)에 대한 업로드 타입별 파일 수 집계
+     */
+    @Query("""
+        SELECT new dev.emoforge.attach.dto.UploadTypeCountResponse(
+            a.uploadType,
+            COUNT(a)
+        )
+        FROM Attachment a
+        WHERE a.memberUuid = :memberUuid
+          AND a.uploadType IN (:types)
+        GROUP BY a.uploadType
+    """)
+    List<UploadTypeCountResponse> countByMemberAndUploadTypes(
+            @Param("memberUuid") String memberUuid,
+            @Param("types") List<UploadType> types
+    );
 
 }

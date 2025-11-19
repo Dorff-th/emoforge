@@ -20,4 +20,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 개별 댓글이 postId + commentId 조건으로 존재하는지 확인 가능
     boolean existsByIdAndPostId(Long id, Long postId);
+
+    /**
+     * 특정 회원(member_uuid)이 작성한 comment 개수를 조회한다.
+     */
+    int countByMemberUuid(@Param("memberUuid") String memberUuid);
 }

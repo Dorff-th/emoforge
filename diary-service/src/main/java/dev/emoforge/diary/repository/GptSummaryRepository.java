@@ -30,4 +30,7 @@ public interface GptSummaryRepository extends JpaRepository<GptSummary, Long> {
     @Modifying
     @Query("DELETE FROM GptSummary g WHERE g.memberUuid = :memberUuid AND g.diaryDate = :date")
     void deleteByMemberUuidAndDiaryDate(@Param("memberUuid") String memberUuid, @Param("date") LocalDate date);
+
+    //특정 사용자(memberUuid)의 gpt 피드백 요약 개수 조회(auth-frontend의 프로필 화면에서 조회 용도)
+    int countByMemberUuid(@Param("memberUuid") String memberUuid);
 }

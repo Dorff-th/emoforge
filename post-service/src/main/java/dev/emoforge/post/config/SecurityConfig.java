@@ -58,6 +58,7 @@ public class SecurityConfig {
                             "/swagger-resources/**",
                             "/api-docs/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/me/statistics").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/posts/**").authenticated()
                         .requestMatchers(HttpMethod.PUT,"/api/posts/**").authenticated()
