@@ -36,7 +36,7 @@ import java.util.Map;
 )
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/attachments")
+@RequestMapping("/api/attach")
 @Slf4j
 public class AttachmentStatsController {
 
