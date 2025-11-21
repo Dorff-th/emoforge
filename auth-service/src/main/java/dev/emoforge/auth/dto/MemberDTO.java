@@ -46,6 +46,13 @@ public class MemberDTO {
     @Schema(description = "사용자 정보 변경일", example = "2025-10-29 13:19:15")
     private String updatedAt;
 
+    @Schema(description = "사용자 탈퇴 신청 여부", example = "true")
+    private boolean deleted;
+
+    @Schema(description = "사용자 탈퇴 신청일", example = "2025-10-29 13:19:15")
+    private String deletedAt;
+
+
     public MemberDTO(Member member) {
         this.uuid = member.getUuid();
         this.username = member.getUsername();
@@ -55,6 +62,8 @@ public class MemberDTO {
         this.status = member.getStatus().name();
         this.createdAt = formatSafe(member.getCreatedAt());
         this.updatedAt = formatSafe(member.getUpdatedAt());
+        this.deleted = member.isDeleted();
+        this.deletedAt = formatSafe(member.getDeletedAt());
     }
 
     private static final DateTimeFormatter FORMATTER =

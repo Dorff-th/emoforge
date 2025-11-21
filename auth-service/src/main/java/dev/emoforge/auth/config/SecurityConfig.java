@@ -151,10 +151,10 @@ public class SecurityConfig {
                                 response.sendRedirect(inactiveRedirectUrl);
                                 return;
                             }
-                            if (member.isDeleted()) {
+                            /*if (member.isDeleted()) { <-- 탈퇴 신청한 사용자가 스스로 탈퇴신청을 취소하게 하려면 주석처리해야 함 
                                 response.sendRedirect(deletedRedirectUrl);
                                 return;
-                            }
+                            }*/
 
                             String accessToken = jwtTokenProvider.generateAccessToken(
                                     principal.getUsername(),

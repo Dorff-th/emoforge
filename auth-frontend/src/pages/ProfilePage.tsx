@@ -1,6 +1,7 @@
 // src/pages/ProfilePage.tsx
 import { useCallback, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import axiosAuth from "@/api/axiosAuth";
 import { addToast } from "@/store/slices/toastSlice";
 import type { RootState, AppDispatch } from "@/store/store";
@@ -13,6 +14,11 @@ import ProfileImageUploadModal from "@/components/profile/ProfileImageUploadModa
 import defaultProfileImg from "@/assets/default-profile.svg";
 import { fetchProfile as fetchProfileThunk } from "@/store/slices/authSlice";
 import { fetchMemberPostStats, fetchMemberAttachmentStats, fetchMemberDiaryStats } from "@/api/userStatApi";
+import { requestWithdrawal} from "@/api/axiosWithdrawal";
+import ConfirmModal from '@/components/ui/ConfirmModal';
+import { withToast } from '@/utils/withToast';
+import { logoutThunk } from "@/store/slices/authSlice";
+
 
 interface Profile {
   uuid: string;
@@ -35,6 +41,8 @@ export default function ProfilePage() {
   const [openEmailModal, setOpenEmailModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileImage, setProfileImage] = useState<ProfileImageResponse | null>(null);
+
+  const navigate = useNavigate();
 
   const loadProfileImage = useCallback(async () => {
     if (!user?.uuid) {
@@ -113,6 +121,37 @@ export default function ProfilePage() {
 
     fetchStats();
   }, []);
+
+  const [withdrawalTarget, setWithdrawalTarget] = useState<any | null>(null);
+  
+
+  // 회원탈퇴 여부 묻는 모달에서 "확인" 눌렀을 때
+  const handleWithdrawalConfirm = async () => {
+    if (!withdrawalTarget) return;
+
+    try {
+      await withToast(
+        requestWithdrawal(),
+        {
+          success: "탈퇴 신청이 완료되었습니다.\n다시 로그인하려면 탈퇴 취소가 필요합니다.",
+          error: "탈퇴 신청 중 오류가 발생했습니다.",
+        }
+      );
+      // 정상 요청 후 자동 로그아웃
+      await dispatch(logoutThunk()).unwrap();
+      navigate("/login"); 
+    } catch (err) {
+      console.error("탈퇴 요청 실패:", err);
+      // withToast가 이미 에러 토스트 처리해 줌
+    } finally {
+      // 모달 닫기
+      setWithdrawalTarget(null);
+    }
+  };
+
+  const handleCancelWithdrawal = () => {
+    setWithdrawalTarget(null);
+  };
 
   const ATTACH_BASE_URL = import.meta.env.VITE_API_ATTACH_BASE_URL;
 
@@ -206,6 +245,19 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* ============================= */}
+      {/* 📌 회원탈퇴 버튼 영역 */}
+      {/* ============================= */}
+
+      <div className="mt-8 flex justify-center">
+        <button
+          className="text-sm text-red-500 hover:text-red-600 hover:underline"
+          onClick={() => setWithdrawalTarget(true)}
+        >
+          회원탈퇴
+        </button>
+      </div>
+
     </div>
 
     {/* ============================= */}
@@ -223,6 +275,18 @@ export default function ProfilePage() {
       memberUuid={user.uuid ?? ""}
       onUploaded={handleProfileImageUploaded}
     />
+    {/* 🔥 회원탈퇴 버튼 클릭시 나오는 모달*/}
+      <ConfirmModal
+        open={!!withdrawalTarget}
+        title="회원탈퇴 확인"
+        description={
+          withdrawalTarget
+            ? `정말 회원 탈퇴를 진행하시겠습니까?\n탈퇴 신청 후 10일 뒤 모든 데이터가 삭제됩니다.`
+            : ''
+        }
+        onConfirm={handleWithdrawalConfirm}
+        onCancel={handleCancelWithdrawal}
+      />
   </div>
 );
 }

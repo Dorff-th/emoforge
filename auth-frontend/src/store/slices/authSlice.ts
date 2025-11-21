@@ -14,11 +14,13 @@ interface AuthUser {
   [key: string]: unknown;
   createdAt?: string;
   updatedAt?: string;
+  deleted?: boolean;
+  deletedAt?: string | null;
 }
 
 interface AuthState {
   user: AuthUser | null;
-  status: "idle" | "loading" | "authenticated" | "unauthenticated" | "error";
+  status: "idle" | "loading" | "authenticated" | "unauthenticated" | "deleted" | "error";
 }
 
 export const fetchProfile = createAsyncThunk<
@@ -84,7 +86,12 @@ const authSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.user = action.payload;
-        state.status = "authenticated";
+        //state.status = "authenticated";
+        if (action.payload.deleted) {
+          state.status = "deleted";   // 🔥 핵심
+        } else {
+          state.status = "authenticated";
+        }
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         if (action.payload === "unauthenticated") {
@@ -92,8 +99,8 @@ const authSlice = createSlice({
         } else {
           state.status = "error";
         }
-      });
-  },
+      })
+    },
 });
 
 export const { logout } = authSlice.actions;

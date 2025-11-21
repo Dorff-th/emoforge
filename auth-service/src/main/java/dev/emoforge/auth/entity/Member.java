@@ -47,6 +47,9 @@ public class Member {
 
     @Column(nullable = false)
     private boolean deleted;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

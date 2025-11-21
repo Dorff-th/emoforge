@@ -18,7 +18,7 @@ function Header() {
     try {
       await dispatch(logoutThunk()).unwrap();
       dispatch(addToast({ type: "info", text: "로그아웃 되었습니다." }));
-      navigate("/login"); //외부 서비스인 PostService로 이동
+      navigate("/login"); 
       //window.location.href = `${SERVICE_URLS.POST}/posts?state=logout_success`; 
     } catch {
       dispatch(addToast({ type: "error", text: "로그아웃 실패" }));

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,8 +36,21 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("UPDATE Member m SET m.status = :status WHERE m.uuid = :uuid")
     int updateStatusByUuid(@Param("uuid") String uuid, @Param("status") MemberStatus status);
 
-    // 관리자 기능 (혹은 사용자가 회원탈퇴를 신청할때)-  탈퇴 여부 변경 (deleted = 0 or 1)
+    // 관리자 기능 (혹은 사용자가 회원탈퇴를 신청할때)-  탈퇴 여부 변경 (deleted = 0 or 1) - 검토중
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Member m SET m.deleted = :deleted WHERE m.uuid = :uuid")
     int updateDeletedByUuid(@Param("uuid") String uuid, @Param("deleted") boolean deleted);
+
+    //탈퇴 요청
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Member m SET m.deleted = true, m.deletedAt = :deletedAt WHERE m.uuid = :uuid")
+    int markMemberAsDeleted(
+            @Param("uuid") String uuid,
+            @Param("deletedAt") LocalDateTime deletedAt
+    );
+
+    //탈퇴 취소
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Member m SET m.deleted = false, m.deletedAt = NULL WHERE m.uuid = :uuid")
+    int cancelMemberDeletion(@Param("uuid") String uuid);
 }
