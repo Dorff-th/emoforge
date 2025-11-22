@@ -15,13 +15,5 @@ public class AuthServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AuthServiceApplication.class, args);
 	}
-	// ✅ 애플리케이션 시작 시 카카오 scope 확인용 로그
-    @Bean
-    CommandLineRunner runner(ClientRegistrationRepository repo) {
-        return args -> {
-            ClientRegistration kakao = repo.findByRegistrationId("kakao");
-            System.out.println(">>> Kakao scopes: " + kakao.getScopes());
-        };
-    }
 
 }

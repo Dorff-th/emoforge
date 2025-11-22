@@ -13,6 +13,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ *  not used - 이용약관 붙이는거 때문에 로직변경으로 인한 미사용
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

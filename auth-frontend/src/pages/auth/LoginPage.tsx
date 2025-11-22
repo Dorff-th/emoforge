@@ -3,16 +3,17 @@ import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/store/hooks";
 import { addToast } from "@/store/slices/toastSlice";
+import { redirectToKakaoLogin } from "@/utils/redirectToKakaoLogin";
 
 export default function LoginPage() {
 
   const dispatch = useAppDispatch();
 
-  const handleKakaoLogin = () => {
-    console.log("Kakao login initiated");
-    console.log("Redirecting to:", import.meta.env.VITE_KAKAO_AUTH_URL);
-    window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
-  };
+  // const handleKakaoLogin = () => {
+  //   window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
+  // };
+
+  
 
    const [params] = useSearchParams();
    useEffect(() => {
@@ -34,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
       <button
-        onClick={handleKakaoLogin}
+        onClick={redirectToKakaoLogin}
         className="rounded-lg bg-yellow-400 px-6 py-3 font-bold text-black hover:bg-yellow-500"
       >
         카카오 로그인

@@ -1,71 +1,54 @@
-import { useEffect } from "react";
-import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchProfile } from "@/store/slices/authSlice";
-import LoginPage from "@/pages/LoginPage";
+import {  Routes, Route, Navigate } from "react-router-dom";
+import { useAppSelector } from "@/store/hooks";
+import LoginPage from "@/pages/auth/LoginPage";
 import ProfilePage from "@/pages/ProfilePage";
 import UiTestPage from "@/pages/UiTestPage";
 import TestPage from "@/pages/TestPage";
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
 import AuthenticatedLayout from "@/components/layout/AuthenticatedLayout";
 import WithdrawalPendingPage from "@/pages/WithdrawalPendingPage";
+import KakaoCallbackPage from "@/pages/auth/KakaoCallbackPage";
+import TermsAgreementPage from "@/pages/auth/TermsAgreementPage";
+import PrivateRoute from "@/private/PrivateRoute";
 
 export default function AppRouter() {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-
   const { status } = useAppSelector((state) => state.auth);
-  const isAuthenticated = status === "authenticated";
-
-  // 최초 프로필 조회
-  useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchProfile());
-    }
-  }, [dispatch, status]);
-
-  // status 변화에 따른 자동 라우팅
-  useEffect(() => {
-    if (status === "authenticated") navigate("/profile");
-    else if (status === "deleted") navigate("/withdraw/pending");
-    else if (status === "unauthenticated") navigate("/login");
-  }, [status, navigate]);
 
   return (
     <ConfirmDialogProvider>
       <Routes>
 
-        {/* Root */}
+        {/* Index 루트 */}
         <Route
-          path="/"
+          index
           element={
-            status === "deleted" ? (
-              <Navigate to="/withdraw/pending" replace />
-            ) : isAuthenticated ? (
+            status === "authenticated" ? (
               <Navigate to="/profile" replace />
+            ) : status === "deleted" ? (
+              <Navigate to="/withdraw/pending" replace />
             ) : (
               <Navigate to="/login" replace />
             )
           }
         />
 
+        {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/ui-test" element={<UiTestPage />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/kakao/callback" element={<KakaoCallbackPage />} />
+        <Route path="/auth/terms" element={<TermsAgreementPage />} />
         <Route path="/withdraw/pending" element={<WithdrawalPendingPage />} />
 
+        {/* Protected Route (로그인 필요) */}
         <Route
           path="/profile"
           element={
-            status === "deleted" ? (
-              <Navigate to="/withdraw/pending" replace />
-            ) : status === "authenticated" ? (
+            <PrivateRoute>
               <AuthenticatedLayout>
                 <ProfilePage />
               </AuthenticatedLayout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            </PrivateRoute>
           }
         />
 
@@ -73,3 +56,4 @@ export default function AppRouter() {
     </ConfirmDialogProvider>
   );
 }
+

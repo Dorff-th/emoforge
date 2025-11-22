@@ -46,7 +46,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
 
-    add_header Content-Security-Policy "default-src 'self' https://www.google.com https://www.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https:; frame-src https://www.google.com/recaptcha/; connect-src 'self' data: https://www.google.com https://www.gstatic.com;" always;
+    add_header Content-Security-Policy "default-src 'self' https://www.google.com https://www.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https:; frame-src https://www.google.com/recaptcha/; connect-src 'self' https://www.google.com https://www.gstatic.com;" always;
 
 
     # ==========================================
@@ -128,24 +128,6 @@ server {
         root /usr/share/nginx/html/auth;
         index index.html;
         try_files $uri $uri/ /index.html;
-    }
-
-    # ================================
-    # 🎯 Kakao Callback (SPA 라우팅)
-    # ================================
-    location /kakao/ {
-    	alias /usr/share/nginx/html/auth/;
-    	index index.html;
-
-    	# 정적파일 먼저 처리
-    	location ~* \.(?:js|css|ico|png|jpg|jpeg|svg|woff2?)$ {
-           try_files $uri =404;
-           access_log off;
-           expires 1M;
-        }
-
-        # SPA fallback
-        try_files $uri $uri/ /kakao/index.html;
     }
 
     # ================================

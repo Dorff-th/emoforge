@@ -103,92 +103,36 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
-        http
-                // 🔒 이 체인은 /api/auth/** 만 처리 (명확하게 스코프 한정)
-                .securityMatcher("/api/auth/**") // ← 추가
 
+        http
+                .securityMatcher("/api/auth/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ 콜백/인가 엔드포인트는 반드시 허용
                         .requestMatchers(
                                 "/api/auth/login",
-                                "/api/auth/login/**",                 // ← 카카오 콜백 포함
-                                "/api/auth/oauth2/**"                 // ← 인가 시작점 포함
-                        ).permitAll()
-                        .requestMatchers(
                                 "/api/auth/refresh",
                                 "/api/auth/health",
-                                "/api/auth/public/**"
+                                "/api/auth/public/**",
+                                "/api/auth/kakao",         // 🔥 code 처리 엔드포인트 허용
+                                "/api/auth/kakao/signup"
                         ).permitAll()
                         .requestMatchers("/api/auth/**").authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(
-                        token -> jwtTokenProvider.validateToken(token, false),
-                        token -> jwtTokenProvider.getAuthentication(token)
-                ), UsernamePasswordAuthenticationFilter.class)
-                // API는 302 말고 401 고정
+
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(
+                                token -> jwtTokenProvider.validateToken(token, false),
+                                token -> jwtTokenProvider.getAuthentication(token)
+                        ),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
                 .exceptionHandling(ex -> ex
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                 new AntPathRequestMatcher("/api/**")
                         )
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        // ✅ 여기서 Spring의 기본 경로를 /api/auth/** 로 "강제"한다 (가장 중요)
-                        .authorizationEndpoint(authorization ->
-                                authorization.baseUri("/api/auth/oauth2/authorization") // ← 변경
-                        )
-                        .redirectionEndpoint(redirection ->
-                                redirection.baseUri("/api/auth/login/oauth2/code/*")    // ← 변경
-                        )
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler((request, response, authentication) -> {
-                            CustomOAuth2User principal = (CustomOAuth2User) authentication.getPrincipal();
-                            Member member = principal.getMember();
-
-                            if (member.getStatus() == MemberStatus.INACTIVE) {
-                                response.sendRedirect(inactiveRedirectUrl);
-                                return;
-                            }
-                            /*if (member.isDeleted()) { <-- 탈퇴 신청한 사용자가 스스로 탈퇴신청을 취소하게 하려면 주석처리해야 함 
-                                response.sendRedirect(deletedRedirectUrl);
-                                return;
-                            }*/
-
-                            String accessToken = jwtTokenProvider.generateAccessToken(
-                                    principal.getUsername(),
-                                    principal.getRole().name(),
-                                    principal.getUuid()
-                            );
-                            String refreshToken = jwtTokenProvider.generateRefreshToken(
-                                    principal.getUsername(),
-                                    principal.getUuid()
-                            );
-
-                            ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
-                                    .httpOnly(true)
-                                    .secure(secure)
-                                    .sameSite(sameSite)
-                                    .domain(accessDomain)  // 예: .emoforge.dev
-                                    .path("/")
-                                    .maxAge(Duration.ofHours(1))
-                                    .build();
-
-                            ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
-                                    .httpOnly(true)
-                                    .secure(secure)
-                                    .domain(refreshDomain) // 예: .emoforge.dev
-                                    .path("/")
-                                    .maxAge(Duration.ofDays(7))
-                                    .build();
-
-                            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-                            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-                            response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-
-                            response.sendRedirect(successRedirectUrl);
-                        })
                 );
 
         return http.build();

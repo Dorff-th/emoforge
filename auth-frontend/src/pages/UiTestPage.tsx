@@ -4,6 +4,9 @@ import { useConfirmDialog } from "@/providers/ConfirmDialogProvider";
 import { startLoading, stopLoading } from "@/store/slices/loadingSlice";
 
 export default function UiTestPage() {
+
+  console.log("🔥 UiTest page loaded", status);
+
   const dispatch = useDispatch();
   const confirm = useConfirmDialog();
 
