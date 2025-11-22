@@ -61,6 +61,7 @@ public class MemberProfileService {
             throw new IllegalArgumentException("현재 이메일과 동일합니다.");
         }
         member.setEmail(email.toLowerCase(Locale.ROOT));
+        member.setUsername(email.toLowerCase(Locale.ROOT)); // username도 email과 동일하게 설정
         return new MemberProfileResponse(member.getUuid(), member.getEmail(), member.getNickname());
     }
 

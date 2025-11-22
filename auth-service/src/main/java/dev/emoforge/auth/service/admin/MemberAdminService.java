@@ -4,14 +4,17 @@ import dev.emoforge.auth.entity.Member;
 import dev.emoforge.auth.enums.MemberStatus;
 import dev.emoforge.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class MemberAdminService {
 
     private final MemberRepository memberRepository;
@@ -41,9 +44,18 @@ public class MemberAdminService {
         Member member = memberRepository.findByUuid(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다: " + uuid));
 
+        if(deleted) {
+            memberRepository.markMemberAsDeleted(
+                    uuid,
+                    LocalDateTime.now()
+            );
+            log.info("🚪 회원 탈퇴 신청으로 변경: uuid={}", uuid);
+        } else {
+            memberRepository.cancelMemberDeletion(uuid);
+            log.info("🚪 회원 탈퇴 신청취소로 변경: uuid={}", uuid);
+        }
+        //deleted 값 갱신
         member.setDeleted(deleted);
-        // ✅ 즉시 반영 (JPA 자동 dirty checking)
-        memberRepository.save(member);
 
         return member;
     }
