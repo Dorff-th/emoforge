@@ -9,12 +9,6 @@ export default function LoginPage() {
 
   const dispatch = useAppDispatch();
 
-  // const handleKakaoLogin = () => {
-  //   window.location.href = import.meta.env.VITE_KAKAO_AUTH_URL;
-  // };
-
-  
-
    const [params] = useSearchParams();
    useEffect(() => {
     const error = params.get("error");

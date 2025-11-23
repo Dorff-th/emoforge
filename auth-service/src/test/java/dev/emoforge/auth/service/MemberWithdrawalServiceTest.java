@@ -27,8 +27,8 @@ class MemberWithdrawalServiceTest {
 
         Member member = repository.findByUuid(memberUuid).orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        System.out.println("\n\n\nmember's deleted : " + member.isDeleted());
-        System.out.println("member's deletedAt : " + member.getDeletedAt());
+        //System.out.println("\n\n\nmember's deleted : " + member.isDeleted());
+        //System.out.println("member's deletedAt : " + member.getDeletedAt());
 
     }
 
@@ -38,8 +38,8 @@ class MemberWithdrawalServiceTest {
         String memberUuid = "0f112339-7efe-4b4b-b9ea-a00d8a770946";
         service.cancelWithdrawal(memberUuid);
         Member member = repository.findByUuid(memberUuid).orElseThrow(()->new IllegalArgumentException("존재하지 않는 회원입니다."));
-        System.out.println("\n\n\nmember's deleted : " + member.isDeleted());
-        System.out.println("member's deletedAt : " + member.getDeletedAt());
+        //System.out.println("\n\n\nmember's deleted : " + member.isDeleted());
+        //System.out.println("member's deletedAt : " + member.getDeletedAt());
 
     }
 

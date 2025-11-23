@@ -145,10 +145,10 @@ public class SecurityConfig {
         //config.setAllowedOrigins(allowedOrigins);
         //config.setAllowedOrigins(corsProps.allowedOrigins()); // ← 깔끔!
         if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
-            System.out.println("\n\n\n===" + corsProps.allowedOriginPatterns());
+            //System.out.println("\n\n\n===" + corsProps.allowedOriginPatterns());
             config.setAllowedOriginPatterns(corsProps.allowedOriginPatterns());
         } else {
-            System.out.println("\n\n\n===" + corsProps.allowedOriginPatterns());
+            //System.out.println("\n\n\n===" + corsProps.allowedOriginPatterns());
             config.setAllowedOrigins(corsProps.allowedOrigins());
         }
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

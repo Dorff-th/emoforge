@@ -152,11 +152,11 @@ public class AdminAuthController {
         }
 
         // JwtTokenProvider에서 사용자 정보 추출
-        System.out.println("\n\n\nauthentication : " +  authentication.toString());
+        //System.out.println("\n\n\nauthentication : " +  authentication.toString());
         String username = authentication.getName();
-        System.out.println("username : " + username);
+        //System.out.println("username : " + username);
         String role = authentication.getAuthorities().iterator().next().getAuthority();
-        System.out.println("role : " + role);
+        //System.out.println("role : " + role);
 
         return ResponseEntity.ok(Map.of(
                 "username", username,
