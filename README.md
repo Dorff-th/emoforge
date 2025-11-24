@@ -1,5 +1,3 @@
-# 2. README.md 파일 정리
-
 # 🛠️ **Emoforge – Personal Productivity & Diary Platform (MSA)**
 
 **Emoforge**는 감정일기, 게시판, 사용자 인증, 첨부파일 관리, GPT 기반 컨텐츠 생성(요약·피드백·음악추천)을 하나의 플랫폼으로 통합한 **개인용 MSA 기반 서비스**입니다.
