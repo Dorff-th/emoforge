@@ -1,22 +1,23 @@
-🛠️ Emoforge – Personal Productivity & Diary Platform (MSA)
+# 2. README.md 파일 정리
 
-Emoforge는 감정일기, 게시판, 사용자 인증, 첨부파일 관리, GPT 기반 컨텐츠 생성(요약·피드백·음악추천)을 하나의 플랫폼으로 통합한 개인용 MSA 기반 서비스입니다.
+# 🛠️ **Emoforge – Personal Productivity & Diary Platform (MSA)**
+
+**Emoforge**는 감정일기, 게시판, 사용자 인증, 첨부파일 관리, GPT 기반 컨텐츠 생성(요약·피드백·음악추천)을 하나의 플랫폼으로 통합한 **개인용 MSA 기반 서비스**입니다.
 
 이 프로젝트는 2025년 기준 약 5개월간 진행되었고, 다음 기술들을 활용하여 실제 운영 가능한 형태로 구축되었습니다:
 
-Spring Boot 3 기반의 다중 백엔드 서비스
+- **Spring Boot 3** 기반의 다중 백엔드 서비스
+- **React + Vite + TypeScript** 기반 4개의 프론트엔드
+- **FastAPI + LangGraph** 기반 GPT 기능 엔진
+- **Docker Compose + Nginx + HTTPS(Certbot)** 기반 인프라
+- **AWS EC2 + RDS** 기반 배포 환경
 
-React + Vite + TypeScript 기반 4개의 프론트엔드
+개발자 개인 프로젝트 수준을 넘어서, **실제 서비스 운영에 필요한 거의 모든 요소**를 갖춘 풀스택 플랫폼입니다.
 
-FastAPI + LangGraph 기반 GPT 기능 엔진
+---
 
-Docker Compose + Nginx + HTTPS(Certbot) 기반 인프라
+# 🏗️ 1. 아키텍처 개요
 
-AWS EC2 + RDS 기반 배포 환경
-
-개발자 개인 프로젝트 수준을 넘어서, 실제 서비스 운영에 필요한 거의 모든 요소를 갖춘 풀스택 플랫폼입니다.
-
-🏗️ 1. 아키텍처 개요
 ```
 ┌───────────────────────────────────────────────┐
 │                  Nginx Gateway                │
@@ -45,9 +46,13 @@ AWS EC2 + RDS 기반 배포 환경
 │   nfe_diary_db          │
 │   nfe_file_db           │
 └─────────────────────────┘
+
 ```
 
-📁 2. 디렉토리 구조 요약
+---
+
+# 📁 2. 디렉토리 구조 요약
+
 ```
 emoforge/
  ├─ auth-service/
@@ -64,173 +69,173 @@ emoforge/
  ├─ docker-compose.frontend.prod.yml
  ├─ nginx/conf.d/default.conf
  └─ README.md   ← (본 문서)
- ```
 
-⚙️ 3. 기술 스택
-Backend
+```
 
-Spring Boot 3
+---
 
-JPA / Hibernate
+# ⚙️ 3. 기술 스택
 
-Spring Security
+### Backend
 
-JWT 인증 (USER / ADMIN 분리)
+- Spring Boot 3
+- JPA / Hibernate
+- Spring Security
+- JWT 인증 (USER / ADMIN 분리)
+- Kakao OAuth2 로그인
+- MariaDB (AWS RDS)
 
-Kakao OAuth2 로그인
+### Frontend
 
-MariaDB (AWS RDS)
+- React
+- Vite
+- TypeScript
+- TailwindCSS
+- ToastUI Editor (게시판 에디터)
 
-Frontend
+### Infra / DevOps
 
-React
+- Docker Compose
+- Nginx Gateway
+- Certbot (HTTPS)
+- AWS EC2
+- AWS RDS
+- GitHub Actions (CI/CD 일부 프로젝트에 적용)
 
-Vite
+### AI / GPT
 
-TypeScript
+- FastAPI
+- LangGraph 기반 orchestration
+- OpenAI gpt-4o-mini (서비스 종료 예정)
 
-TailwindCSS
+---
 
-ToastUI Editor (게시판 에디터)
+# 🚀 4. 서비스별 설명
 
-Infra / DevOps
+---
 
-Docker Compose
+## 🔐 **auth-service (Backend)**
 
-Nginx Gateway
+- 로그인 / 회원가입 / 인증 / 인가
+- Kakao OAuth2 로그인
+- 사용자 프로필 관리
+- 관리자 기능 제공
+- DB: **nfe_auth_db**
 
-Certbot (HTTPS)
+### 빌드 & 배포
 
-AWS EC2
-
-AWS RDS
-
-GitHub Actions (CI/CD 일부 프로젝트에 적용)
-
-AI / GPT
-
-FastAPI
-
-LangGraph 기반 orchestration
-
-OpenAI gpt-4o-mini (서비스 종료 예정)
-
-🚀 4. 서비스별 설명
-🔐 auth-service (Backend)
-
-로그인 / 회원가입 / 인증 / 인가
-
-Kakao OAuth2 로그인
-
-사용자 프로필 관리
-
-관리자 기능 제공
-
-DB: nfe_auth_db
-
-빌드 & 배포 <br/>
+```
 ./auth-service/gradlew clean build -x test
 sudo docker-compose -f docker-compose.backend.prod.yml build auth-service
 sudo docker-compose -f docker-compose.backend.prod.yml --env-file .env.prod up -d auth-service
 
-🎨 auth-frontend (React)
+```
 
-Kakao OAuth 로그인
+---
 
-프로필 이미지 / 닉네임 / 이메일 관리
+## 🎨 **auth-frontend (React)**
 
-3개 서비스 통계 조회
+- Kakao OAuth 로그인
+- 프로필 이미지 / 닉네임 / 이메일 관리
+- 3개 서비스 통계 조회
+- 탈퇴 / 탈퇴 철회 기능
 
-탈퇴 / 탈퇴 철회 기능
+### 빌드 & 배포
 
-빌드 & 배포 <br/>
+```
 ./auth-frontend/npm run build
 sudo docker-compose -f docker-compose.frontend.prod.yml build auth-frontend
 sudo docker-compose -f docker-compose.frontend.prod.yml --env-file .env.prod up -d auth-frontend
 
-📎 attachment-service (Backend)
+```
 
-프로필 이미지
+---
 
-게시판 첨부파일
+## 📎 **attachment-service (Backend)**
 
-에디터 이미지
+- 프로필 이미지
+- 게시판 첨부파일
+- 에디터 이미지
+- TEMP → CONFIRMED 워크플로우
+- DB: nfe_file_db
 
-TEMP → CONFIRMED 워크플로우
+---
 
-DB: nfe_file_db
+## 📝 **post-service (Backend)**
 
-📝 post-service (Backend)
+- 게시글 CRUD
+- 댓글 CRUD
+- 태그
+- 첨부파일 연동
+- DB: nfe_post_db
 
-게시글 CRUD
+---
 
-댓글 CRUD
+## 🖥️ **post-frontend (React)**
 
-태그
+- ToastUI Markdown 에디터
+- 게시글 목록/조회/등록/수정/삭제
+- 댓글 작성/삭제
+- 첨부파일 미리보기/다운로드
 
-첨부파일 연동
+---
 
-DB: nfe_post_db
+## 📘 **diary-service (Backend)**
 
-🖥️ post-frontend (React)
+- 감정 기록
+- GPT 요약
+- GPT 음악 추천
+- 감정 통계
+- DB: nfe_diary_db
 
-ToastUI Markdown 에디터
+---
 
-게시글 목록/조회/등록/수정/삭제
+## 📔 **diary-frontend (React)**
 
-댓글 작성/삭제
+- 감정 입력 UI
+- 감정 Calendar
+- 감정 통계
+- GPT 음악 추천 모달
+- 회고 목록 및 검색
 
-첨부파일 미리보기/다운로드
+---
 
-📘 diary-service (Backend)
+## 🤖 **langgraph_service (FastAPI)**
 
-감정 기록
+- GPT 요약 / 피드백
+- GPT 음악 추천
+- OpenAI gpt-4o-mini 기반
 
-GPT 요약
+---
 
-GPT 음악 추천
+## 🧹 **cleanup-service**
 
-감정 통계
+- 첨부파일 가비지 데이터 삭제
+- orphan 이미지 정리
+- TEMP 파일 주기적 정리
 
-DB: nfe_diary_db
+---
 
-📔 diary-frontend (React)
+# 🌐 5. Nginx + HTTPS 구성
 
-감정 입력 UI
+### 설정파일
 
-감정 Calendar
-
-감정 통계
-
-GPT 음악 추천 모달
-
-회고 목록 및 검색
-
-🤖 langgraph_service (FastAPI)
-
-GPT 요약 / 피드백
-
-GPT 음악 추천
-
-OpenAI gpt-4o-mini 기반
-
-🧹 cleanup-service
-
-첨부파일 가비지 데이터 삭제
-
-orphan 이미지 정리
-
-TEMP 파일 주기적 정리
-
-🌐 5. Nginx + HTTPS 구성
-설정파일
+```
 ./nginx/conf.d/default.conf
 
-설정 테스트 & 재로드
+```
+
+### 설정 테스트 & 재로드
+
+```
 sudo docker exec nginx_gateway nginx -t
 sudo docker exec nginx_gateway nginx -s reload
 
-Certbot 인증서 발급 (최초 1회)
+```
+
+### Certbot 인증서 발급 (최초 1회)
+
+```
 sudo docker-compose -f docker-compose.backend.prod.yml up -d nginx certbot
 
 sudo docker exec -it certbot certbot certonly --webroot \
@@ -239,19 +244,36 @@ sudo docker exec -it certbot certbot certonly --webroot \
   --email {your@email} \
   --agree-tos --no-eff-email
 
-🐳 6. Backend 전체 실행 방법
+```
+
+---
+
+# 🐳 6. Backend 전체 실행 방법
 
 예시:
 
+```
 sudo docker-compose -f docker-compose.backend.prod.yml build
 sudo docker-compose -f docker-compose.backend.prod.yml --env-file .env.prod up -d
 
+```
 
 서비스 하나만 재기동:
 
+```
 sudo docker-compose -f docker-compose.backend.prod.yml build diary-service
 sudo docker-compose -f docker-compose.backend.prod.yml --env-file .env.prod up -d diary-service
 
-📦 7. Frontend 전체 실행 방법
+```
+
+---
+
+# 📦 7. Frontend 전체 실행 방법
+
+```
 sudo docker-compose -f docker-compose.frontend.prod.yml build
 sudo docker-compose -f docker-compose.frontend.prod.yml --env-file .env.prod up -d
+
+```
+
+[1) Auth-Service [README.md](http://README.md) 내용](https://www.notion.so/1-Auth-Service-README-md-2b56eb4e297780cea9d6f4c75904a04c?pvs=21)
