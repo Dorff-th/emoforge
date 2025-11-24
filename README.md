@@ -1,3 +1,5 @@
+# 2. README.md 파일 정리 (검토필요)
+
 # 🛠️ **Emoforge – Personal Productivity & Diary Platform (MSA)**
 
 **Emoforge**는 감정일기, 게시판, 사용자 인증, 첨부파일 관리, GPT 기반 컨텐츠 생성(요약·피드백·음악추천)을 하나의 플랫폼으로 통합한 **개인용 MSA 기반 서비스**입니다.
@@ -98,13 +100,13 @@ emoforge/
 - Certbot (HTTPS)
 - AWS EC2
 - AWS RDS
-- GitHub Actions (CI/CD 일부 프로젝트에 적용)
+- ~~GitHub Actions (CI/CD 일부 프로젝트에 적용)~~
 
 ### AI / GPT
 
 - FastAPI
 - LangGraph 기반 orchestration
-- OpenAI gpt-4o-mini (서비스 종료 예정)
+- OpenAI ~~gpt-4o-mini (서비스 종료 예정)~~ → gpt-4.1-mini 교체
 
 ---
 
@@ -273,3 +275,23 @@ sudo docker-compose -f docker-compose.frontend.prod.yml build
 sudo docker-compose -f docker-compose.frontend.prod.yml --env-file .env.prod up -d
 
 ```
+
+[1) auth-service ](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/1)%20auth-service%202b56eb4e297780cea9d6f4c75904a04c.md)
+
+[2) attachment-service](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/2)%20attachment-service%202b56eb4e297780ce9abdc840df469396.md)
+
+[3) post-service](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/3)%20post-service%202b56eb4e297780ada80efbe8c6c8a584.md)
+
+[4) diary-service](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/4)%20diary-service%202b56eb4e2977809ba07de13d6eec373b.md)
+
+[5) langgraph_service](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/5)%20langgraph_service%202b56eb4e297780b7a602ef668832aeaa.md)
+
+[6) auth-frontend](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/6)%20auth-frontend%202b56eb4e297780b4809acf91fe494de4.md)
+
+[7) post-frontend](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/7)%20post-frontend%202b56eb4e297780559a0af486fbc7b4eb.md)
+
+[8) diary-frontend](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/8)%20diary-frontend%202b56eb4e297780ba871ce3c969dec932.md)
+
+[9) admin-frontend](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/9)%20admin-frontend%202b56eb4e2977803da830c9be055769e0.md)
+
+[10) cleanup-service](2%20README%20md%20%ED%8C%8C%EC%9D%BC%20%EC%A0%95%EB%A6%AC%20(%EA%B2%80%ED%86%A0%ED%95%84%EC%9A%94)/10)%20cleanup-service%202b56eb4e2977807e84a9c133cc897a1b.md)

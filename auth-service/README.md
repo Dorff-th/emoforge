@@ -1,3 +1,5 @@
+# 1) auth-service
+
 # 🔐 **auth-service – Authentication & Authorization Backend**
 
 Spring Boot 3 기반의 인증/인가 서비스로, emoforge 플랫폼의 핵심 엔진입니다.
@@ -108,7 +110,7 @@ auth-frontend → auth-service → Kakao API → auth-service → JWT 발급 →
 
 ```
 POST /api/auth/kakao/signup
-POST /api/auth/kakao/login
+POST /api/auth/kakao
 
 ```
 
@@ -116,11 +118,11 @@ POST /api/auth/kakao/login
 
 ```
 GET    /api/auth/me
-PUT    /api/auth/me/profile
-PUT    /api/auth/me/nickname
-PUT    /api/auth/me/email
-POST   /api/auth/me/withdraw        # 탈퇴
-POST   /api/auth/me/withdraw/cancel # 탈퇴 철회
+~~PUT    /api/auth/me/profile~~
+PUT    /api/auth/members/nickname
+PUT    /api/auth/members/email
+POST   /api/auth/me/withdrawal        # 탈퇴
+POST   /api/auth/me/withdrawal/cancel # 탈퇴 철회
 
 ```
 
@@ -129,7 +131,7 @@ POST   /api/auth/me/withdraw/cancel # 탈퇴 철회
 ```
 GET  /api/auth/admin/members
 PUT  /api/auth/admin/members/{uuid}/status
-PUT  /api/auth/admin/members/{uuid}/deletion
+PUT  /api/auth/admin/members/{uuid}/deleted
 
 ```
 
@@ -160,7 +162,7 @@ DB name: **nfe_auth_db**
 | nickname | 사용자 닉네임 |
 | password | 랜덤 패스워드(로그인에 사용되지 않음) |
 | role | USER / ADMIN |
-| profile_image_url | 프로필 이미지 |
+| ~~profile_image_url~~ | ~~프로필 이미지~~ |
 | deleted | 탈퇴 여부 |
 | created_at / updated_at | 생성 / 수정 시간 |
 
@@ -201,12 +203,12 @@ sudo docker logs -f auth-service
 # 🔧 **8. 환경 변수 (.env.prod 예시)**
 
 ```
-AUTH_DB_URL=jdbc:mariadb://xxx.amazonaws.com:3306/nfe_auth_db
-AUTH_DB_USER=xxxx
-AUTH_DB_PASS=xxxx
+DB_URL=jdbc:mariadb://xxx.amazonaws.com:3306/nfe_auth_db
+DB_USERNAME=xxxx
+DB_PASSWORD=xxxx
 
-JWT_USER_SECRET=xxxx
-JWT_ADMIN_SECRET=xxxx
+JWT_SECRET_USER=xxxx
+JWT_SECRET_ADMIN=xxxx
 
 KAKAO_CLIENT_ID=xxxx
 KAKAO_CLIENT_SECRET=xxxx
