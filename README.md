@@ -17,6 +17,7 @@ AWS EC2 + RDS 기반 배포 환경
 개발자 개인 프로젝트 수준을 넘어서, 실제 서비스 운영에 필요한 거의 모든 요소를 갖춘 풀스택 플랫폼입니다.
 
 🏗️ 1. 아키텍처 개요
+```
 ┌───────────────────────────────────────────────┐
 │                  Nginx Gateway                │
 │       HTTPS Termination / Routing / Logs      │
@@ -44,8 +45,10 @@ AWS EC2 + RDS 기반 배포 환경
 │   nfe_diary_db          │
 │   nfe_file_db           │
 └─────────────────────────┘
+```
 
 📁 2. 디렉토리 구조 요약
+```
 emoforge/
  ├─ auth-service/
  ├─ auth-frontend/
@@ -61,6 +64,7 @@ emoforge/
  ├─ docker-compose.frontend.prod.yml
  ├─ nginx/conf.d/default.conf
  └─ README.md   ← (본 문서)
+ ```
 
 ⚙️ 3. 기술 스택
 Backend
