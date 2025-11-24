@@ -128,7 +128,7 @@ Kakao OAuth2 로그인
 
 DB: nfe_auth_db
 
-빌드 & 배포
+빌드 & 배포 <br/>
 ./auth-service/gradlew clean build -x test
 sudo docker-compose -f docker-compose.backend.prod.yml build auth-service
 sudo docker-compose -f docker-compose.backend.prod.yml --env-file .env.prod up -d auth-service
@@ -143,7 +143,7 @@ Kakao OAuth 로그인
 
 탈퇴 / 탈퇴 철회 기능
 
-빌드 & 배포
+빌드 & 배포 <br/>
 ./auth-frontend/npm run build
 sudo docker-compose -f docker-compose.frontend.prod.yml build auth-frontend
 sudo docker-compose -f docker-compose.frontend.prod.yml --env-file .env.prod up -d auth-frontend
