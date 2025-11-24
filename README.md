@@ -273,5 +273,3 @@ sudo docker-compose -f docker-compose.frontend.prod.yml build
 sudo docker-compose -f docker-compose.frontend.prod.yml --env-file .env.prod up -d
 
 ```
-
-[1) Auth-Service [README.md](http://README.md) 내용](https://www.notion.so/1-Auth-Service-README-md-2b56eb4e297780cea9d6f4c75904a04c?pvs=21)
