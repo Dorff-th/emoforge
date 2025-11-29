@@ -28,54 +28,6 @@ public class GptService {
     private final GptSummaryRepository gptSummaryRepository;
     private final LangGraphClient langGraphClient; // ✅ 새로 주입되는 클라이언트
 
-
-    /**
-     * 사용자가 입력한 감정을 기반으로
-     * GPT에게 짧고 자연스러운 영어 문장 예시를 요청한다.
-     *
-     * @param feelingKo 한국어 감정 표현
-     * @return 영어 문장 예시 리스트 (3~5개)
-     */
-    public List<String> getFeelingSuggestions(String feelingKo) {
-        String prompt = String.format("""
-            사용자가 "%s" 라고 느꼈을 때,
-            이를 짧고 일상적인 영어 문장으로 자연스럽게 표현한 예시를 3~5개 추천해줘.
-            각 문장은 따로 줄바꿈해서 보여줘.
-        """, feelingKo);
-
-        String result = diaryGptClient.chat(prompt, GptRole.FEELING_TRANSLATOR);
-        return Arrays.stream(result.split("\n"))
-                .filter(line -> !line.trim().isEmpty())
-                .map(String::trim)
-                .collect(Collectors.toList());
-    }
-
-    //감정일기 피드백 메서드
-    public String getDiaryFeedback(String content, String feedbackType) {
-        String style = switch (feedbackType) {
-            case "encourage" -> "[피드백 스타일: 따뜻하고 긍정적이며 응원하는 말투]";
-            case "scold"     -> "[피드백 스타일: 엄격하고 직설적으로 지적하는 말투]";
-            case "roast"     -> "[피드백 스타일: 유머를 섞어 가볍게 놀리면서 지적하는 말투]";
-            case "coach"     -> "[피드백 스타일: 냉정하고 목표지향적인 조언자 말투]";
-            case "random"    -> "[피드백 스타일: 랜덤 스타일]";
-            case "default"   -> "[피드백 스타일: 무난한 말투]";
-            default          -> "[피드백 스타일: 따뜻하고 응원하는 말투]";
-        };
-
-        String prompt = String.format("""
-        아래 회고 내용을 %s로 피드백 해줘.
-        회고: %s
-        조건: 
-        - 스타일에 맞춰 반드시 한두 문장만 줄 것
-        - 스타일에 따라 말투가 명확하게 구분되어야 함
-        - 지시된 스타일과 다르게 응답하면 안 됨
-        """, style, content);
-
-        log.info("\n --- prompt : " + prompt);
-
-        return diaryGptClient.chat(prompt, GptRole.FEEDBACK_COACH);
-    }
-
     public String generateAndSaveSummary(String memberUuid, LocalDate date) {
         // 1. 해당 날짜의 회고들 가져오기
         List<DiaryEntry> diaryList = diaryEntryRepository

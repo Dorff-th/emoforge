@@ -88,7 +88,8 @@ public class DiaryEntrySearchRepositoryImpl implements DiaryEntrySearchRepositor
         List<Predicate> predicates = new ArrayList<>();
 
         // 로그인된 사용자 조건
-        predicates.add(cb.equal(root.get("member").get("id"), memberUuid));
+        //predicates.add(cb.equal(root.get("member").get("id"), memberUuid));
+        predicates.add(cb.equal(root.get("memberUuid"), memberUuid));
 
         // 감정 점수 조건
         if (emotionMap != null && !emotionMap.isEmpty()) {

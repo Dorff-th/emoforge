@@ -73,9 +73,6 @@ public class SecurityConfig {
 
     private final Environment env;
 
-    //@Value("${auth.cors.allowed-origins}")
-    //private List<String> allowedOrigins;
-
     private final AuthCorsProperties corsProps;
 
     // ✅ (변경) admin / user 전용 체인 분리
@@ -142,13 +139,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        //config.setAllowedOrigins(allowedOrigins);
-        //config.setAllowedOrigins(corsProps.allowedOrigins()); // ← 깔끔!
+
         if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
-            //System.out.println("\n\n\n===" + corsProps.allowedOriginPatterns());
             config.setAllowedOriginPatterns(corsProps.allowedOriginPatterns());
         } else {
-            //System.out.println("\n\n\n===" + corsProps.allowedOriginPatterns());
             config.setAllowedOrigins(corsProps.allowedOrigins());
         }
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

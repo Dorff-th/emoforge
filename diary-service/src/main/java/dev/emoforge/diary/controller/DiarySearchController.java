@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "DiarySearch", description = "회고 통합 검색 API")
 @RestController
-@RequestMapping("/api/dairy/search")
+@RequestMapping("/api/diary/diaries/search")
 @RequiredArgsConstructor
 @Slf4j
 public class DiarySearchController {
