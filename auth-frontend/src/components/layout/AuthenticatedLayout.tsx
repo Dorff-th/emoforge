@@ -1,7 +1,11 @@
 // src/components/layout/AuthenticatedLayout.tsx
 import Header from "@/components/common/Header";
 
-export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+export default function AuthenticatedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <Header />
