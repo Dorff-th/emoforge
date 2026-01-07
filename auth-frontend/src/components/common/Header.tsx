@@ -1,6 +1,7 @@
 // src/components/common/Header.tsx
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FileText, BookOpen } from "lucide-react";
 import { SERVICE_URLS } from "@/config/constants";
 import { logoutThunk } from "@/store/slices/authSlice";
@@ -30,12 +31,12 @@ function Header() {
         <div className="flex items-center justify-between py-3">
           {/* Left: Brand */}
           <div className="flex items-center gap-8">
-            <a
-              href={SERVICE_URLS.AUTH}
+            <Link
+              to={SERVICE_URLS.AUTH}
               className="text-sm font-semibold tracking-tight text-blue-600"
             >
               EmoForge
-            </a>
+            </Link>
 
             {/* Center: Navigation */}
             <nav className="flex items-center gap-6 text-sm text-gray-600">
