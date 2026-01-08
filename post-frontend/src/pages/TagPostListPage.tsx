@@ -1,13 +1,14 @@
 // src/pages/PostListPage.tsx
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
-import { fetchPosts, fetchPostsByTag } from '@/api/postApi';
-import type { PostDTO } from '@/types/Post';
-import type { PageResponse } from '@/types/Common';
-import Pagination from '@/components/common/Pagination';
-import { withToast } from '@/utils/withToast';
-import NewPostButton from '@/components/ui/NewPostButton';
+import { fetchPosts, fetchPostsByTag } from "@/api/postApi";
+import type { PostDTO } from "@/types/Post";
+import type { PageResponse } from "@/types/Common";
+import Pagination from "@/components/common/Pagination";
+import { withToast } from "@/utils/withToast";
+import NewPostButton from "@/components/ui/NewPostButton";
+import { LayoutList, MessageCircle, Paperclip, Tag } from "lucide-react";
 
 export default function TagPostListPage() {
   const [posts, setPosts] = useState<PostDTO[]>([]);
@@ -17,15 +18,15 @@ export default function TagPostListPage() {
   const navigate = useNavigate();
   const { tagName } = useParams<{ tagName?: string }>();
 
-    const { status } = useAppSelector((state) => state.auth);
-    const isAuthenticated = status === "authenticated";
+  const { status } = useAppSelector((state) => state.auth);
+  const isAuthenticated = status === "authenticated";
 
   const loadPosts = async (pageNum: number) => {
     const data = await withToast(
       tagName
-        ? fetchPostsByTag(tagName, pageNum, 10, 'createdAt', 'DESC')
-        : fetchPosts(pageNum, 10, 'createdAt', 'DESC'),
-      { error: '게시글 목록 로드 실패' },
+        ? fetchPostsByTag(tagName, pageNum, 10, "createdAt", "DESC")
+        : fetchPosts(pageNum, 10, "createdAt", "DESC"),
+      { error: "게시글 목록 로드 실패" }
     );
 
     if (data) {
@@ -40,14 +41,23 @@ export default function TagPostListPage() {
   }, [tagName]);
 
   return (
-    <div className="px-4 sm:px-8 py-8 bg-gray-100 min-h-screen">
+    <div className="mx-auto max-w-6xl px-5 bg-gray-100 rounded-xl p-6">
       <h2 className="text-2xl font-bold mb-4">
         {tagName ? (
           <>
-            태그 검색 결과: <span className="text-blue-600">#{tagName}</span>
+            <div className="flex items-center gap-2">
+              <Tag size={18} className="text-gray-500" />
+              <h1 className="text-base font-medium text-gray-800">
+                Tag:
+                <span className="ml-1 text-blue-600">{tagName}</span>
+              </h1>
+            </div>
           </>
         ) : (
-          '게시글 목록'
+          <div className="flex items-center gap-2 mb-4">
+            <LayoutList size={20} />
+            <h1 className="text-lg font-semibold">Posts</h1>
+          </div>
         )}
       </h2>
 
@@ -70,23 +80,37 @@ export default function TagPostListPage() {
               onClick={() => navigate(`/${post.id}`)}
             >
               {/* 제목 */}
-              <h3 className="text-base font-semibold text-gray-900 mb-2">{post.title}</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                {post.title}
+              </h3>
 
               {/* 댓글/첨부 */}
-              <div className="mb-2 space-x-3 text-sm">
-                {post.commentCount > 0 && <span>💬 댓글 ({post.commentCount})</span>}
-                {post.attachmentCount > 0 && <span>💾 첨부 ({post.attachmentCount})</span>}
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                {post.commentCount > 0 && (
+                  <div className="flex items-center gap-1">
+                    <MessageCircle size={14} />
+                    <span>{post.commentCount}</span>
+                  </div>
+                )}
+                {post.attachmentCount > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Paperclip size={14} />
+                    <span>2</span>
+                  </div>
+                )}
               </div>
 
               {/* 카테고리 · 날짜 · 닉네임 */}
               <p className="text-sm text-gray-500">
-                <span>{post.categoryName}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {post.categoryName}
+                </span>
                 <span className="mx-1">·</span>
                 <span>
-                  {new Date(post.createdAt).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
+                  {new Date(post.createdAt).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
                   })}
                 </span>
                 <span className="mx-1">·</span>
@@ -95,7 +119,9 @@ export default function TagPostListPage() {
             </div>
           ))
         ) : (
-          <div className="text-center text-gray-400 py-8">게시글이 없습니다.</div>
+          <div className="text-center text-gray-400 py-8">
+            게시글이 없습니다.
+          </div>
         )}
       </div>
 

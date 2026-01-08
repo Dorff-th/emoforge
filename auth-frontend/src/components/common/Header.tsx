@@ -32,7 +32,7 @@ function Header() {
           {/* Left: Brand */}
           <div className="flex items-center gap-8">
             <Link
-              to={SERVICE_URLS.AUTH}
+              to="/"
               className="text-sm font-semibold tracking-tight text-blue-600"
             >
               EmoForge
