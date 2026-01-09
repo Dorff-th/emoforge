@@ -25,125 +25,129 @@ interface AttachUploadResponseDto {
   createdAt: string;
 }
 
-const PostContentEditor = forwardRef<Editor, Props>(({ value, onChange, groupTempKey, postId }, ref) => {
-  const dispatch = useAppDispatch();
-  const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
+const PostContentEditor = forwardRef<Editor, Props>(
+  ({ value, onChange, groupTempKey, postId }, ref) => {
+    const dispatch = useAppDispatch();
+    const memberUuid = useAppSelector((state) => state.auth.user?.uuid);
 
-  const tempKeyRef = useRef<string>(groupTempKey ?? uuidv4());
+    const tempKeyRef = useRef<string>(groupTempKey ?? uuidv4());
 
-  const handleImageUpload = useCallback(
-    async (blob: Blob, callback: (url: string, altText: string) => void) => {
-      if (!memberUuid) {
-        dispatch(
-          showToast({
-            type: "error",
-            text: "Sign in to upload images.",
-          }),
-        );
-        return false;
-      }
-
-      const formData = new FormData();
-
-      formData.append("file", blob);
-      formData.append("uploadType", "EDITOR_IMAGE");
-      formData.append("memberUuid", memberUuid);
-      formData.append("attachmentStatus", "TEMP");
-      formData.append("tempKey", tempKeyRef.current);
-      formData.append("groupTempKey", tempKeyRef.current);
-      if (postId) {
-        formData.append("postId", postId.toString());
-      }
-
-      try {
-        const { data } = await axiosAttach.post<AttachUploadResponseDto>(
-          "",
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          },
-        );
-
-        const imageUrl = data.publicUrl ?? data.fileUrl ?? data.url;
-
-        if (!imageUrl) {
-          throw new Error("Attachment service did not return an accessible URL.");
+    const handleImageUpload = useCallback(
+      async (blob: Blob, callback: (url: string, altText: string) => void) => {
+        if (!memberUuid) {
+          dispatch(
+            showToast({
+              type: "error",
+              text: "Sign in to upload images.",
+            })
+          );
+          return false;
         }
 
-        const altText = (blob as File).name ?? "editor image";
-        callback(imageUrl, altText);
-      } catch (error) {
-        console.error("Image upload failed:", error);
-        dispatch(
-          showToast({
-            type: "error",
-            text: "Image upload failed.",
-          }),
-        );
-      }
+        const formData = new FormData();
 
-      return false;
-    },
-    [dispatch, memberUuid],
-  );
+        formData.append("file", blob);
+        formData.append("uploadType", "EDITOR_IMAGE");
+        formData.append("memberUuid", memberUuid);
+        formData.append("attachmentStatus", "TEMP");
+        formData.append("tempKey", tempKeyRef.current);
+        formData.append("groupTempKey", tempKeyRef.current);
+        if (postId) {
+          formData.append("postId", postId.toString());
+        }
 
-  useEffect(() => {
-    if (!ref || typeof ref === "function") return;
-    const editorInstance = ref.current?.getInstance();
-    if (!editorInstance) return;
+        try {
+          const { data } = await axiosAttach.post<AttachUploadResponseDto>(
+            "",
+            formData,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
 
-    if (typeof editorInstance.removeHook === "function") {
-      editorInstance.removeHook("addImageBlobHook");
-    }
+          const imageUrl = data.publicUrl ?? data.fileUrl ?? data.url;
 
-    editorInstance.addHook("addImageBlobHook", handleImageUpload);
+          if (!imageUrl) {
+            throw new Error(
+              "Attachment service did not return an accessible URL."
+            );
+          }
 
-    return () => {
+          const altText = (blob as File).name ?? "editor image";
+          callback(imageUrl, altText);
+        } catch (error) {
+          console.error("Image upload failed:", error);
+          dispatch(
+            showToast({
+              type: "error",
+              text: "Image upload failed.",
+            })
+          );
+        }
+
+        return false;
+      },
+      [dispatch, memberUuid]
+    );
+
+    useEffect(() => {
+      if (!ref || typeof ref === "function") return;
+      const editorInstance = ref.current?.getInstance();
+      if (!editorInstance) return;
+
       if (typeof editorInstance.removeHook === "function") {
         editorInstance.removeHook("addImageBlobHook");
       }
-    };
-  }, [handleImageUpload, ref]);
 
-  useEffect(() => {
-    if (!ref || typeof ref === "function") return;
-    const editorInstance = ref.current?.getInstance();
-    if (!editorInstance) return;
+      editorInstance.addHook("addImageBlobHook", handleImageUpload);
 
-    if (!value) {
-      return;
-    }
+      return () => {
+        if (typeof editorInstance.removeHook === "function") {
+          editorInstance.removeHook("addImageBlobHook");
+        }
+      };
+    }, [handleImageUpload, ref]);
 
-    const fixedContent = fixContentForEditor(value);
-    if (editorInstance.getMarkdown() === fixedContent) {
-      return;
-    }
+    useEffect(() => {
+      if (!ref || typeof ref === "function") return;
+      const editorInstance = ref.current?.getInstance();
+      if (!editorInstance) return;
 
-    editorInstance.setMarkdown(fixedContent);
-  }, [ref, value]);
+      if (!value) {
+        return;
+      }
 
-  const handleEditorChange = useCallback(() => {
-    if (!ref || typeof ref === "function") return;
-    const editorInstance = ref.current?.getInstance();
-    if (!editorInstance) return;
+      const fixedContent = fixContentForEditor(value);
+      if (editorInstance.getMarkdown() === fixedContent) {
+        return;
+      }
 
-    onChange(editorInstance.getMarkdown());
-  }, [onChange, ref]);
+      editorInstance.setMarkdown(fixedContent);
+    }, [ref, value]);
 
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      <Editor
-        ref={ref}
-        height="400px"
-        initialEditType="markdown"
-        previewStyle="vertical"
-        placeholder="Write your content..."
-        useCommandShortcut={true}
-        onChange={handleEditorChange}
-      />
-    </div>
-  );
-});
+    const handleEditorChange = useCallback(() => {
+      if (!ref || typeof ref === "function") return;
+      const editorInstance = ref.current?.getInstance();
+      if (!editorInstance) return;
+
+      onChange(editorInstance.getMarkdown());
+    }, [onChange, ref]);
+
+    return (
+      <div className="border rounded-lg overflow-hidden">
+        <Editor
+          ref={ref}
+          height="400px"
+          initialEditType="wysiwyg"
+          previewStyle="vertical"
+          placeholder="Write your content..."
+          useCommandShortcut={true}
+          onChange={handleEditorChange}
+        />
+      </div>
+    );
+  }
+);
 
 PostContentEditor.displayName = "PostContentEditor";
 

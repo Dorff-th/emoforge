@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
-import { fetchCategories } from '@/api/categoryApi';
-import type { Category } from '@/types/Category';
+import { useEffect, useState } from "react";
+import { fetchCategories } from "@/api/categoryApi";
+import type { Category } from "@/types/Category";
+import { Folder } from "lucide-react";
 
 interface CategorySelectProps {
   value?: number; // 선택된 카테고리 id
   onChange?: (id: number) => void;
 }
 
-export default function CategorySelect({ value, onChange }: CategorySelectProps) {
+export default function CategorySelect({
+  value,
+  onChange,
+}: CategorySelectProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +25,7 @@ export default function CategorySelect({ value, onChange }: CategorySelectProps)
           onChange?.(data[0].id);
         }
       } catch (err) {
-        console.error('카테고리 불러오기 실패:', err);
+        console.error("카테고리 불러오기 실패:", err);
       } finally {
         setLoading(false);
       }
@@ -36,12 +40,15 @@ export default function CategorySelect({ value, onChange }: CategorySelectProps)
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">카테고리</label>
+      <label className="flex items-center gap-2">
+        <Folder size={16} />
+        Category
+      </label>
       <select
         className="w-full border rounded-md px-3 py-2 focus:ring focus:ring-blue-200"
-        value={value ?? ''}
+        value={value ?? ""}
         onChange={(e) => onChange?.(Number(e.target.value))}
-      > 
+      >
         {categories.map((cat) => (
           <option key={cat.id} value={cat.id}>
             {cat.name}

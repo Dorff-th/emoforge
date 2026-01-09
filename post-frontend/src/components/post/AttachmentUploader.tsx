@@ -1,12 +1,11 @@
 ﻿import { useCallback, useRef } from "react";
-import type { ChangeEvent } from "react"; 
+import type { ChangeEvent } from "react";
 import axiosAttach from "@/api/axiosAttach";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addToast as showToast } from "@/store/slices/toastSlice";
 import { formatFileSize } from "@/utils/fileUtils";
-import type { AttachmentItem } from '@/types/Attachment';
-
-
+import type { AttachmentItem } from "@/types/Attachment";
+import { Paperclip } from "lucide-react";
 
 interface AttachmentUploaderProps {
   groupTempKey: string;
@@ -36,7 +35,9 @@ const AttachmentUploader = ({
 
   const handleFileSelect = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
-      const selectedFiles = event.target.files ? Array.from(event.target.files) : [];
+      const selectedFiles = event.target.files
+        ? Array.from(event.target.files)
+        : [];
       if (!selectedFiles.length) return;
 
       if (!memberUuid) {
@@ -56,26 +57,36 @@ const AttachmentUploader = ({
       for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("groupTempKey", groupTempKey); 
+        formData.append("groupTempKey", groupTempKey);
         formData.append("tempKey", groupTempKey);
         formData.append("uploadType", "ATTACHMENT");
         formData.append("memberUuid", memberUuid);
         formData.append("attachmentStatus", "TEMP");
 
         try {
-          const { data } = await axiosAttach.post<AttachmentItem>("", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+          const { data } = await axiosAttach.post<AttachmentItem>(
+            "",
+            formData,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
 
           uploaded.push({
             ...data,
             isNew: true,
-            originalName: data.originalName ?? data.originFileName ?? data.fileName ?? file.name,
+            originalName:
+              data.originalName ??
+              data.originFileName ??
+              data.fileName ??
+              file.name,
             fileSize: data.fileSize ?? file.size,
           });
         } catch (error) {
           console.error("업로드 실패:", error);
-          dispatch(showToast({ type: "error", text: `파일 ${file.name} 업로드 실패` }));
+          dispatch(
+            showToast({ type: "error", text: `파일 ${file.name} 업로드 실패` })
+          );
         }
       }
 
@@ -95,7 +106,9 @@ const AttachmentUploader = ({
         try {
           await axiosAttach.delete(`/${att.id}`);
           setItems(items.filter((a) => a.id !== att.id));
-          dispatch(showToast({ type: "success", text: "첨부파일이 삭제되었습니다." }));
+          dispatch(
+            showToast({ type: "success", text: "첨부파일이 삭제되었습니다." })
+          );
         } catch (error) {
           console.error("삭제 실패:", error);
           dispatch(showToast({ type: "error", text: "첨부파일 삭제 실패" }));
@@ -103,7 +116,9 @@ const AttachmentUploader = ({
       } else {
         // 기존 첨부 → 삭제 예정 표시
         setItems(
-          items.map((a) => (a.id === att.id ? { ...a, markedForDelete: true } : a))
+          items.map((a) =>
+            a.id === att.id ? { ...a, markedForDelete: true } : a
+          )
         );
         if (!deleteIds.includes(att.id)) {
           setDeleteIds([...deleteIds, att.id]);
@@ -115,7 +130,11 @@ const AttachmentUploader = ({
 
   const handleUndoDelete = useCallback(
     (att: AttachmentItem) => {
-      setItems(items.map((a) => (a.id === att.id ? { ...a, markedForDelete: false } : a)));
+      setItems(
+        items.map((a) =>
+          a.id === att.id ? { ...a, markedForDelete: false } : a
+        )
+      );
       setDeleteIds(deleteIds.filter((id) => id !== att.id));
     },
     [items, setItems, deleteIds, setDeleteIds]
@@ -124,8 +143,13 @@ const AttachmentUploader = ({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Attachments</label>
-        <p className="text-xs text-gray-500">Upload supporting files for this post.</p>
+        <label className="flex items-center gap-2">
+          <Paperclip size={16} />
+          Attachments
+        </label>
+        <p className="text-xs text-gray-500">
+          Upload supporting files for this post.
+        </p>
       </div>
 
       <input
@@ -139,11 +163,12 @@ const AttachmentUploader = ({
       {items.length > 0 && (
         <ul className="space-y-2">
           {items.map((att) => (
-            
             <li
               key={att.id}
               className={`flex items-center justify-between rounded border px-3 py-2 text-sm shadow-sm ${
-                att.markedForDelete ? "bg-gray-100 line-through text-gray-400" : "bg-white"
+                att.markedForDelete
+                  ? "bg-gray-100 line-through text-gray-400"
+                  : "bg-white"
               }`}
             >
               <div className="min-w-0 pr-3">
@@ -151,7 +176,9 @@ const AttachmentUploader = ({
                   {att.originFileName ?? att.fileName ?? "파일"}
                 </p>
                 {typeof att.fileSize === "number" && (
-                  <p className="text-xs text-gray-500">{formatFileSize(att.fileSize)}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatFileSize(att.fileSize)}
+                  </p>
                 )}
               </div>
 

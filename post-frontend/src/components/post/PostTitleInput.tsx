@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { Type } from "lucide-react";
 
 interface PostTitleInputProps {
   value?: string;
@@ -7,14 +8,17 @@ interface PostTitleInputProps {
 
 const MAX_LENGTH = 100; // 🔹 제목 최대 길이 제한
 
-export default function PostTitleInput({ value = '', onChange }: PostTitleInputProps) {
+export default function PostTitleInput({
+  value = "",
+  onChange,
+}: PostTitleInputProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
     if (!newValue.trim()) {
-      setError('제목을 입력하세요.');
+      setError("제목을 입력하세요.");
     } else if (newValue.length > MAX_LENGTH) {
       setError(`제목은 최대 ${MAX_LENGTH}자까지 가능합니다.`);
     } else {
@@ -25,14 +29,17 @@ export default function PostTitleInput({ value = '', onChange }: PostTitleInputP
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault(); // 🔹 Enter로 인한 form submit 방지
     }
   };
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">제목</label>
+      <label className="flex items-center gap-2">
+        <Type size={16} />
+        Title
+      </label>
       <input
         type="text"
         value={value}
@@ -41,7 +48,7 @@ export default function PostTitleInput({ value = '', onChange }: PostTitleInputP
         placeholder="제목을 입력하세요"
         maxLength={MAX_LENGTH}
         className={`w-full border rounded-md px-3 py-2 focus:ring focus:ring-blue-200 ${
-          error ? 'border-red-500' : ''
+          error ? "border-red-500" : ""
         }`}
       />
       <div className="flex justify-between mt-1 text-sm">

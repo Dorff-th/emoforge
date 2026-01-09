@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { fetchSuggest } from '@/api/tagApi';
-import { getPostTags } from '@/api/postApi'; // 📌 기존 태그 불러오기
-import type { Tag } from '@/types/Tag';
+import { useState, useEffect } from "react";
+import { fetchSuggest } from "@/api/tagApi";
+import { getPostTags } from "@/api/postApi"; // 📌 기존 태그 불러오기
+import type { Tag } from "@/types/Tag";
+import { Tag as TagIcon } from "lucide-react";
 
 interface PostTagInputProps {
   postId?: number; // 수정 모드일 경우
@@ -9,8 +10,12 @@ interface PostTagInputProps {
   onChange: (tags: Tag[], deleteTagIds: number[]) => void;
 }
 
-export default function PostTagInput({ postId, value, onChange }: PostTagInputProps) {
-  const [inputValue, setInputValue] = useState('');
+export default function PostTagInput({
+  postId,
+  value,
+  onChange,
+}: PostTagInputProps) {
+  const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [deleteTagIds, setDeleteTagIds] = useState<number[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -40,12 +45,12 @@ export default function PostTagInput({ postId, value, onChange }: PostTagInputPr
 
   // 🔹 태그 추가 (# 제거 후 저장)
   const addTag = (name: string) => {
-    const trimmed = name.replace(/^#/, '');
+    const trimmed = name.replace(/^#/, "");
     if (!value.find((t) => t.name === trimmed)) {
       const newTags = [...value, { id: 0, name: trimmed }]; // 신규 태그는 id=0
       onChange(newTags, deleteTagIds);
     }
-    setInputValue('');
+    setInputValue("");
     setSuggestions([]);
   };
 
@@ -67,7 +72,10 @@ export default function PostTagInput({ postId, value, onChange }: PostTagInputPr
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">태그</label>
+      <label className="flex items-center gap-2">
+        <TagIcon size={16} />
+        Tag
+      </label>
       <div className="flex flex-wrap gap-2 border rounded p-2">
         {/* 태그칩 (표시할 때만 # 붙임) */}
         {value.map((tag) => (
@@ -92,10 +100,10 @@ export default function PostTagInput({ postId, value, onChange }: PostTagInputPr
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ',') {
+            if (e.key === "Enter" || e.key === ",") {
               e.preventDefault();
-               const trimmed = inputValue.trim();
-               if (trimmed.length === 0) return; // 🚫 빈 태그 방지!
+              const trimmed = inputValue.trim();
+              if (trimmed.length === 0) return; // 🚫 빈 태그 방지!
               addTag(inputValue.trim());
             }
           }}

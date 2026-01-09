@@ -1,9 +1,10 @@
 // src/pages/PostEditPage.tsx
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { fetchPostDetail } from '@/api/postApi';
-import type { PostDetailDTO } from '@/types/Post';
-import PostForm from '@/components/post/PostForm';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchPostDetail } from "@/api/postApi";
+import type { PostDetailDTO } from "@/types/Post";
+import PostForm from "@/components/post/PostForm";
+import { FileEdit } from "lucide-react";
 
 export default function PostEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +19,7 @@ export default function PostEditPage() {
         const data = await fetchPostDetail(Number(id));
         setPost(data);
       } catch (err) {
-        console.error('게시글 로딩 실패', err);
+        console.error("게시글 로딩 실패", err);
       } finally {
         setLoading(false);
       }
@@ -32,7 +33,10 @@ export default function PostEditPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">게시글 수정</h1>
+      <h1 className="flex items-center gap-2 text-xl font-semibold mb-6">
+        <FileEdit size={20} />
+        Post Edit
+      </h1>
       {post && <PostForm mode="edit" initialData={post} />}
     </div>
   );
