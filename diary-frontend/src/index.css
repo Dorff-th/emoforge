@@ -1,4 +1,4 @@
-body {
+/* body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -25,8 +25,140 @@ code {
 
 .animate-slideDownCenter {
   animation: slideDownCenter 0.6s ease-out;
-}
+} */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== Header Container ===== */
+.diary-header {
+  width: 100%;
+  background: rgba(225, 245, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.diary-header__inner {
+  max-width: 1200px;      /* ← 본문 카드랑 맞추기 */
+  margin: 0 auto;
+  padding: 0 16px;        /* 모바일 여백 */
+}
+
+/* ===== Top Brand ===== */
+.brand-core {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color : blue;
+}
+
+.brand-separator {
+  opacity: 0.4;
+  margin: 0 4px;
+}
+
+.brand-sub {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+/* ===== Bottom Row ===== */
+.diary-header__bottom {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* ===== Nav ===== */
+.diary-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.nav-item:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.nav-item.active {
+  background: rgba(0,0,0,0.08);
+  font-weight: 500;
+}
+
+/* ===== External (Board) ===== */
+.diary-header__external {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.nav-item.external {
+  opacity: 0.7;
+}
+
+.nav-item.external:hover {
+  opacity: 1;
+}
+
+.nav-item.external svg:last-child {
+  margin-left: 2px;
+}
+
+/* ===== Divider ===== */
+.divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(0,0,0,0.1);
+  margin: 0 6px;
+}
+
+/* ===== Utils ===== */
+.diary-header__utils {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;          /* ← 기존 8px → 확 넓힘 */
+  padding-right: 24px; /* ← 오른쪽에서 살짝 떼기 */
+}
+
+/* ===== Search ===== */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 999px;
+  margin-right: 6px;
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 120px;
+  font-size: 0.8rem;
+}
+
+.nav-item span {
+  line-height: 1;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  cursor: pointer;
+}

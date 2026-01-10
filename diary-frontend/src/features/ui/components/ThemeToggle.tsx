@@ -1,14 +1,20 @@
-// src/components/common/ThemeToggle.tsx
-import React from 'react';
-import { useTheme } from '@/features/system/context/ThemeContext';
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "@/features/system/context/ThemeContext";
 
 const ThemeToggle = () => {
-  
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (
-    <button onClick={toggleTheme} className="flex items-center">
-      {isDarkMode ? '☀️' : '🌙'}
+    <button
+      onClick={toggleTheme}
+      className="theme-toggle"
+      aria-label="Toggle theme"
+    >
+      {isDarkMode ? (
+        <Sun size={18} strokeWidth={1.75} />
+      ) : (
+        <Moon size={18} strokeWidth={1.75} />
+      )}
     </button>
   );
 };

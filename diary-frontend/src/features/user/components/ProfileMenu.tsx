@@ -1,8 +1,7 @@
 // src/components/common/ProfileMenu.tsx
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { User, Settings, LogOut } from "lucide-react";
-import Avatar from "@/components/common/Avatar";
+import Avatar from "./Avatar";
 import { SERVICE_URLS } from "@/config/constants";
 
 interface ProfileMenuProps {
@@ -42,13 +41,13 @@ export default function ProfileMenu({ user, onLogout }: ProfileMenuProps) {
       {/* Dropdown */}
       {open && (
         <div className="absolute right-0 mt-2 w-40 rounded-lg border bg-white shadow-md text-sm text-gray-700">
-          <Link to={`${SERVICE_URLS.AUTH}/profile`}>
+          <a href={`${SERVICE_URLS.AUTH}/profile`}>
             <MenuItem
               icon={<User size={14} />}
               label="Profile"
               title="나의 프로필 화면으로 이동합니다."
             />
-          </Link>
+          </a>
           <MenuItem
             icon={<Settings size={14} />}
             label="Settings"

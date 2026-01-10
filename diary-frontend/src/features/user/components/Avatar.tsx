@@ -8,20 +8,18 @@ interface AvatarProps {
 }
 
 export default function Avatar({ src, alt, size = 40 }: AvatarProps) {
-
-  const ATTACH_BASE_URL = import.meta.env.VITE_API_ATTACH_BASE_URL; 
+  const ATTACH_BASE_URL = import.meta.env.VITE_API_ATTACH_BASE_URL;
 
   const imageUrl = src
     ? `${ATTACH_BASE_URL + src}?t=${Date.now()}` // ✅ 캐싱 방지용 querystring
     : defaultProfileImg; // 기본 아바타 이미지
-  
 
   return (
     <img
       src={imageUrl}
-      alt={alt || 'profile'}
+      alt={alt || "profile"}
       style={{ width: size, height: size }}
-      className="rounded-full object-cover border"
+      className="avatar rounded-full object-cover border border-black/10"
     />
   );
 }

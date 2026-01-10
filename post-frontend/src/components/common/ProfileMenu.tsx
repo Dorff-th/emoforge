@@ -42,9 +42,17 @@ export default function ProfileMenu({ user, onLogout }: ProfileMenuProps) {
       {open && (
         <div className="absolute right-0 mt-2 w-40 rounded-lg border bg-white shadow-md text-sm text-gray-700">
           <a href={`${SERVICE_URLS.AUTH}/profile`}>
-            <MenuItem icon={<User size={14} />} label="Profile" />
+            <MenuItem
+              icon={<User size={14} />}
+              label="Profile"
+              title="나의 프로필 화면으로 이동합니다."
+            />
           </a>
-          <MenuItem icon={<Settings size={14} />} label="Settings" />
+          <MenuItem
+            icon={<Settings size={14} />}
+            label="Settings"
+            title="준비중.."
+          />
 
           <div className="my-1 border-t" />
 
@@ -53,6 +61,7 @@ export default function ProfileMenu({ user, onLogout }: ProfileMenuProps) {
             label="Sign out"
             danger
             onClick={onLogout}
+            title="로그아웃"
           />
         </div>
       )}
@@ -65,14 +74,17 @@ function MenuItem({
   label,
   danger,
   onClick,
+  title,
 }: {
   icon: React.ReactNode;
   label: string;
   danger?: boolean;
   onClick?: () => void;
+  title?: string;
 }) {
   return (
     <button
+      title={title}
       onClick={onClick}
       className={`
         flex w-full items-center gap-2 px-3 py-2
