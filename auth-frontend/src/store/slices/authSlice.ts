@@ -100,6 +100,10 @@ const authSlice = createSlice({
           state.status = "error";
         }
       })
+      .addCase(logoutThunk.fulfilled, (state) => {
+      state.user = null;
+      state.status = "unauthenticated";
+    });
     },
 });
 
