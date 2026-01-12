@@ -1,4 +1,5 @@
 // src/components/common/Header.tsx
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
@@ -6,10 +7,12 @@ import { logoutThunk } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
 import type { AppDispatch } from "@/store/store";
 import type { RootState } from "@store/store";
-import { FileText, BookOpen } from "lucide-react";
+import { FileText, BookOpen, Layers, Info, ChevronDown } from "lucide-react";
 import ProfileMenu from "@/components/common/ProfileMenu";
 
 function AuthenticatedHeader() {
+  const [aboutOpen, setAboutOpen] = useState(false);
+
   const dispatch = useDispatch<AppDispatch>();
 
   const user = useSelector((state: RootState) => state.auth.user);
@@ -39,6 +42,41 @@ function AuthenticatedHeader() {
             </Link>
 
             {/* Center: Navigation */}
+            <nav
+              className="relative flex items-center gap-6 text-sm text-gray-600 "
+              onMouseEnter={() => setAboutOpen(true)}
+              onMouseLeave={() => setAboutOpen(false)}
+            >
+              <a
+                href={`${SERVICE_URLS.AUTH}/about/emoforge`}
+                className="flex items-center gap-1 px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-100"
+              >
+                <Layers size={16} />
+                <span>About</span>
+                <ChevronDown size={14} className="mt-[1px]" />
+              </a>
+
+              {aboutOpen && (
+                <div className="absolute left-0 top-full pt-2 mt-0 w-48 rounded-md border bg-white shadow-lg z-20">
+                  <a
+                    href={`${SERVICE_URLS.AUTH}/about/emoforge`}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <Layers size={14} />
+                    Emoforge
+                  </a>
+
+                  <a
+                    href={`${SERVICE_URLS.AUTH}/about/intro`}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <Info size={14} />
+                    Intro
+                  </a>
+                </div>
+              )}
+            </nav>
+
             <nav className="flex items-center gap-6 text-sm text-gray-600">
               <a
                 href={SERVICE_URLS.POST}
