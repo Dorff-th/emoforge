@@ -11,10 +11,11 @@ import WithdrawalPendingPage from "@/pages/WithdrawalPendingPage";
 import KakaoCallbackPage from "@/pages/auth/KakaoCallbackPage";
 import TermsAgreementPage from "@/pages/auth/TermsAgreementPage";
 import PrivateRoute from "@/private/PrivateRoute";
+import { fetchProfile as fetchProfileThunk } from "@/store/slices/authSlice";
 import PublicLayout from "@/components/layout/PublicLayout";
 import AboutLayout from "@/components/layout/AboutLayout";
 import AboutEmoforgePage from "@/pages/about/emoforge/AboutEmoforgePage";
-import { fetchProfile as fetchProfileThunk } from "@/store/slices/authSlice";
+import AboutIntroPage from "@/pages/about/intro/AboutIntroPage";
 
 export default function AppRouter() {
   const { status } = useAppSelector((state) => state.auth);
@@ -58,6 +59,7 @@ export default function AppRouter() {
 
         <Route element={<AboutLayout />}>
           <Route path="/about/emoforge" element={<AboutEmoforgePage />} />
+          <Route path="/about/intro" element={<AboutIntroPage />} />
         </Route>
 
         {/* Protected Route (로그인 필요) */}
