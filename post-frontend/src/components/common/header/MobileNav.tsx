@@ -43,15 +43,24 @@ const MobileNav = ({ isAuthenticated, open, onClose }: MobileNavProps) => {
 
         {aboutOpen && (
           <div className="ml-6 border-l pl-3 text-gray-600">
-            <MobileLink to="/about/emoforge" onClick={onClose}>
+            <MobileLink
+              to={`${SERVICE_URLS.AUTH}/about/emoforge`}
+              onClick={onClose}
+            >
               <Layers size={13} />
               Emoforge
             </MobileLink>
-            <MobileLink to="/about/intro" onClick={onClose}>
+            <MobileLink
+              to={`${SERVICE_URLS.AUTH}/about/intro`}
+              onClick={onClose}
+            >
               <Info size={13} />
               Intro
             </MobileLink>
-            <MobileLink to="/about/analysis" onClick={onClose}>
+            <MobileLink
+              to={`${SERVICE_URLS.AUTH}/about/analysis`}
+              onClick={onClose}
+            >
               <TrendingUp size={13} />
               Analysis
             </MobileLink>

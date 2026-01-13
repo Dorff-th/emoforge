@@ -1,6 +1,10 @@
-import PublicHeader from "@/components/common/PublicHeader";
+import PublicHeader from "@/components/common/header/PublicHeader";
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default function PublicLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <PublicHeader />

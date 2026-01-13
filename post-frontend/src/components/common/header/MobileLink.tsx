@@ -1,19 +1,16 @@
+import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 
-interface MobileExternalLinkProps {
-  href: string;
+interface MobileLinkProps {
+  to: string;
   children: ReactNode;
   onClick?: () => void;
 }
 
-const MobileExternalLink = ({
-  href,
-  children,
-  onClick,
-}: MobileExternalLinkProps) => {
+const MobileLink = ({ to, children, onClick }: MobileLinkProps) => {
   return (
-    <a
-      href={href}
+    <Link
+      to={to}
       onClick={onClick}
       className="
          flex items-center gap-2     // ⭐ 핵심
@@ -24,8 +21,8 @@ const MobileExternalLink = ({
       "
     >
       {children}
-    </a>
+    </Link>
   );
 };
 
-export default MobileExternalLink;
+export default MobileLink;
