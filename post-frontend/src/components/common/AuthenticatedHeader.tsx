@@ -32,8 +32,9 @@ function AuthenticatedHeader() {
     <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-5">
         <div className="flex items-center justify-between py-3">
-          {/* Left: Brand */}
-          <div className="flex items-center gap-8">
+          {/* Left */}
+          <div className="flex items-center gap-6">
+            {/* Brand */}
             <Link
               to="/"
               className="text-sm font-semibold tracking-tight text-blue-600"
@@ -41,23 +42,28 @@ function AuthenticatedHeader() {
               EmoForge
             </Link>
 
-            {/* Center: Navigation */}
+            {/* Navigation */}
             <nav
-              className="relative flex items-center gap-6 text-sm text-gray-600 "
+              className="relative flex items-center gap-3 text-sm text-gray-600"
               onMouseEnter={() => setAboutOpen(true)}
               onMouseLeave={() => setAboutOpen(false)}
             >
+              {/* About */}
               <a
                 href={`${SERVICE_URLS.AUTH}/about/emoforge`}
-                className="flex items-center gap-1 px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-100"
+                className="flex items-center gap-1.5
+              px-3 py-2
+              rounded-md border border-gray-200
+              hover:bg-gray-100"
               >
                 <Layers size={16} />
                 <span>About</span>
                 <ChevronDown size={14} className="mt-[1px]" />
               </a>
 
+              {/* About Dropdown */}
               {aboutOpen && (
-                <div className="absolute left-0 top-full pt-2 mt-0 w-48 rounded-md border bg-white shadow-lg z-20">
+                <div className="absolute left-0 top-full mt-2 w-48 rounded-md border bg-white shadow-lg z-20">
                   <a
                     href={`${SERVICE_URLS.AUTH}/about/emoforge`}
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
@@ -65,7 +71,6 @@ function AuthenticatedHeader() {
                     <Layers size={14} />
                     Emoforge
                   </a>
-
                   <a
                     href={`${SERVICE_URLS.AUTH}/about/intro`}
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
@@ -75,36 +80,34 @@ function AuthenticatedHeader() {
                   </a>
                 </div>
               )}
-            </nav>
 
-            <nav className="flex items-center gap-6 text-sm text-gray-600">
+              {/* Posts */}
               <a
                 href={SERVICE_URLS.POST}
-                className="group flex items-center gap-1.5
-                    rounded-md border border-gray-200
-                    px-3 py-1.5
-                    text-sm text-gray-600
-                    transition-all duration-200
-                    hover:-translate-y-0.5
-                  hover:border-gray-300
-                  hover:bg-white
-                    hover:shadow-sm"
+                className="flex items-center gap-1.5
+              px-3 py-2
+              rounded-md border border-gray-200
+              transition-all
+              hover:-translate-y-0.5
+              hover:border-gray-300
+              hover:bg-white
+              hover:shadow-sm"
               >
                 <FileText size={16} className="text-gray-400" />
                 Posts
               </a>
 
+              {/* Diary */}
               <a
                 href={`${SERVICE_URLS.DIARY}/user/home`}
-                className="group flex items-center gap-1.5
-                    rounded-md border border-gray-200
-                    px-3 py-1.5
-                    text-sm text-gray-600
-                    transition-all duration-200
-                    hover:-translate-y-0.5
-                  hover:border-gray-300
-                  hover:bg-white
-                    hover:shadow-sm"
+                className="flex items-center gap-1.5
+              px-3 py-2
+              rounded-md border border-gray-200
+              transition-all
+              hover:-translate-y-0.5
+              hover:border-gray-300
+              hover:bg-white
+              hover:shadow-sm"
               >
                 <BookOpen size={16} className="text-gray-400" />
                 Diary
@@ -112,7 +115,7 @@ function AuthenticatedHeader() {
             </nav>
           </div>
 
-          {/* Right: Profile */}
+          {/* Right */}
           <ProfileMenu user={user} onLogout={handleLogout} />
         </div>
       </div>

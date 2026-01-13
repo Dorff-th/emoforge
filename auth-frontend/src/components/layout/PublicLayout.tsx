@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import PublicHeader from "@/components/common/PublicHeader";
+import PublicHeader from "@/components/common/header/PublicHeader";
 
 export default function PublicLayout() {
   return (

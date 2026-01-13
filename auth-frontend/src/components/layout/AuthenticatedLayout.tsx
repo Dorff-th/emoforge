@@ -1,5 +1,5 @@
 // src/components/layout/AuthenticatedLayout.tsx
-import Header from "@/components/common/Header";
+import Header from "@/components/common/header/Header";
 
 export default function AuthenticatedLayout({
   children,

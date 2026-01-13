@@ -16,6 +16,7 @@ import PublicLayout from "@/components/layout/PublicLayout";
 import AboutLayout from "@/components/layout/AboutLayout";
 import AboutEmoforgePage from "@/pages/about/emoforge/AboutEmoforgePage";
 import AboutIntroPage from "@/pages/about/intro/AboutIntroPage";
+import AboutAnalysisPage from "@/pages/about/analysis/AboutAnalysisPage";
 
 export default function AppRouter() {
   const { status } = useAppSelector((state) => state.auth);
@@ -60,6 +61,7 @@ export default function AppRouter() {
         <Route element={<AboutLayout />}>
           <Route path="/about/emoforge" element={<AboutEmoforgePage />} />
           <Route path="/about/intro" element={<AboutIntroPage />} />
+          <Route path="/about/analysis" element={<AboutAnalysisPage />} />
         </Route>
 
         {/* Protected Route (로그인 필요) */}
