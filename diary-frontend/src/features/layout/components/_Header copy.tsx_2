@@ -5,10 +5,6 @@ import ThemeToggle from "@/features/ui/components/ThemeToggle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SERVICE_URLS } from "@/config/constants";
 import ProfileMenu from "@/features/user/components/ProfileMenu";
-import DesktopNav from "./DesktopNav";
-import MobileNav from "./MobileNav";
-import { Menu } from "lucide-react";
-
 import {
   Home,
   PenLine,
@@ -21,8 +17,6 @@ import {
 } from "lucide-react";
 
 const Header = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   const { logout, user } = useAuth();
   //const { showInfo } = useToastHelper();
   const location = useLocation();
@@ -38,6 +32,8 @@ const Header = () => {
     showInfo("로그아웃 완료 👋");
     logout();
   };
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,28 +85,36 @@ const Header = () => {
     <>
       <header className="diary-header">
         <div className="diary-header__inner">
-          {/* Top Row */}
+          {/* ───────────────── Top Row ───────────────── */}
           <div className="diary-header__top">
-            <div className="flex items-center gap-2">
-              <button className="sm:hidden" onClick={() => setMobileOpen(true)}>
-                <Menu size={20} />
-              </button>
-
-              <span className="text-sm font-semibold text-blue-600">
+            <div className="diary-header__brand">
+              <span className="text-sm font-semibold tracking-tight text-blue-600">
                 EmoForge
               </span>
+              <span className="brand-separator">•</span>
+              <span className="brand-sub">Diary</span>
             </div>
           </div>
 
-          {/* Bottom Row */}
-          <div className="diary-header__bottom flex items-center">
-            {/* Desktop Nav */}
-            <DesktopNav menuItems={menuItems} />
+          {/* ───────────────── Bottom Row ───────────────── */}
+          <div className="diary-header__bottom">
+            {/* Left : Diary Menus */}
+            <nav className="diary-header__nav">
+              {menuItems
+                .filter((item) => !item.external)
+                .map(({ path, label, icon: Icon }) => (
+                  <Link key={path} to={path} className="nav-item">
+                    <Icon size={18} strokeWidth={1.75} />
+                    <span>{label}</span>
+                  </Link>
+                ))}
+            </nav>
 
-            <div className="diary-header__divider hidden sm:block" />
+            {/* Center Divider */}
+            <div className="diary-header__divider" />
 
-            {/* External App */}
-            <div className="diary-header__external hidden sm:flex">
+            {/* External App : Board */}
+            <div className="diary-header__external">
               {menuItems
                 .filter((item) => item.external)
                 .map(({ path, label, icon: Icon }) => (
@@ -118,34 +122,32 @@ const Header = () => {
                     key={path}
                     href={path}
                     className="nav-item external"
-                    target="_self"
+                    target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Icon size={18} />
+                    <Icon size={18} strokeWidth={1.75} />
                     <span>{label}</span>
                     <ExternalLink size={14} />
                   </a>
                 ))}
             </div>
 
-            {/* Utilities */}
-            <div className="ml-auto flex items-center gap-2 min-w-0">
-              <form
-                onSubmit={handleSearch}
-                className="flex items-center gap-1 flex-grow min-w-0"
-              >
-                <div className="search-box flex items-center gap-1 flex-grow min-w-0">
+            {/* Right : Utilities */}
+            <div className="diary-header__utils">
+              <form onSubmit={handleSearch} className="flex items-center gap-1">
+                <div className="search-box">
                   <Search size={18} />
                   <input
-                    className="w-full min-w-0"
                     placeholder="Search…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
+
                 <ThemeToggle />
               </form>
-
+            </div>
+            <div className="diary-header__profile">
               <ProfileMenu user={user} onLogout={handleLogout} />
             </div>
           </div>
@@ -153,13 +155,6 @@ const Header = () => {
       </header>
 
       <div className="border-b border-blue-200 dark:border-gray-600 shadow-sm" />
-
-      {/* Mobile Drawer */}
-      <MobileNav
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        menuItems={menuItems}
-      />
     </>
   );
 };
