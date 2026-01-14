@@ -2,6 +2,7 @@ import React from "react";
 import AuthenticatedLayout from "./AuthenticatedLayout";
 import PublicLayout from "./PublicLayout";
 import { SERVICE_URLS } from "@/config/constants";
+import StateLoading from "@/components/common/StateLoading";
 
 interface ConditionalLayoutRouteProps {
   status: "authenticated" | "idle" | "unauthenticated" | "loading" | "error";
@@ -9,16 +10,22 @@ interface ConditionalLayoutRouteProps {
   authRequired?: boolean; // ✅ 옵션 추가
 }
 
-const ConditionalLayoutRoute: React.FC<ConditionalLayoutRouteProps> = ({ status, children, authRequired }) => {
-
-  
-  if (authRequired && status !== "authenticated" && status !== "idle" && status !== "loading") {
+const ConditionalLayoutRoute: React.FC<ConditionalLayoutRouteProps> = ({
+  status,
+  children,
+  authRequired,
+}) => {
+  if (
+    authRequired &&
+    status !== "authenticated" &&
+    status !== "idle" &&
+    status !== "loading"
+  ) {
     window.location.href = `${SERVICE_URLS.AUTH}/login?status=unauthorized`;
   }
-  
 
   if (status === "idle" || status === "loading") {
-    return <div>Loading...</div>;
+    return <StateLoading />;
   }
 
   if (authRequired && status !== "authenticated") {

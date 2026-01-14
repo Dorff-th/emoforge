@@ -5,6 +5,7 @@ import { fetchPostDetail } from "@/api/postApi";
 import type { PostDetailDTO } from "@/types/Post";
 import PostForm from "@/components/post/PostForm";
 import { FileEdit } from "lucide-react";
+import PostLoading from "@/components/common/PostLoading";
 
 export default function PostEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +29,7 @@ export default function PostEditPage() {
     fetchPost();
   }, [id]);
 
-  if (loading) return <div>로딩중...</div>;
+  if (loading) return <PostLoading />;
   if (!post) return <div>게시글을 불러올 수 없습니다.</div>;
 
   return (

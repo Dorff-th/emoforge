@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProfile } from "@/store/slices/authSlice";
+import StateLoading from "@/components/common/StateLoading";
 
 export default function PrivateRoute({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
@@ -17,7 +18,7 @@ export default function PrivateRoute({ children }: { children: ReactNode }) {
 
   // 🔥 절대 렌더링 중 dispatch() 호출 금지
   if (status === "idle" || status === "loading") {
-    return <div>Loading...</div>;
+    return <StateLoading />;
   }
 
   // refresh_token이 있으면 interceptor가 재발급을 시도하게 해야 함
@@ -35,4 +36,3 @@ export default function PrivateRoute({ children }: { children: ReactNode }) {
 
   return children;
 }
-

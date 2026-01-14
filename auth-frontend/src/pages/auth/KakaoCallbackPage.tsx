@@ -5,6 +5,7 @@ import { openTermsModal } from "@/store/slices/termsSlice";
 import axiosAuth from "@/api/axiosAuth";
 import { fetchProfile } from "@/store/slices/authSlice";
 import { addToast } from "@/store/slices/toastSlice";
+import KakaoLoading from "@/components/common/KakaoLoading";
 
 export default function KakaoCallbackPage() {
   const navigate = useNavigate();
@@ -15,7 +16,12 @@ export default function KakaoCallbackPage() {
     const code = url.searchParams.get("code");
 
     if (!code) {
-      dispatch(addToast({ type: "error", text: "카카오 로그인에 실패했습니다. 다시 시도해주세요." }));
+      dispatch(
+        addToast({
+          type: "error",
+          text: "카카오 로그인에 실패했습니다. 다시 시도해주세요.",
+        })
+      );
       navigate("/login");
       return;
     }
@@ -31,11 +37,16 @@ export default function KakaoCallbackPage() {
         if (data.status === "NEED_AGREEMENT") {
           dispatch(
             openTermsModal({
-              kakaoId: data.kakaoId,       // 신규가입 판단용 키
-              nickname: data.nickname,     // 기본 닉네임
+              kakaoId: data.kakaoId, // 신규가입 판단용 키
+              nickname: data.nickname, // 기본 닉네임
             })
           );
-          dispatch(addToast({ type: "info", text: "약관에 동의해야 가입을 완료할 수 있습니다." }));
+          dispatch(
+            addToast({
+              type: "info",
+              text: "약관에 동의해야 가입을 완료할 수 있습니다.",
+            })
+          );
           navigate("/auth/terms");
           return;
         }
@@ -49,22 +60,25 @@ export default function KakaoCallbackPage() {
         }
 
         // 4) 예외 처리
-         dispatch(addToast({ type: "error", text: "카카오 로그인 처리 중 알 수 없는 응답입니다." }));
+        dispatch(
+          addToast({
+            type: "error",
+            text: "카카오 로그인 처리 중 알 수 없는 응답입니다.",
+          })
+        );
         navigate("/login");
-
       } catch (err) {
         console.error("카카오 로그인 오류:", err);
-        dispatch(addToast({ type: "error", text: "카카오 로그인 처리 중 오류가 발생했습니다." }));
+        dispatch(
+          addToast({
+            type: "error",
+            text: "카카오 로그인 처리 중 오류가 발생했습니다.",
+          })
+        );
         navigate("/login");
       }
     })(); // ← 즉시 실행 async 함수 끝
-
   }, [dispatch, navigate]);
 
-  return (
-    <div className="w-full h-screen flex items-center justify-center">
-      <span className="text-lg text-gray-600">카카오 로그인 처리 중...</span>
-    </div>
-  );
+  return <KakaoLoading />;
 }
-

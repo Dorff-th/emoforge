@@ -37,6 +37,7 @@ import {
   UserPlus,
   Edit3,
 } from "lucide-react";
+import StateLoading from "@/components/common/StateLoading";
 
 interface Profile {
   uuid: string;
@@ -102,7 +103,7 @@ export default function ProfilePage() {
     await dispatch(fetchProfileThunk()).unwrap(); // 전역 상태 갱신
   };
 
-  if (!user) return <p>Loading...</p>;
+  if (!user) return <StateLoading />;
 
   //사용자 통계 불러오기
   const loadAllMemberStats = async () => {

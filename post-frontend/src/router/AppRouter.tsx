@@ -5,16 +5,15 @@ import { fetchProfile } from "@/store/slices/authSlice";
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
 import ConditionalLayoutRoute from "@/components/layout/ConditionalLayoutRoute";
 import PageListPage from "@/pages/PostListPage";
-import PostDetail from '@/pages/PostDetail';
+import PostDetail from "@/pages/PostDetail";
 import TagPostListPage from "@/pages/TagPostListPage";
 import PostWritePage from "@/pages/PostWritePage";
 import PostEditPage from "@/pages/PostEditPage";
-
+import StateLoading from "@/components/common/StateLoading";
 
 import UiTestPage from "@/pages/UiTestPage";
 
 export default function AppRouter() {
-
   const dispatch = useAppDispatch();
   const { status } = useAppSelector((state) => state.auth);
   //const isAuthenticated = status === "authenticated";
@@ -28,69 +27,68 @@ export default function AppRouter() {
 
   // Show loading indicator while fetching
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <StateLoading />;
   }
 
-    return (
-        <BrowserRouter basename="/posts/">
-            <ConfirmDialogProvider>
-            <Routes>
-              <Route path="test/ui-test" element={<UiTestPage />} />
-              
-              {/* 게시글 목록 */}
-              <Route
-                path=""
-                element={
-                  <ConditionalLayoutRoute status={status}>
-                    <PageListPage />
-                  </ConditionalLayoutRoute>
-                }
-              />
+  return (
+    <BrowserRouter basename="/posts/">
+      <ConfirmDialogProvider>
+        <Routes>
+          <Route path="test/ui-test" element={<UiTestPage />} />
 
-              {/* 태그별 게시글 목록 */}    
-              <Route
-                path="tags/:tagName"
-                element={
-                  <ConditionalLayoutRoute status={status}>
-                    <TagPostListPage />
-                  </ConditionalLayoutRoute>
-                }
-              />
-         
-              {/* 게시글 상세 */}
-              <Route
-                path=":id"
-                element={
-                  <ConditionalLayoutRoute status={status}>
-                    <PostDetail />
-                  </ConditionalLayoutRoute>
-                }
-              />
+          {/* 게시글 목록 */}
+          <Route
+            path=""
+            element={
+              <ConditionalLayoutRoute status={status}>
+                <PageListPage />
+              </ConditionalLayoutRoute>
+            }
+          />
 
-              {/* 게시글 작성 */}
-              <Route
-                path="new"
-                element={
-                  <ConditionalLayoutRoute status={status} authRequired>
-                    <PostWritePage />
-                  </ConditionalLayoutRoute>
-                }
-              />
+          {/* 태그별 게시글 목록 */}
+          <Route
+            path="tags/:tagName"
+            element={
+              <ConditionalLayoutRoute status={status}>
+                <TagPostListPage />
+              </ConditionalLayoutRoute>
+            }
+          />
 
-              {/* 게시글 수정 */}
-              <Route
-                path=":id/edit"
-                element={ 
-                  <ConditionalLayoutRoute status={status} authRequired>
-                    <PostEditPage />
-                  </ConditionalLayoutRoute>
-                }
-              />
+          {/* 게시글 상세 */}
+          <Route
+            path=":id"
+            element={
+              <ConditionalLayoutRoute status={status}>
+                <PostDetail />
+              </ConditionalLayoutRoute>
+            }
+          />
 
-              <Route path="*" element={<Navigate to="" replace />} />
-            </Routes>
-            </ConfirmDialogProvider>
-        </BrowserRouter>
-    );
+          {/* 게시글 작성 */}
+          <Route
+            path="new"
+            element={
+              <ConditionalLayoutRoute status={status} authRequired>
+                <PostWritePage />
+              </ConditionalLayoutRoute>
+            }
+          />
 
-}    
+          {/* 게시글 수정 */}
+          <Route
+            path=":id/edit"
+            element={
+              <ConditionalLayoutRoute status={status} authRequired>
+                <PostEditPage />
+              </ConditionalLayoutRoute>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="" replace />} />
+        </Routes>
+      </ConfirmDialogProvider>
+    </BrowserRouter>
+  );
+}
