@@ -1,12 +1,14 @@
 // src/main.tsx
-import "./index.css"; // ✅ Tailwind import
+import "./index.css";
 import ReactDOM from "react-dom/client";
-import { Provider } from "react-redux";
-import {store } from "./store/store";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { queryClient } from "./lib/queryClient";
 import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
+  <QueryClientProvider client={queryClient}>
     <App />
-  </Provider>
+    <ReactQueryDevtools initialIsOpen={false} />
+  </QueryClientProvider>
 );

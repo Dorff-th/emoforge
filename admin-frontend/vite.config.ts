@@ -34,7 +34,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@store': path.resolve(__dirname, 'src/store'),
       },
     },
   }

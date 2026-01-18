@@ -44,3 +44,11 @@ Thumbs.db
 
 # Allow example templates
 !**/.env.example
+
+# Windows reserved / temp
+nul
+admin-frontend/nul
+
+# Claude / AI artifacts
+admin-frontend/.claude/
+admin-frontend/claude_history/

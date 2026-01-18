@@ -1,66 +1,59 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-  fetchCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from '@/api/adminCategoryApi';
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from '@/hooks/queries/useCategories';
 import type { Category } from '@/types/Category';
 import { Button } from '@/components/ui/button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
-import { withToast } from '@/utils/withToast';
 
 export default function AdminCategoryPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
-
-  // 🔥 삭제 확인용 타겟 카테고리
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
-  const loadCategories = async () => {
-    const data = await fetchCategories();
-    setCategories(data);
-  };
+  const { data: categories = [], isLoading } = useCategories();
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const handleAdd = async () => {
+  const handleAdd = () => {
     if (!newCategory.trim()) return;
-    await createCategory(newCategory.trim());
-    setNewCategory('');
-    loadCategories();
+    createMutation.mutate(newCategory.trim(), {
+      onSuccess: () => setNewCategory(''),
+    });
   };
 
-  const handleUpdate = async (id: number) => {
+  const handleUpdate = (id: number) => {
     if (!editingName.trim()) return;
-    await updateCategory(id, editingName.trim());
-    setEditingId(null);
-    setEditingName('');
-    loadCategories();
-  };
-
-  // 실제 삭제 로직
-  const handleDelete = async (id: number) => {
-    await withToast(
-      deleteCategory(id).then(() => loadCategories()),
-      { success: '카테고리 삭제 완료' },
+    updateMutation.mutate(
+      { id, name: editingName.trim() },
+      {
+        onSuccess: () => {
+          setEditingId(null);
+          setEditingName('');
+        },
+      }
     );
   };
 
-  // 모달에서 "확인" 눌렀을 때
   const handleConfirm = () => {
     if (!deleteTarget) return;
-    handleDelete(deleteTarget.id);
-    setDeleteTarget(null); // 모달 닫기
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => setDeleteTarget(null),
+    });
   };
 
   const handleCancel = () => {
     setDeleteTarget(null);
   };
+
+  if (isLoading) {
+    return <div className="p-4">카테고리 목록을 불러오는 중...</div>;
+  }
 
   return (
     <div className="p-4">
@@ -75,7 +68,9 @@ export default function AdminCategoryPage() {
           placeholder="새 카테고리 이름"
           className="border rounded px-2 py-1 flex-1"
         />
-        <Button onClick={handleAdd}>추가</Button>
+        <Button onClick={handleAdd} disabled={createMutation.isPending}>
+          {createMutation.isPending ? '추가 중...' : '추가'}
+        </Button>
       </div>
 
       {/* 목록 */}
@@ -106,7 +101,12 @@ export default function AdminCategoryPage() {
               <td className="border px-2 py-1 space-x-2">
                 {editingId === cat.id ? (
                   <>
-                    <Button onClick={() => handleUpdate(cat.id)}>저장</Button>
+                    <Button
+                      onClick={() => handleUpdate(cat.id)}
+                      disabled={updateMutation.isPending}
+                    >
+                      {updateMutation.isPending ? '저장 중...' : '저장'}
+                    </Button>
                     <Button
                       variant="secondary"
                       onClick={() => setEditingId(null)}
@@ -127,7 +127,7 @@ export default function AdminCategoryPage() {
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => setDeleteTarget(cat)} // 🔥 여기서만 타겟 지정
+                      onClick={() => setDeleteTarget(cat)}
                     >
                       삭제
                     </Button>
@@ -139,7 +139,6 @@ export default function AdminCategoryPage() {
         </tbody>
       </table>
 
-      {/* 🔥 페이지에서 딱 1개만 렌더되는 ConfirmModal */}
       <ConfirmModal
         open={!!deleteTarget}
         title="카테고리 삭제"

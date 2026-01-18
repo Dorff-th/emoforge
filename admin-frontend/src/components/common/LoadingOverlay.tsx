@@ -1,8 +1,10 @@
-// src/components/LoadingOverlay.tsx
-import { useAppSelector } from "@/store/hooks";
+import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 
 export default function LoadingOverlay() {
-  const isLoading = useAppSelector((state) => state.loading.isLoading);
+  const isFetching = useIsFetching();
+  const isMutating = useIsMutating();
+
+  const isLoading = isFetching > 0 || isMutating > 0;
 
   if (!isLoading) return null;
 

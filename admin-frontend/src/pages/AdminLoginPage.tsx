@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axiosAuthAdmin from "@/api/axiosAuthAdmin";
 import ReCAPTCHA from "react-google-recaptcha";
-import { addToast } from '@store/slices/toastSlice';
+import { useToast } from "@/providers/ToastProvider";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminLoginPage() {
@@ -11,6 +11,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
@@ -27,16 +28,15 @@ export default function AdminLoginPage() {
       const res = await axiosAuthAdmin.post("/admin/login", {
         username,
         password,
-        captchaToken, // ✅ reCAPTCHA 토큰 전달
+        captchaToken,
       });
 
       if (res.status === 200) {
         addToast({ text: '로그인에 성공했습니다.', type: 'success' });
-        //window.location.href = "/admin/dashboard";
         navigate('/admin/dashboard');
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || "로그인 실패");
+      addToast({ text: err.response?.data?.message || "로그인 실패", type: 'error' });
     } finally {
       setLoading(false);
     }

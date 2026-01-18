@@ -1,20 +1,25 @@
-import { useDispatch } from "react-redux";
-import { addToast } from "@/store/slices/toastSlice";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/providers/ToastProvider";
 import { useConfirmDialog } from "@/providers/ConfirmDialogProvider";
-import { startLoading, stopLoading } from "@/store/slices/loadingSlice";
 
 export default function UiTestPage() {
-  const dispatch = useDispatch();
+  const { addToast } = useToast();
   const confirm = useConfirmDialog();
 
+  // 로딩 테스트용 mutation (실제 API 호출 없이 딜레이만)
+  const loadingMutation = useMutation({
+    mutationFn: () => new Promise((resolve) => setTimeout(resolve, 1500)),
+    onSuccess: () => {
+      addToast({ type: "success", text: "로딩 테스트 완료!" });
+    },
+  });
+
   const handleToast = () => {
-    dispatch(addToast({ type: "success", text: "토스트 메시지 테스트!" }));
+    addToast({ type: "success", text: "토스트 메시지 테스트!" });
   };
 
-  const handleLoading = async () => {
-    dispatch(startLoading());
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    dispatch(stopLoading());
+  const handleLoading = () => {
+    loadingMutation.mutate();
   };
 
   const handleConfirm = async () => {
@@ -25,9 +30,9 @@ export default function UiTestPage() {
       cancelText: "취소",
     });
     if (ok) {
-      dispatch(addToast({ type: "info", text: "삭제되었습니다." }));
+      addToast({ type: "info", text: "삭제되었습니다." });
     } else {
-      dispatch(addToast({ type: "warning", text: "취소되었습니다." }));
+      addToast({ type: "warning", text: "취소되었습니다." });
     }
   };
 
@@ -37,8 +42,12 @@ export default function UiTestPage() {
       <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={handleToast}>
         토스트 테스트
       </button>
-      <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleLoading}>
-        로딩 테스트
+      <button
+        className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
+        onClick={handleLoading}
+        disabled={loadingMutation.isPending}
+      >
+        {loadingMutation.isPending ? "로딩 중..." : "로딩 테스트"}
       </button>
       <button className="px-4 py-2 bg-red-500 text-white rounded" onClick={handleConfirm}>
         Confirm 테스트

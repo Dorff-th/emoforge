@@ -1,44 +1,17 @@
-import { useEffect, useState } from "react";
-import axiosAuthAdmin from "@/api/axiosAuthAdmin";
-
-interface MemberDTO {
-  uuid: string;
-  username: string;
-  status: string;
-  deleted: boolean;
-}
+import {
+  useMembers,
+  useToggleMemberStatus,
+  useToggleMemberDeleted,
+} from '@/hooks/queries/useMembers';
 
 export default function AdminMemberPage() {
-  const [members, setMembers] = useState<MemberDTO[]>([]);
+  const { data: members = [], isLoading } = useMembers();
+  const toggleStatusMutation = useToggleMemberStatus();
+  const toggleDeletedMutation = useToggleMemberDeleted();
 
-  const fetchMembers = async () => {
-    const res = await axiosAuthAdmin.get("/admin/members");
-    setMembers(res.data);
-  };
-
-  const toggleStatus = async (uuid: string, current: string) => {
-    const next = current === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-    await axiosAuthAdmin.patch(`/admin/members/${uuid}/status`, null, {
-      params: { status: next },
-    });
-    fetchMembers();
-  };
-
-  // ✅ 탈퇴 여부 토글 (백엔드: /{uuid}/deleted?deleted=true|false)
-  const toggleDeleted = async (uuid: string, current: boolean) => {
-    const res = await axiosAuthAdmin.patch(`/admin/members/${uuid}/deleted`, null, {
-      params: { deleted: !current },
-    });
-
-    const updated = res.data;
-    setMembers((prev) =>
-      prev.map((m) => (m.uuid === updated.uuid ? updated : m))
-    );
-  };
-
-  useEffect(() => {
-    fetchMembers();
-  }, []);
+  if (isLoading) {
+    return <div className="p-4">회원 목록을 불러오는 중...</div>;
+  }
 
   return (
     <div>
@@ -54,22 +27,34 @@ export default function AdminMemberPage() {
           </tr>
         </thead>
         <tbody>
-          {members.map((m: any) => (
+          {members.map((m) => (
             <tr key={m.uuid} className="border-b hover:bg-gray-50">
               <td className="p-2">{m.uuid}</td>
               <td className="p-2">{m.username}</td>
               <td className="p-2">{m.status}</td>
-              <td className="p-2">{m.deleted  ? "Y" : "N"}</td>
+              <td className="p-2">{m.deleted ? 'Y' : 'N'}</td>
               <td className="p-2 space-x-2">
                 <button
-                  onClick={() => toggleStatus(m.uuid, m.status)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
+                  onClick={() =>
+                    toggleStatusMutation.mutate({
+                      uuid: m.uuid,
+                      currentStatus: m.status,
+                    })
+                  }
+                  disabled={toggleStatusMutation.isPending}
+                  className="bg-blue-500 text-white px-3 py-1 rounded disabled:opacity-50"
                 >
                   상태변경
                 </button>
                 <button
-                  onClick={() => toggleDeleted(m.uuid, m.deleted)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
+                  onClick={() =>
+                    toggleDeletedMutation.mutate({
+                      uuid: m.uuid,
+                      currentDeleted: m.deleted,
+                    })
+                  }
+                  disabled={toggleDeletedMutation.isPending}
+                  className="bg-red-500 text-white px-3 py-1 rounded disabled:opacity-50"
                 >
                   탈퇴토글
                 </button>
