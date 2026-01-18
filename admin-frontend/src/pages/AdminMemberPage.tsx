@@ -3,6 +3,8 @@ import {
   useToggleMemberStatus,
   useToggleMemberDeleted,
 } from '@/hooks/queries/useMembers';
+import { StatusPill } from '@/components/ui/StatusPill';
+import { DeleteTogglePill } from '@/components/member/DeleteTogglePill';
 
 export default function AdminMemberPage() {
   const { data: members = [], isLoading } = useMembers();
@@ -23,44 +25,51 @@ export default function AdminMemberPage() {
             <th className="p-2 text-left">닉네임</th>
             <th className="p-2 text-left">상태</th>
             <th className="p-2 text-left">탈퇴여부</th>
-            <th className="p-2 text-left">액션</th>
           </tr>
         </thead>
         <tbody>
-          {members.map((m) => (
-            <tr key={m.uuid} className="border-b hover:bg-gray-50">
-              <td className="p-2">{m.uuid}</td>
-              <td className="p-2">{m.username}</td>
-              <td className="p-2">{m.status}</td>
-              <td className="p-2">{m.deleted ? 'Y' : 'N'}</td>
-              <td className="p-2 space-x-2">
-                <button
-                  onClick={() =>
-                    toggleStatusMutation.mutate({
-                      uuid: m.uuid,
-                      currentStatus: m.status,
-                    })
-                  }
-                  disabled={toggleStatusMutation.isPending}
-                  className="bg-blue-500 text-white px-3 py-1 rounded disabled:opacity-50"
-                >
-                  상태변경
-                </button>
-                <button
-                  onClick={() =>
-                    toggleDeletedMutation.mutate({
-                      uuid: m.uuid,
-                      currentDeleted: m.deleted,
-                    })
-                  }
-                  disabled={toggleDeletedMutation.isPending}
-                  className="bg-red-500 text-white px-3 py-1 rounded disabled:opacity-50"
-                >
-                  탈퇴토글
-                </button>
-              </td>
-            </tr>
-          ))}
+          {members.map((m) => {
+            const isStatusLoading =
+              toggleStatusMutation.isPending &&
+              toggleStatusMutation.variables?.uuid === m.uuid;
+            const isDeletedLoading =
+              toggleDeletedMutation.isPending &&
+              toggleDeletedMutation.variables?.uuid === m.uuid;
+
+            return (
+              <tr key={m.uuid} className="border-b hover:bg-gray-50">
+                <td className="p-2 font-mono text-sm">{m.uuid}</td>
+                <td className="p-2">{m.username}</td>
+                <td className="p-2">
+                  <StatusPill
+                    label={m.status === 'ACTIVE' ? '활성' : '비활성'}
+                    state={m.status === 'ACTIVE' ? 'active' : 'inactive'}
+                    onClick={() =>
+                      toggleStatusMutation.mutate({
+                        uuid: m.uuid,
+                        currentStatus: m.status,
+                      })
+                    }
+                    isLoading={isStatusLoading}
+                    ariaLabel={`${m.username} 상태: ${m.status}. 클릭하여 토글`}
+                  />
+                </td>
+                <td className="p-2">
+                  <DeleteTogglePill
+                    isDeleted={m.deleted}
+                    onToggle={() =>
+                      toggleDeletedMutation.mutate({
+                        uuid: m.uuid,
+                        currentDeleted: m.deleted,
+                      })
+                    }
+                    isLoading={isDeletedLoading}
+                    memberName={m.username}
+                  />
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

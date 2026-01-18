@@ -48,10 +48,8 @@ export function useToggleMemberStatus() {
       const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       return updateMemberStatus(uuid, nextStatus);
     },
-    onSuccess: (updatedMember) => {
-      queryClient.setQueryData<MemberDTO[]>(memberKeys.all, (old) =>
-        old?.map((m) => (m.uuid === updatedMember.uuid ? updatedMember : m))
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: memberKeys.all });
       addToast({ type: 'success', text: '회원 상태가 변경되었습니다.' });
     },
   });
