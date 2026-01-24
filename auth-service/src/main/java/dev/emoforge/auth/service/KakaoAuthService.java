@@ -69,7 +69,6 @@ public class KakaoAuthService {
         );
 
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-                member.getUsername(),
                 member.getUuid()
         );
 

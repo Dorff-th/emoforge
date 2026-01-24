@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(if not exist \"C:\\\\devtools\\\\zmylong\\\\MSA\\\\emoforge\\\\post-service\\\\md\" mkdir \"C:\\\\devtools\\\\zmylong\\\\MSA\\\\emoforge\\\\post-service\\\\md\")",
+      "Bash(./gradlew compileJava:*)",
+      "Bash(./gradlew classes:*)",
+      "Bash(ls:*)",
+      "Bash(cmd.exe /c \"gradlew.bat compileJava\")"
+    ]
+  }
+}

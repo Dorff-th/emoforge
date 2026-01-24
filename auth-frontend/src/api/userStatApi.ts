@@ -14,6 +14,7 @@ export const fetchMemberAttachmentStats = async () => {
     const response = await axiosAttach.get<MemberAttachmentStatsResponse>(
         `/me/statistics`
     );
+    console.log(response.data);
     return response.data;
 }
 

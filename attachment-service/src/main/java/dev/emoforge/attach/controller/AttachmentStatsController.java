@@ -2,6 +2,7 @@ package dev.emoforge.attach.controller;
 
 import dev.emoforge.attach.domain.UploadType;
 import dev.emoforge.attach.dto.MemberAttachmentStatsResponse;
+import dev.emoforge.attach.security.CustomUserPrincipal;
 import dev.emoforge.attach.service.AttachmentStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,7 +63,11 @@ public class AttachmentStatsController {
     public ResponseEntity<MemberAttachmentStatsResponse> getMyAttachmentStats(
             Authentication authentication
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         log.info("📊 Attachment statistics 요청: memberUuid={}", memberUuid);
 
         Map<UploadType, Long> stats = attachmentStatsService.getUserAttachmentCounts(memberUuid);

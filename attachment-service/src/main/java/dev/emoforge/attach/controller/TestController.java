@@ -1,5 +1,6 @@
 package dev.emoforge.attach.controller;
 
+import dev.emoforge.attach.security.CustomUserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,11 @@ public class TestController {
     )
     @GetMapping("/api/attach/test/jwt")
     public String testJwt(Authentication authentication) {
-        return "JWT member_uuid = " + authentication.getPrincipal();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
+
+        return "JWT member_uuid = " + memberUuid;
     }
 }

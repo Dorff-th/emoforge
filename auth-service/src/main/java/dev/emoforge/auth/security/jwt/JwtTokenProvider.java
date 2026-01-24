@@ -54,11 +54,12 @@ public class JwtTokenProvider {
 
     /**
      * Access Token 생성 (User)
+     * [2026-01-24 변경] setSubject에 username 대신 uuid 할당
      */
     public String generateAccessToken(String username, String role, String uuid) {
         return Jwts.builder()
-                .setSubject(username) // username = email
-                .claim("uuid", uuid)
+                .setSubject(uuid) // (변경) username -> uuid
+                .claim("username", username) // (추가) 기존 subject였던 username은 claim으로 이동하여 필요시 사용
                 .claim("role", role)
                 .claim("type", "access")
                 .setIssuedAt(new Date())
@@ -70,11 +71,12 @@ public class JwtTokenProvider {
 
     /**
      * Refresh Token 생성 (User)
+     * [2026-01-24 변경] setSubject에 username 대신 uuid 할당
      */
-    public String generateRefreshToken(String username, String uuid) {
+    public String generateRefreshToken(String uuid) {
         return Jwts.builder()
-                .setSubject(username)
-                .claim("uuid", uuid)
+                .setSubject(uuid)
+                //.claim("username", username)
                 .claim("type", "refresh")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
@@ -89,9 +91,8 @@ public class JwtTokenProvider {
     public String generateAdminToken(String uuid, String username) {
 
         return Jwts.builder()
-                .setSubject(username)
-                .claim("uuid", uuid)
-                //.claim("username", username)
+                .setSubject(uuid)
+                .claim("username", username)
                 .claim("role", "ADMIN")
                 .claim("type", "ADMIN_LOGIN") // 선택: 토큰 구분용
                 .setIssuedAt(new Date())
@@ -144,14 +145,16 @@ public class JwtTokenProvider {
      * username 추출
      */
     public String getUsernameFromToken(String token) {
-        return getClaims(token).getSubject();
+        // 🔄 [2026-01-24 21:47 KST] subject는 uuid이므로 username은 claim에서 조회
+        return getClaims(token).get("username", String.class);
     }
 
     /**
      * uuid 추출
      */
     public String getUuidFromToken(String token) {
-        return getClaims(token).get("uuid", String.class);
+        // 🔄 [2026-01-24] uuid는 JWT subject에서 직접 추출
+        return getClaims(token).getSubject();
     }
 
     /**
@@ -177,6 +180,12 @@ public class JwtTokenProvider {
         String username = getUsernameFromToken(token);
         String role = getRoleFromToken(token);
         String uuid = getUuidFromToken(token); // ⚡ JWT claim에서 uuid 꺼내오기
+        // 🔄 [2026-01-24 21:47 KST] Authentication 식별자는 uuid 기준
+
+        if (username == null || username.isBlank()) {
+            //  [2026-01-24] refresh 토큰 등 username 없는 경우 fallback
+            username = uuid;
+        }
 
         List<GrantedAuthority> authorities =
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
@@ -189,6 +198,21 @@ public class JwtTokenProvider {
         return authentication;
     }
 
+    public String getTokenType(String token) {
+        // 🔎 [2026-01-24 22:32 KST] JWT claim에서 토큰 타입(access / refresh / admin) 추출
+        //    - refresh 컨트롤러, 보안 필터 등에서 토큰 오용 방지 목적
+
+        Claims claims = getClaims(token);
+
+        String type = claims.get("type", String.class);
+
+        if (type == null || type.isBlank()) {
+            // 🛡 [2026-01-24 22:32 KST] type 없는 토큰은 비정상으로 간주
+            throw new IllegalArgumentException("JWT type claim is missing");
+        }
+
+        return type;
+    }
 
 
 }

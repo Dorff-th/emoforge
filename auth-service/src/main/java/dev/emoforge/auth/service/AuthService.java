@@ -56,7 +56,7 @@ public class AuthService {
         
         // JWT 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(member.getUsername(), member.getRole().name(), member.getUuid());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(member.getUsername(), member.getUuid());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(member.getUuid());
         
         return LoginResponse.builder()
                 .accessToken(accessToken)

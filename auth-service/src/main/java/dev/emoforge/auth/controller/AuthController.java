@@ -168,6 +168,8 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+
+
         String refreshToken = null;
 
         if (request.getCookies() != null) {
@@ -184,18 +186,33 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
 
-        // ✅ (변경) getClaims(refreshToken, false) → userSecret 기반 claims 파싱
-        String memberUuid = jwtTokenProvider.getClaims(refreshToken).get("uuid", String.class);
+        // 🛡 [2026-01-24 22:14 KST] access/admin 토큰으로 refresh 시도 방지
+        if (!"refresh".equals(jwtTokenProvider.getTokenType(refreshToken))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token type");
+        }
+
+
+        //String memberUuid = jwtTokenProvider.getClaims(refreshToken).get("uuid", String.class);
+        // 🔄 [2026-01-24 22:14 KST] refresh 토큰의 식별자는 JWT subject(uuid) 기준
+        //    - claim("uuid") 의존 제거
+        String memberUuid = jwtTokenProvider.getUuidFromToken(refreshToken);
         Member member = memberRepository.findByUuid(memberUuid)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
         // 새 토큰 발급
+        // 🔄 [2026-01-24 22:14 KST] generateAccessToken(subject=uuid) 기준으로 파라미터 정렬
         String newAccessToken = jwtTokenProvider.generateAccessToken(
-                member.getUsername(), member.getRole().name(), member.getUuid()
+                member.getUuid(),
+                member.getRole().name(),
+                member.getUsername()
         );
+
+
+        // 🔄 [2026-01-24 22:14 KST] refresh 토큰은 uuid만 필요
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(
-                member.getUsername(), member.getUuid()
+                member.getUuid()
         );
+
 
         // ✅ (변경) domain을 auth 서브도메인으로 제한
         ResponseCookie accessCookie = ResponseCookie.from(accessCookieName, newAccessToken)

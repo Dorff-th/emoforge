@@ -29,7 +29,8 @@ public class MemberService {
         return memberRepository.findByKakaoId(kakaoId)
                 .orElseGet(() -> {
                     // 카카오로 부터 보안상 이메일 사용 불가 시 dummy 생성
-                    String username = "kakao_" + UUID.randomUUID().toString().substring(0, 8) + "@dummy.local";
+                    //String username = "kakao_" + UUID.randomUUID().toString().substring(0, 8) + "@dummy.local";
+                    String username =  UUID.randomUUID().toString();
 
                     String randomPassword = UUID.randomUUID().toString();
                     String encoded = passwordEncoder.encode(randomPassword);
