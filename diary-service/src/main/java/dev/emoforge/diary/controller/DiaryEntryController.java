@@ -9,6 +9,7 @@ import dev.emoforge.diary.dto.request.GPTSummaryRequestDTO;
 import dev.emoforge.diary.dto.response.DiaryGroupPageResponseDTO;
 import dev.emoforge.diary.dto.response.DiaryGroupResponseDTO;
 import dev.emoforge.diary.dto.response.GPTSummaryResponseDTO;
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.repository.DiaryEntryRepository;
 import dev.emoforge.diary.repository.GptSummaryRepository;
 import dev.emoforge.diary.service.DiaryEntryService;
@@ -86,7 +87,10 @@ public class DiaryEntryController {
             Authentication authentication,
             Pageable pageable
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         return diaryEntryService.getDiaryListGroupedByDate(memberUuid, pageable);
     }
 
@@ -111,7 +115,11 @@ public class DiaryEntryController {
     public List<DiaryGroupResponseDTO> getDiaryListMonthly(Authentication authentication,
                                                            @RequestParam("yearMonth") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate yearMonth) {
 
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
+
         return diaryEntryService.getEntriesForMonthlyGroupedByDate(memberUuid, yearMonth);
 
     }
@@ -138,7 +146,10 @@ public class DiaryEntryController {
             @RequestBody DiarySaveRequestDTO dto
     ) throws JsonProcessingException {
 
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         diaryEntryService.saveDiary(memberUuid, dto);
         return ResponseEntity.ok().build();
     }
@@ -165,7 +176,10 @@ public class DiaryEntryController {
             @RequestBody GPTSummaryRequestDTO request
     ) {
 
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
 
         String summary = gptService.generateAndSaveSummary(
                 memberUuid,
@@ -198,7 +212,11 @@ public class DiaryEntryController {
             Authentication authentication) {
 
         // 1️⃣ 인증 정보에서 uuid 추출
-        String currentUuid = (String) authentication.getPrincipal();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+
+        String currentUuid = principal.getUuid();
 
         // 2️⃣ DB에서 회고 조회
         DiaryEntry target = diaryEntryRepository.findById(diaryEntryId)
@@ -243,7 +261,10 @@ public class DiaryEntryController {
 
         log.debug("\n\n\n====/summary 실행");
 
-        String currentUuid = (String) authentication.getPrincipal();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String currentUuid = principal.getUuid();
         gptSummaryRepository.deleteByMemberUuidAndDiaryDate(currentUuid, date);
 
         return ResponseEntity.ok().body(
@@ -273,7 +294,11 @@ public class DiaryEntryController {
             Authentication authentication) {
 
         // 1️⃣ 인증된 사용자 UUID 추출
-        String currentUuid = (String) authentication.getPrincipal();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+
+        String currentUuid = principal.getUuid();
 
         // 2️⃣ 그 사용자의 해당 날짜 회고 전체 삭제
         diaryEntryService.deleteAllByDate(currentUuid, date);

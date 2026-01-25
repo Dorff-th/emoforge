@@ -3,6 +3,7 @@ package dev.emoforge.diary.controller;
 
 import dev.emoforge.diary.dto.request.DiarySearchRequestDTO;
 import dev.emoforge.diary.dto.response.DiarySearchResultDTO;
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.service.DiarySearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -67,7 +68,10 @@ public class DiarySearchController {
     public Page<DiarySearchResultDTO> search(Authentication authentication,
                                              @RequestBody DiarySearchRequestDTO request, Pageable pageable) {
 
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         request.setMemberUuid(memberUuid);
 
         log.info(request.toString());

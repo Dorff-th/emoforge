@@ -80,19 +80,16 @@ public class JwtTokenProvider {
             .getBody();
     }
 
-
-    public String getMemberUuid(String token) {
-        return getClaims(token).get("uuid", String.class);
-    }
-
     public String getUsernameFromToken(String token) {
-        return getClaims(token).getSubject();
+        // 🔄 [2026-01-24 21:47 KST] subject는 uuid이므로 username은 claim에서 조회
+        return getClaims(token).get("username", String.class);
     }
     /**
      * uuid 추출
      */
     public String getUuidFromToken(String token) {
-        return getClaims(token).get("uuid", String.class);
+        // 🔄 [2026-01-24] uuid는 JWT subject에서 직접 추출
+        return getClaims(token).getSubject();
     }
     /**
      * role 추출
@@ -101,11 +98,18 @@ public class JwtTokenProvider {
         return getClaims(token).get("role", String.class);
     }
 
+
     public Authentication getAuthentication(String token) {
 
         String username = getUsernameFromToken(token);
         String role = getRoleFromToken(token);
         String uuid = getUuidFromToken(token); // ⚡ JWT claim에서 uuid 꺼내오기
+        // 🔄 [2026-01-24 21:47 KST] Authentication 식별자는 uuid 기준
+
+        if (username == null || username.isBlank()) {
+            //  [2026-01-24] refresh 토큰 등 username 없는 경우 fallback
+            username = uuid;
+        }
 
         List<GrantedAuthority> authorities =
             Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
@@ -117,4 +121,5 @@ public class JwtTokenProvider {
 
         return authentication;
     }
+
 }

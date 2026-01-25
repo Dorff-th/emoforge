@@ -42,7 +42,3 @@ async def get_summary(req: SummaryRequest):
     return await summarize_diary(req)
 
 
-# ✅ 관리자 테스트
-@router.get("/admin/test")
-async def admin_test(user=Depends(require_role("ADMIN"))):
-    return {"message": f"관리자 접근 성공 ✅ - {user['member_uuid']}"}

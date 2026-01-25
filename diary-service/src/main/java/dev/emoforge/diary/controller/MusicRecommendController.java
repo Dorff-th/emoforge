@@ -3,6 +3,7 @@ package dev.emoforge.diary.controller;
 import dev.emoforge.diary.dto.music.MusicRecommendHistoryDTO;
 import dev.emoforge.diary.dto.music.MusicRecommendRequest;
 import dev.emoforge.diary.dto.music.RecommendResultDTO;
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.service.MusicRecommendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -96,7 +97,10 @@ public class MusicRecommendController {
             @RequestBody MusicRecommendRequest request,
             Authentication authentication
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         RecommendResultDTO result = musicRecommendService.recommendForDiaryEntry(
                 request.getDiaryEntryId(),
                 request.getArtistPreferences(),

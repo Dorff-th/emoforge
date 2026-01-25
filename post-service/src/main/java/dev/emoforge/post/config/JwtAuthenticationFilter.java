@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = resolveTokenFromCookie(request);
 
+
         // ✅ (변경) JwtTokenProvider 직접 호출 → 주입받은 함수 사용
         if (token != null && validateFunction.apply(token)) {
             try {

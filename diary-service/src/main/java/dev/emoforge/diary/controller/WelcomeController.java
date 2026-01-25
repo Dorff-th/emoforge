@@ -1,5 +1,6 @@
 package dev.emoforge.diary.controller;
 
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.service.GptService;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,12 @@ public class WelcomeController {
 
     @GetMapping("/jwt")
     public String testJwt(Authentication authentication) {
-        return "Diary-Service : JWT member_uuid = " + authentication.getPrincipal();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
+
+        return "Diary-Service : JWT member_uuid = " + memberUuid;
     }
 
 

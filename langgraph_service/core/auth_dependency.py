@@ -14,7 +14,12 @@ def verify_jwt_from_cookie(request: Request):
         )
     
     payload = decode_jwt(token)
-    return payload  # { member_uuid, username, role, exp ... }
+    #return payload  # { member_uuid, username, role, exp ... }
+    return {
+        "member_uuid": payload.get("sub"),
+        "role": payload.get("role"),
+        "claims": payload
+    }
 
 def require_role(required_role: str):
     def inner(user=Depends(verify_jwt_from_cookie)):

@@ -3,6 +3,7 @@ package dev.emoforge.diary.controller;
 
 import dev.emoforge.diary.dto.response.GPTSummaryResponseDTO;
 import dev.emoforge.diary.dto.response.SummaryResponseDTO;
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.service.SummaryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -69,7 +70,11 @@ public class SummaryController {
     @GetMapping("/today")
     public ResponseEntity<SummaryResponseDTO> getTodaySummary(Authentication authentication) {
 
-        String memberUuid = authentication.getPrincipal().toString();
+        //String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         log.info("✅ SummaryService 진입: memberUuid={}", memberUuid);
 
         log.debug(memberUuid);
@@ -104,7 +109,11 @@ public class SummaryController {
     @GetMapping("/gpt/today")
     public ResponseEntity<GPTSummaryResponseDTO> getTodayGptSummary(Authentication authentication) {
 
-        String memberUuid = authentication.getPrincipal().toString();
+        //String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         var result = summaryService.getTodayGPTSummary(memberUuid);
         return ResponseEntity.ok(result);
     }

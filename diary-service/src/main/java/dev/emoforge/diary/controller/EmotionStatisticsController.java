@@ -2,6 +2,7 @@ package dev.emoforge.diary.controller;
 
 
 import dev.emoforge.diary.dto.statistics.EmotionStatisticsDTO;
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.service.EmotionStatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -63,7 +64,10 @@ public class EmotionStatisticsController {
             Authentication authentication
 
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         return emotionStatisticsService.getEmotionStatistics(memberUuid, startDate, endDate);
     }
 }

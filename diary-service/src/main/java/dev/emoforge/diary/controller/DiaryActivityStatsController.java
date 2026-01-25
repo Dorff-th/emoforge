@@ -1,6 +1,7 @@
 package dev.emoforge.diary.controller;
 
 import dev.emoforge.diary.dto.response.MemberDiaryStatsResponse;
+import dev.emoforge.diary.global.security.CustomUserPrincipal;
 import dev.emoforge.diary.service.DiaryActivityStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,7 +61,10 @@ public class DiaryActivityStatsController {
     public ResponseEntity<MemberDiaryStatsResponse> getMyDiaryStats(
             Authentication authentication
     ) {
-        String memberUuid = authentication.getPrincipal().toString();
+        CustomUserPrincipal principal =
+                (CustomUserPrincipal) authentication.getPrincipal();
+
+        String memberUuid = principal.getUuid();
         log.info("📊 Diary activity stats 요청: memberUuid={}", memberUuid);
 
         MemberDiaryStatsResponse response =
