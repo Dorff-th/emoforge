@@ -154,12 +154,6 @@ public class AttachmentController {
     @PostMapping("/count/batch")
     public Map<Long, Integer> countByPostIds(@RequestBody List<Long> postIds) {
 
-        try {
-            Thread.sleep(3000); // 지연 테스트용
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         return attachmentService.countByPostIds(postIds);
     }
 
