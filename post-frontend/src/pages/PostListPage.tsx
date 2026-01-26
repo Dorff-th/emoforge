@@ -9,6 +9,7 @@ import Pagination from "@/components/common/Pagination";
 import { withToast } from "@/utils/withToast";
 import NewPostButton from "@/components/ui/NewPostButton";
 import { LayoutList, MessageCircle, Paperclip } from "lucide-react";
+import PostListPageLoading from "@/components/common/PostListLoading";
 
 export default function PostListPage() {
   const [posts, setPosts] = useState<PostDTO[]>([]);
@@ -19,8 +20,12 @@ export default function PostListPage() {
 
   const { status } = useAppSelector((state) => state.auth);
 
+  //[2026-01-026] 로딩 표시를 위한 state 추가
+  const [isLoading, setIsLoading] = useState(true);
+
   const isAuthenticated = status === "authenticated";
   const loadPosts = async (pageNum: number) => {
+    setIsLoading(true);
     const data = await withToast(fetchPosts(pageNum, 10, "createdAt", "DESC"), {
       error: "게시글 목록 로드 실패",
     });
@@ -29,11 +34,16 @@ export default function PostListPage() {
       setPageInfo(data);
       setPage(pageNum);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
     loadPosts(1);
   }, []);
+
+  if (isLoading) {
+    return <PostListPageLoading />;
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-5 bg-gray-100 rounded-xl p-6">

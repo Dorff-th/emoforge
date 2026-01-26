@@ -8,6 +8,7 @@ import dev.emoforge.post.repository.PostRepository;
 import dev.emoforge.post.service.external.AttachClient;
 import dev.emoforge.post.service.external.AuthClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostListFacadeService {
 
     private static final int PAGE_BLOCK_SIZE = 10;
@@ -41,9 +43,15 @@ public class PostListFacadeService {
         }
 
         List<Long> postIds = dtoList.stream().map(PostSimpleDTO::id).toList();
-        Map<Long, Integer> attachCounts = postIds.isEmpty()
+
+        /*Map<Long, Integer> attachCounts = postIds.isEmpty()
             ? Collections.emptyMap()
-            : attachClient.countByPostIds(postIds);
+            : attachClient.countByPostIds(postIds);*/
+        // [2026-01-26] 첨부파일 정보는 선택 데이터이므로, 실패 시 빈 맵으로 대체한다
+        Map<Long, Integer> attachCounts =
+            postIds.isEmpty()
+                ? Collections.emptyMap()
+                : fetchAttachCountsSafely(postIds);
 
         Map<String, AuthClient.PublicProfileResponse> profileCache = new HashMap<>();
 
@@ -76,4 +84,20 @@ public class PostListFacadeService {
 
         return new PageResponseDTO<>(requestDTO, posts.getTotalElements(), responses, PAGE_BLOCK_SIZE);
     }
+
+    /**
+     * 2026-01-26
+     * Attachment-Service 호출을 안전하게 감싸는 헬퍼 메서드.
+     * 서비스 장애가 발생하더라도 게시글 목록 조회를 중단하지 않도록
+     * 실패 시 빈 결과를 반환한다.
+     */
+    private Map<Long, Integer> fetchAttachCountsSafely(List<Long> postIds) {
+        try {
+            return attachClient.countByPostIds(postIds);
+        } catch (Exception e) {
+            log.warn("Attachment-Service unavailable. fallback to empty map", e);
+            return Collections.emptyMap();
+        }
+    }
+
 }

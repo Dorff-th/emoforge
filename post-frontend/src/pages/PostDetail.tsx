@@ -70,6 +70,12 @@ export default function PostDetail() {
 
   if (!post) return <div className="p-6">로딩중...</div>;
 
+  //[2026-01-26]
+  const content = post.content.replace(
+    /\/uploads\//g,
+    `${backendBaseUrl}/uploads/`,
+  );
+
   return (
     <div className="mx-auto max-w-6xl px-5 bg-gray-100 rounded-xl p-6">
       {/* 제목 */}
@@ -84,10 +90,27 @@ export default function PostDetail() {
       {/* 본문 */}
       <div className="border rounded-lg p-4 bg-white shadow mb-6">
         <Viewer
-          initialValue={post.content.replace(
-            /\/uploads\//g,
-            `${backendBaseUrl}/uploads/`
-          )}
+          initialValue={content}
+          customHTMLRenderer={{
+            image(node: any, { entering }: { entering: boolean }) {
+              if (!entering) return;
+
+              const alt =
+                node.altText && node.altText.trim().length > 0
+                  ? node.altText
+                  : "";
+
+              return {
+                type: "openTag",
+                tagName: "img",
+                attributes: {
+                  src: node.destination,
+                  alt: alt,
+                  onerror: "this.style.display='none'",
+                },
+              };
+            },
+          }}
         />
       </div>
 

@@ -47,10 +47,15 @@ public class PostDetailFacadeService {
         }
 
         // 3️⃣ 첨부파일 조회 (Attachment-Service)
-        List<AttachmentResponse> editorImages =
+        /*List<AttachmentResponse> editorImages =
             attachClient.findByPostId(postId, "EDITOR_IMAGE");
         List<AttachmentResponse> attachments =
-            attachClient.findByPostId(postId, "ATTACHMENT");
+            attachClient.findByPostId(postId, "ATTACHMENT");*/
+        List<AttachmentResponse> editorImages =
+            fetchAttachmentsSafely(postId, "EDITOR_IMAGE");
+        List<AttachmentResponse> attachments =
+            fetchAttachmentsSafely(postId, "ATTACHMENT");
+
 
         // 4️⃣ DTO 조립 후 반환
         return new PostDetailResponse(
@@ -67,5 +72,22 @@ public class PostDetailFacadeService {
             editorImages,
             attachments
         );
+    }
+
+    /**
+     * 2026-01-26
+     * Attachment-Service 호출을 안전하게 감싸는 헬퍼 메서드.
+     * 서비스 장애가 발생하더라도 게시글 목록 조회를 중단하지 않도록
+     * 실패 시 빈 결과를 반환한다.
+     */
+    private List<AttachmentResponse> fetchAttachmentsSafely(
+        Long postId, String type
+    ) {
+        try {
+            return attachClient.findByPostId(postId, type);
+        } catch (Exception e) {
+            log.warn("Attachment-Service unavailable. postId={}, type={}", postId, type, e);
+            return List.of();
+        }
     }
 }
